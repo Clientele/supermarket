@@ -29,5 +29,14 @@ Route::prefix('v1/auth')->group(function(){
 ///2. CONFIGURATIONS
 
 
+/// ORDERS
+
+
+/// PRODUCTS
+
+
+/// INVENTORY
+
+
 
 
