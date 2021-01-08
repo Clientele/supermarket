@@ -1,18 +1,7 @@
-/*=========================================================================================
-  File Name: state.js
-  Description: Vuex Store - state
-  ----------------------------------------------------------------------------------------
-  Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-  Author: Pixinvent
-  Author URL: http://www.themeforest.net/user/pixinvent
-==========================================================================================*/
 
 import navbarSearchAndPinList from '@/layouts/components/navbar/navbarSearchAndPinList'
 import themeConfig, { colors } from '@/../themeConfig.js'
 
-// /////////////////////////////////////////////
-// Helper
-// /////////////////////////////////////////////
 
 // *From Auth - Data will be received from auth provider
 const userDefaults = {

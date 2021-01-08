@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class ProductAvailabilityZone extends Model
 {
     use HasFactory;
+    protected $fillable = [
+
+    ];
 }
+
+
+

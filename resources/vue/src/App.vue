@@ -7,7 +7,6 @@
   Author URL: http://www.themeforest.net/user/pixinvent
 ========================================================================================== -->
 
-
 <template>
   <div id="app" :class="vueAppClasses">
     <router-view @setAppClasses="setAppClasses" />

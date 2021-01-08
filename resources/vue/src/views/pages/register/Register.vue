@@ -1,12 +1,10 @@
-<!-- =========================================================================================
+ <!-- =========================================================================================
     File Name: Register.vue
     Description: Register Page
     ----------------------------------------------------------------------------------------
     Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-      Author: Pixinvent
-    Author URL: http://www.themeforest.net/user/pixinvent
+    Author: Charden  Daxicen
 ========================================================================================== -->
-
 
 <template>
     <div class="h-screen flex w-full bg-img vx-row no-gutter items-center justify-center">

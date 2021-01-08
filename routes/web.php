@@ -17,7 +17,7 @@ Route::get('/', 'HomeController@index');
 
 Route::get('/staff', 'HomeController@staff');
 
- Route::get('/vendor', 'HomeController@vendor');
+Route::get('/vendor', 'HomeController@vendor');
 
 Route::get('/boogie/boogie', 'HomeController@vendor');
 Route::get('/boogie', 'HomeController@vendor');

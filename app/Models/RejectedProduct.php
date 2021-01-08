@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class RejectedProduct extends Model
 {
     use HasFactory;
+    protected $fillable = [
+
+    ];
 }
+
+

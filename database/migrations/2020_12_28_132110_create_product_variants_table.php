@@ -25,6 +25,7 @@ class CreateProductVariantsTable extends Migration
             $table->boolean('is_published');
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
+
             $table->softDeletes();
             $table->timestamps();
         });

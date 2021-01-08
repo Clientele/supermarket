@@ -45,12 +45,17 @@ export default {
     })
   },
   login (email, pwd) {
+
+    console.log(JSON.stringify(axios.defaults.baseURL));
+
     return axios.post('/api/auth/login', {
       email,
       password: pwd
     })
   },
   registerUser (name, email, pwd) {
+
+
     return axios.post('/api/auth/register', {
       displayName: name,
       email,

@@ -22,12 +22,9 @@
 >> php artisan passport:install
  
 [Seeding]
-php artisan db:seed --class=RolesSeeder
-php artisan db:seed --class=AdminSeeder
- 
-php artisan db:seed --class=CategoriesSeeder 
-php artisan db:seed --class=OptionsSeeder 
-php artisan db:seed --class=AmenitiesSeeder 
+php artisan db:seed --class=PermissionsSeeder
+php artisan db:seed --class=SuperAdminSeeder
+  
 
 [Credentials]
 'email'=>"medicci@florence.com", 

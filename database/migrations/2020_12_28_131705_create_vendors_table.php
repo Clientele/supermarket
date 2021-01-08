@@ -22,6 +22,8 @@ class CreateVendorsTable extends Migration
             $table->string('phone_number_1')->nullable();
             $table->string('phone_number_2')->nullable();
             $table->boolean('is_active');
+
+            $table->softDeletes();
             $table->timestamps();
         });
 

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <span>Username</span>
     <vs-input
         v-validate="'required|email|min:3'"
         data-vv-validate-on="blur"
@@ -7,11 +8,12 @@
         icon-no-border
         icon="icon icon-user"
         icon-pack="feather"
-        label-placeholder="Email"
+        label-placeholder=" "
         v-model="email"
-        class="w-full"/>
+        class="w-full  mb-6"/>
     <span class="text-danger text-sm">{{ errors.first('email') }}</span>
 
+    <span>Password</span>
     <vs-input
         data-vv-validate-on="blur"
         v-validate="'required|min:6|max:10'"
@@ -20,15 +22,17 @@
         icon-no-border
         icon="icon icon-lock"
         icon-pack="feather"
-        label-placeholder="Password"
+        label-placeholder=" "
         v-model="password"
-        class="w-full mt-6" />
+        class="w-full mb-6" />
     <span class="text-danger text-sm">{{ errors.first('password') }}</span>
 
     <div class="flex flex-wrap justify-between my-5">
         <vs-checkbox v-model="checkbox_remember_me" class="mb-3">Remember Me</vs-checkbox>
         <router-link to="/pages/forgot-password">Forgot Password?</router-link>
     </div>
+
+
     <div class="flex flex-wrap justify-between mb-3">
       <vs-button  type="border" @click="registerUser">Register</vs-button>
       <vs-button :disabled="!validateForm" @click="loginJWT">Login</vs-button>
@@ -40,9 +44,9 @@
 export default {
   data () {
     return {
-      email: 'admin@admin.com',
-      password: 'adminadmin',
-      checkbox_remember_me: false
+      email: 'admin@ajab.com',
+      password: 'sanitizer',
+      checkbox_remember_me: true
     }
   },
   computed: {
@@ -51,7 +55,9 @@ export default {
     }
   },
   methods: {
+
     checkLogin () {
+
       // If user is already logged in notify
       if (this.$store.state.auth.isUserLoggedIn()) {
 
@@ -70,6 +76,8 @@ export default {
       }
       return true
     },
+
+
     loginJWT () {
 
       if (!this.checkLogin()) return
@@ -86,8 +94,10 @@ export default {
       }
 
       this.$store.dispatch('auth/loginJWT', payload)
-        .then(() => { this.$vs.loading.close() })
-        .catch(error => {
+        .then(() => {
+          this.$vs.loading.close()
+
+        }).catch(error => {
           this.$vs.loading.close()
           this.$vs.notify({
             title: 'Error',

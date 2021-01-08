@@ -4,10 +4,8 @@
   Component Name: VerticalNavMenu
   ----------------------------------------------------------------------------------------
   Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-    Author: Pixinvent
-  Author URL: http://www.themeforest.net/user/pixinvent
+  Author: Charden Daxicen
 ========================================================================================== -->
-
 
 <template>
   <div class="parentx">
@@ -31,8 +29,8 @@
 
           <!-- Logo -->
           <router-link tag="div" class="vx-logo cursor-pointer flex items-center" to="/">
-            <logo class="w-10 mr-4 fill-current text-primary" />
-            <span class="vx-logo-text text-primary" v-show="isMouseEnter || !reduce" v-if="title">{{ title }}</span>
+            <img :src="require('@/assets/images/ajab/logo.png')" alt="user-img" width="40" height="40" class=" mr-4 cursor-pointer block" />
+             <span class="vx-logo-text text-primary" v-show="isMouseEnter || !reduce" v-if="title">{{ title }}</span>
           </router-link>
           <!-- /Logo -->
 
@@ -61,7 +59,9 @@
         <div class="shadow-bottom" v-show="showShadowBottom" />
 
         <!-- Menu Items -->
-        <component :is="scrollbarTag" ref="verticalNavMenuPs" class="scroll-area-v-nav-menu pt-2" :settings="settings" @ps-scroll-y="psSectionScroll" @scroll="psSectionScroll" :key="$vs.rtl">
+        <component :is="scrollbarTag" ref="verticalNavMenuPs" class="scroll-area-v-nav-menu pt-2"
+                   :settings="settings" @ps-scroll-y="psSectionScroll"
+                   @scroll="psSectionScroll" :key="$vs.rtl">
           <template v-for="(item, index) in menuItemsUpdated">
 
             <!-- Group Header -->

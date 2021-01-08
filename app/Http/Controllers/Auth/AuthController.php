@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\GoodBaseController;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -18,8 +19,17 @@ class AuthController extends GoodBaseController
      }
 
     public function login(Request $request){
-        return "Not implemented";
-        return view('welcome');
+        $user = User::where([
+            'email' => $request->input('email')
+        ])->first();
+
+        if(!$user){
+            return $this->returnError('User not found',["User not found"]);
+        }
+
+        $responseData['accessToken'] = $user->createToken('web')->accessToken;
+        $responseData['user'] = $user;
+        return $this->returnResponse('Logged In Successfully',$responseData);
     }
 
 

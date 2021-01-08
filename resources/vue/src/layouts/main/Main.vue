@@ -3,8 +3,6 @@
     Description: Main layout
     ----------------------------------------------------------------------------------------
     Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-    Author: Pixinvent
-    Author URL: http://www.themeforest.net/user/pixinvent
 ========================================================================================== -->
 
 
@@ -13,22 +11,10 @@
 
     <vx-tour :steps="steps" v-if="!disableThemeTour && (windowWidth >= 1200 && mainLayoutType === 'vertical' && verticalNavMenuWidth == 'default')" />
 
-    <the-customizer
-      v-if                    = "!disableCustomizer"
-      :footerType             = "footerType"
-      :hideScrollToTop        = "hideScrollToTop"
-      :navbarType             = "navbarType"
-      :navbarColor            = "navbarColor"
-      :routerTransition       = "routerTransition"
-      @toggleHideScrollToTop  = "toggleHideScrollToTop"
-      @updateFooter           = "updateFooter"
-      @updateNavbar           = "updateNavbar"
-      @updateNavbarColor      = "updateNavbarColor"
-      @updateRouterTransition = "updateRouterTransition" />
 
     <v-nav-menu
       :navMenuItems = "navMenuItems"
-      title         = "Vuexy"
+      title         = "Ajab"
       parent        = ".layout--main" />
 
     <div id="content-area" :class="[contentAreaClass, {'show-overlay': bodyOverlay}]">

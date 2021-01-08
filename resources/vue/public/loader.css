@@ -5,11 +5,13 @@
   display: block;
   position: absolute;
 }
+
 .loading-logo{
   position: absolute;
-  left: calc(50% - 45px);
-  top: 40%;
+  left: calc(50% - 48px );
+  top: 30%;
 }
+
 .loading {
   position: absolute;
   left: calc(50% - 35px);
@@ -26,7 +28,7 @@
   width: 100%;
   height: 100%;
   border: 3px solid transparent;
-  border-left: 3px solid rgba(121, 97, 249,1);
+  border-left: 3px solid rgba(230,154,75,1);
   border-radius: 50%;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
@@ -35,15 +37,17 @@
 .loading .effect-1{
   animation: rotate 1s ease infinite;
 }
+
 .loading .effect-2{
   animation: rotateOpacity 1s ease infinite .1s;
 }
+
 .loading .effect-3{
   position: absolute;
   width: 100%;
   height: 100%;
   border: 3px solid transparent;
-  border-left: 3px solid rgba(121, 97, 249,1);
+  border-left: 3px solid rgba(230,154,75,1);
   -webkit-animation: rotateOpacity 1s ease infinite .2s;
   animation: rotateOpacity 1s ease infinite .2s;
   border-radius: 50%;

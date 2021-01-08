@@ -8,7 +8,7 @@
 ========================================================================================== -->
 
 <template>
-    <vx-card class="overflow-hidden">
+    <vx-card class="overflow-hidden" action-buttons>
         <div slot="no-body">
             <div class="p-6" :class="{
               'flex justify-between flex-row-reverse items-center': iconRight,

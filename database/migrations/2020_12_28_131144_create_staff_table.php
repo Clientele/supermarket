@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Utils\GoodConstants;
 
 class CreateStaffTable extends Migration
 {
@@ -20,6 +21,8 @@ class CreateStaffTable extends Migration
             $table->string('staff_name')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('email')->nullable();
+            $table->string('status')->default(GoodConstants::$STAFF_STATUS_ACTIVE)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
 

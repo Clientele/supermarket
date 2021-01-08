@@ -33,7 +33,7 @@ class CreateOrdersTable extends Migration
             $table->bigInteger('delivery_place_id')->unsigned()->nullable();
 
 
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->bigInteger('order_created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
             $table->softDeletes();
             $table->timestamps();
