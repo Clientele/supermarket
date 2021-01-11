@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Config;
 
 use App\Http\Controllers\GoodBaseController;
+use App\Models\Depot;
 use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class VehiclesController extends GoodBaseController{
@@ -15,21 +18,29 @@ class VehiclesController extends GoodBaseController{
 
     public function ping(Request $request){
         return "Success";
-     }
-
-    public function login(Request $request){
-        $user = User::where([
-            'email' => $request->input('email')
-        ])->first();
-
-        if(!$user){
-            return $this->returnError('User not found',["User not found"]);
-        }
-
-        $responseData['accessToken'] = $user->createToken('web')->accessToken;
-        $responseData['user'] = $user;
-        return $this->returnResponse('Logged In Successfully',$responseData);
     }
+
+    public function addVehicle(Request $request){
+        $depot = Vehicle::updateOrCreate([
+            'id'=>$request->input('id'),
+        ],[
+            'default_depot_id'=>$request->input('default_depot_id'),
+            'driver_id'=>$request->input('driver_id'),
+            'assigned_staff_id'=>$request->input('assigned_staff_id'),
+
+            'vehicle_type'=>$request->input('vehicle_type'),
+            'make'=>$request->input('make'),
+            'model'=>$request->input('model'),
+            'licence_plate_number'=>$request->input('licence_plate_number'),
+            'vehicle_status'=>$request->input('vehicle_status'),
+
+            'created_by'=> Auth::id()
+        ]);
+
+        return $this->returnResponse('Vehicle Added', $depot);
+
+    }
+
 
 
 

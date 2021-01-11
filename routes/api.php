@@ -66,9 +66,29 @@ Route::prefix('v1/config')->group(function () {
         Route::post('staff/user/update', 'Config\StaffController@updateStaff');
         Route::post('staff/user/remove', 'Config\StaffController@removeStaff');
 
-        /*** DEPOTS         ***/
+        /*** ASSETS  ***/
+        #depots
+        Route::post('assets/depot/add', 'Config\DepotsController@addDepot');
+        Route::post('assets/depot/remove', 'Config\DepotsController@removeDepot');
 
-        /*** VEHICLES       ***/
+        #vehicles
+        Route::post('assets/vehicle/add', 'Config\VehiclesController@addVehicle');
+
+        /*** ADDRESSES  ***/
+        #regions
+        Route::post('addresses/region/add', 'Config\AddressesController@addRegion');
+        Route::post('addresses/region/update', 'Config\AddressesController@updateRegion');
+        Route::post('addresses/region/remove', 'Config\AddressesController@removeRegion');
+
+        #districts
+        Route::post('addresses/district/add', 'Config\AddressesController@addDistrict');
+        Route::post('addresses/district/update', 'Config\AddressesController@updateDistrict');
+        Route::post('addresses/district/remove', 'Config\AddressesController@removeDistrict');
+
+        #places
+        Route::post('addresses/place/add', 'Config\AddressesController@addPlace');
+        Route::post('addresses/place/update', 'Config\AddressesController@updatePlace');
+        Route::post('addresses/place/remove', 'Config\AddressesController@removePlace');
 
     });
 
@@ -92,19 +112,25 @@ Route::prefix('v1/resources')->group(function () {
         Route::post('staff/details', 'Resources\StaffResourcesController@getStaffDetails');
         Route::get('staff/no_role', 'Resources\StaffResourcesController@getStaffWithNoRole');
 
-        /*** DEPOTS         ***/
+        /*** ASSETS  ***/
+        #depots
+        Route::get('assets/depots', 'Resources\AssetsResourcesController@getDepots');
 
-        /*** VEHICLES       ***/
+        #vehicles
+        Route::get('assets/vehicles', 'Resources\AssetsResourcesController@getVehicles');
+
 
     });
 
 
 
-    /*** ADDRESSES      ***/
+    /*** +++++++++++++++++++ ***/
+    /*** ADDRESSES  ***/
     Route::get('addresses/countries', 'Resources\AddressesResourcesController@getCountries');
     Route::get('addresses/regions', 'Resources\AddressesResourcesController@getRegions');
     Route::get('addresses/districts', 'Resources\AddressesResourcesController@getDistricts');
     Route::get('addresses/places', 'Resources\AddressesResourcesController@getPlaces');
+    Route::post('addresses/find', 'Resources\AddressesResourcesController@findAddress');
 
 
 });

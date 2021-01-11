@@ -2,7 +2,7 @@
     File Name: Main.vue
     Description: Main layout
     ----------------------------------------------------------------------------------------
-    Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
+    Author : Charden Daxicen
 ========================================================================================== -->
 
 
@@ -10,7 +10,6 @@
   <div class="layout--main" :class="[layoutTypeClass, navbarClasses, footerClasses, {'no-scroll': isAppPage}]">
 
     <vx-tour :steps="steps" v-if="!disableThemeTour && (windowWidth >= 1200 && mainLayoutType === 'vertical' && verticalNavMenuWidth == 'default')" />
-
 
     <v-nav-menu
       :navMenuItems = "navMenuItems"
@@ -24,10 +23,7 @@
     <template v-if="mainLayoutType === 'horizontal' && windowWidth >= 1200">
       <the-navbar-horizontal
         :navbarType= "navbarType"
-        :class="[
-          {'text-white' : isNavbarDark  && !isThemeDark},
-          {'text-base'  : !isNavbarDark && isThemeDark}
-        ]" />
+        :class="[ {'text-white' : isNavbarDark  && !isThemeDark},{'text-base'  : !isNavbarDark && isThemeDark} ]" />
 
       <div style="height: 62px" v-if="navbarType === 'static'"></div>
 
@@ -148,7 +144,7 @@ export default {
       hideScrollToTop   : themeConfig.hideScrollToTop,
       isNavbarDark      : false,
       navbarColor       : themeConfig.navbarColor || '#fff',
-      navbarType        : themeConfig.navbarType  || 'floating',
+      navbarType        : themeConfig.navbarType  || 'sticky',
       navMenuItems,
       routerTransition  : themeConfig.routerTransition || 'none',
       routeTitle        : this.$route.meta.pageTitle,
@@ -187,6 +183,9 @@ export default {
     }
   },
   watch: {
+    showErrorNotificationTriggered: function(val){
+      console.log("MainView:"+val);
+    },
     '$route' () {
       this.routeTitle = this.$route.meta.pageTitle
     },
@@ -230,7 +229,10 @@ export default {
       }
     },
     verticalNavMenuWidth () { return this.$store.state.verticalNavMenuWidth },
-    windowWidth ()          { return this.$store.state.windowWidth }
+    windowWidth ()          { return this.$store.state.windowWidth },
+
+    showErrorNotificationTriggered(){ return this.$store.state.general.showGeneralNotification }
+
   },
   methods: {
     changeRouteTitle (title) {
@@ -287,6 +289,13 @@ export default {
       this.disableThemeTour = true
       this.dynamicWatchers.rtl()
     })
+
+    this.dynamicWatchers.verticalNavMenuWidth = this.$watch('$store.state.verticalNavMenuWidth', () => {
+      this.disableThemeTour = true
+      this.dynamicWatchers.verticalNavMenuWidth()
+    })
+
+
   },
   beforeDestroy () {
     Object.keys(this.dynamicWatchers).map(i => {

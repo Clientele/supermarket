@@ -1,10 +1,6 @@
 <!-- =========================================================================================
   File Name: AddNewDataSidebar.vue
   Description: Add New Data - Sidebar component
-  ----------------------------------------------------------------------------------------
-  Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-  Author: Pixinvent
-  Author URL: http://www.themeforest.net/user/pixinvent
 ========================================================================================== -->
 
 
@@ -21,28 +17,51 @@
       <div class="p-6">
 
         <!-- DEPOT NAME -->
-        <vs-input label="Depot Name" v-model="dataName" class="mt-5 w-full" name="item-name" v-validate="'required'" />
-        <span class="text-danger text-sm" v-show="errors.has('item-name')">{{ errors.first('item-name') }}</span>
+        <vs-input label="Depot Name" v-model="depotInstance.depot_name" class="mt-5 w-full" name="name" v-validate="'required'" />
+        <span class="text-danger text-sm" v-show="errors.has('item-name')">{{ errors.first('name') }}</span>
 
-        <!-- DEPOT SUPERVISOR -->
-        <vs-select v-model="dataCategory" label="Depot Location" class="mt-5 w-full" name="item-category" v-validate="'required'">
-          <vs-select-item :key="item.value" :value="item.value" :text="item.text" v-for="item in category_choices" />
-        </vs-select>
-        <span class="text-danger text-sm" v-show="errors.has('item-category')">{{ errors.first('item-category') }}</span>
 
+
+        <vs-input v-if="!selectedAddress" label="Location" v-model="locationQuery" class="mt-5 w-full" name="location" v-validate="'required'" />
+        <span class="text-danger text-sm" v-show="errors.has('location')">{{ errors.first('item-name') }}</span>
+
+
+        <!-- Address result -->
+        <div v-for="(address,index) in addresses" :key="index"
+             @click="pickAddress(address)" class="location-item px-2 py-2 rounded mt-4">
+          <ul>
+            <li>{{  address.location_name }} </li>
+          </ul>
+        </div>
+
+        <!-- selected address -->
+        <div class="mt-4" v-if="selectedAddress">
+          <span class=" text-sm" >Depot Location</span>
+        </div>
+        <div class="selected-address px-2 py-2 rounded mt-4" v-if="selectedAddress">
+          <div class="flex flex-wrap items-center">
+            <div class="flex-grow">
+              {{  selectedAddress.location_name }}
+            </div>
+            <vs-button @click="removeAddress()" color="danger" type="flat" icon-pack="feather" icon="icon-x"></vs-button>
+          </div>
+        </div>
 
       </div>
     </component>
 
     <div class="flex flex-wrap items-center p-6" slot="footer">
-      <vs-button class="mr-6" @click="submitData" :disabled="!isFormValid">Submit</vs-button>
+      <vs-button class="mr-6" @click="saveDepot()" :disabled="!isFormValid">Submit</vs-button>
       <vs-button type="border" color="danger" @click="isSidebarActiveLocal = false">Cancel</vs-button>
     </div>
+
+
   </vs-sidebar>
 </template>
 
 <script>
 import VuePerfectScrollbar from 'vue-perfect-scrollbar'
+import axios from "@/axios";
 
 export default {
   props: {
@@ -60,27 +79,24 @@ export default {
   },
   data () {
     return {
+      /*** Location **/
+      locationQuery: '',
+      locationSearchDialog: false,
+      searchTerm: '',
+      addressesRawResults: [],
+      selectedAddress: null,
+      /*** [end] Location **/
 
-      dataId: null,
-      dataName: '',
-      dataCategory: null,
-      dataImg: null,
-      dataOrder_status: 'pending',
-      dataPrice: 0,
+      depotInstance: {
+        depot_name: '',
 
-      category_choices: [
-        {text:'Audio', value:'audio'},
-        {text:'Computers', value:'computers'},
-        {text:'Fitness', value:'fitness'},
-        {text:'Appliance', value:'appliance'}
-      ],
+        country_id: '',
+        zone_id: '',
+        region_id: '',
+        district_id: '',
+        place_id: ''
+      },
 
-      order_status_choices: [
-        {text:'Pending', value:'pending'},
-        {text:'Canceled', value:'canceled'},
-        {text:'Delivered', value:'delivered'},
-        {text:'On Hold', value:'on_hold'}
-      ],
       settings: { // perfectscrollbar settings
         maxScrollbarLength: 60,
         wheelSpeed: .60
@@ -91,19 +107,21 @@ export default {
     isSidebarActive (val) {
       if (!val) return
       if (Object.entries(this.data).length === 0) {
-        this.initValues()
+        //this.initValues()
         this.$validator.reset()
       } else {
-        const { category, id, img, name, order_status, price } = JSON.parse(JSON.stringify(this.data))
-        this.dataId = id
-        this.dataCategory = category
-        this.dataImg = img
-        this.dataName = name
-        this.dataOrder_status = order_status
-        this.dataPrice = price
-        this.initValues()
+         this.depotInstance = this.data ;
+         this.selectedAddress = {};
+         this.selectedAddress.location_name =  this.data.location_name;
+         this.selectedAddress.country_id =  this.data.country_id;
+         this.selectedAddress.zone_id =  this.data.zone_id;
+         this.selectedAddress.region_id =  this.data.region_id;
+         this.selectedAddress.district_id =  this.data.district_id;
+         this.selectedAddress.place_id =  this.data.place_id;
       }
-      // Object.entries(this.data).length === 0 ? this.initValues() : { this.dataId, this.dataName, this.dataCategory, this.dataOrder_status, this.dataPrice } = JSON.parse(JSON.stringify(this.data))
+     },
+    locationQuery(query){
+      this.searchLocations();
     }
   },
   computed: {
@@ -124,61 +142,133 @@ export default {
       return !this.errors.any()
     },
 
-    scrollbarTag () { return this.$store.getters.scrollbarTag }
+    scrollbarTag () { return this.$store.getters.scrollbarTag },
+
+    addresses(){
+     return this.addressesRawResults.map(function (resultItem) {
+
+       let location = {};
+
+
+       if(resultItem.type==="places"){
+         location.location_name = resultItem.searchable.place_name
+         location.place_id = resultItem.searchable.id
+       }
+       if(resultItem.type==="districts"){
+         location.location_name = resultItem.searchable.district_name
+         location.district_id = resultItem.searchable.id
+       }
+       if(resultItem.type==="regions"){
+         location.location_name = resultItem.searchable.region_name
+         location.region_id = resultItem.searchable.id
+       }
+
+
+       if(resultItem.searchable.place){
+         location.location_name = location.location_name+ " "+ resultItem.searchable.district.district_name;
+         location.place_id = resultItem.searchable.id;
+       }
+
+       if(resultItem.searchable.district){
+         location.location_name = location.location_name+ " "+ resultItem.searchable.district.district_name;
+         location.district_id = resultItem.searchable.district.id;
+       }
+
+       if(resultItem.searchable.region){
+         location.location_name = location.location_name+ " "+ resultItem.searchable.region.region_name;
+         location.region_id = resultItem.searchable.region.id;
+       }
+
+       if(resultItem.searchable.country){
+         location.location_name = location.location_name+ " "+ resultItem.searchable.region.region_name;
+         location.country_id = resultItem.searchable.country.id;
+       }
+
+       return location;
+
+     })
+    }
   },
+
   methods: {
-    initValues () {
-      if (this.data.id) return
-      this.dataId = null
-      this.dataName = ''
-      this.dataCategory = null
-      this.dataOrder_status = 'pending'
-      this.dataPrice = 0
-      this.dataImg = null
+
+    /*** Addresses **/
+    pickAddress(address){
+      this.addressesRawResults = [];
+      this.selectedAddress = address;
     },
-    submitData () {
-      this.$validator.validateAll().then(result => {
-        if (result) {
-          const obj = {
-            id: this.dataId,
-            name: this.dataName,
-            img: this.dataImg,
-            category: this.dataCategory,
-            order_status: this.dataOrder_status,
-            price: this.dataPrice
-          }
 
-          if (this.dataId !== null && this.dataId >= 0) {
-            this.$store.dispatch('dataList/updateItem', obj).catch(err => { console.error(err) })
-          } else {
-            delete obj.id
-            obj.popularity = 0
-            this.$store.dispatch('dataList/addItem', obj).catch(err => { console.error(err) })
-          }
+    removeAddress(){
+      this.selectedAddress = null;
+    },
+    /*** [end] Addresses **/
 
+    saveDepot(){
+      if(this.selectedAddress==null){
+        this.$vs.notify({ title: 'Alert',  text: 'Select Address', color: 'danger'})
+        return ;
+      }
+
+      this.depotInstance.country_id =  this.selectedAddress.country_id;
+      this.depotInstance.region_id =  this.selectedAddress.region_id;
+      this.depotInstance.district_id =  this.selectedAddress.district_id;
+      this.depotInstance.place_id =  this.selectedAddress.place_id;
+
+      axios.post('/config/assets/depot/add', this.depotInstance)
+        .then((response) => {
+          this.$vs.notify({ title: 'Success',  text: 'Depot Added', color: 'success'})
+          this.depotInstance = {};
+          this.selectedAddress = null;
           this.$emit('closeSidebar')
-          this.initValues()
-        }
+        }).catch((error) => {
+        console.log(error)
       })
     },
-    updateCurrImg (input) {
-      if (input.target.files && input.target.files[0]) {
-        const reader = new FileReader()
-        reader.onload = e => {
-          this.dataImg = e.target.result
-        }
-        reader.readAsDataURL(input.target.files[0])
+
+    searchLocations(){
+      this.addressesRawResults = [];
+
+      if(!(this.locationQuery)){
+        return ;
       }
+
+      axios.post('/resources/addresses/find',{
+        query : this.locationQuery
+      }).then((response) => {
+
+        if(response.data.success){
+          this.addressesRawResults = response.data.payload.addresses;
+        }
+       }).catch((error) => {
+        console.log(error)
+      })
     }
+
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.location-item{
+  border: 1px solid #e5e5e5;
+  background-color: #dbf4fc;
+}
+
+.selected-address{
+  border: 1px solid #2a9d8f;
+  background-color: #eaf5f4;
+   color: #2a9d8f;
+}
+
+div.location-item:hover{
+  background-color: #b7e9f9;
+  cursor: pointer;
+}
+
 .add-new-data-sidebar {
   ::v-deep .vs-sidebar--background {
     z-index: 52010;
-  }
+}
 
   ::v-deep .vs-sidebar {
     z-index: 52010;
@@ -199,7 +289,6 @@ export default {
     }
   }
 }
-
 .scroll-area--data-list-add-new {
     // height: calc(var(--vh, 1vh) * 100 - 4.3rem);
     height: calc(var(--vh, 1vh) * 100 - 16px - 45px - 82px);

@@ -23,6 +23,10 @@ class Staff extends Model{
        "status"
      ];
 
+    public function vehicles(){
+        return $this->hasMany('App\Models\Vehicle', 'assigned_staff_id' );
+    }
+
 
 }
 

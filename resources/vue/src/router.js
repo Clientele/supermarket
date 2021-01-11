@@ -10,10 +10,6 @@
                       breadcrumb => Add breadcrumb to specific page
                       pageTitle => Display title besides breadcrumb
                     }
-  ----------------------------------------------------------------------------------------
-  Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-  Author: Pixinvent
-  Author URL: http://www.themeforest.net/user/pixinvent
 ==========================================================================================*/
 
 
@@ -80,6 +76,7 @@ const router = new Router({
           meta: { rule: 'admin'}
         },
 
+        /*** ASSETS ***/
         //Depots
         {
           path: '/config/depots',
@@ -88,15 +85,15 @@ const router = new Router({
           meta: { rule: 'admin'}
         },
 
-        //Assets
+        //Vehicles
         {
           path: '/config/assets/vehicles',
           name: 'config-assets/vehicles',
-          component: () => import('@/views/config/assets/Vehicles'),
+          component: () => import('@/views/config/vehicles/Vehicles'),
           meta: { rule: 'admin'}
         },
 
-        //Addresses
+        /*** ADDRESSES ***/
         {
           path: '/config/addresses',
           name: 'config-addresses',

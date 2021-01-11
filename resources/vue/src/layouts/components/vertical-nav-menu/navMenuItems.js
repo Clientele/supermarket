@@ -45,7 +45,7 @@ export default [
            },
           {
             url: '/products/products',
-            name: 'Tailwind',
+            name: 'Vendors',
             slug: 'grid-tailwind',
            }
         ]
@@ -125,17 +125,18 @@ export default [
            }
         ]
       },
-      {
-        url: '/config/depots',
-        name: 'Depots',
-        slug: 'colors',
-        icon: 'ArchiveIcon',
-       },
+
       {
         url: null,
         name: 'Assets',
         icon: 'TruckIcon',
         submenu: [
+          {
+            url: '/config/depots',
+            name: 'Depots',
+            slug: 'colors',
+            icon: 'ArchiveIcon',
+          },
           {
             url: '/config/assets/vehicles',
             name: 'Vehicles',

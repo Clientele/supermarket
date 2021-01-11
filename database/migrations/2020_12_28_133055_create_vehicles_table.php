@@ -17,7 +17,7 @@ class CreateVehiclesTable extends Migration
             $table->id();
             $table->bigInteger('default_depot_id')->unsigned()->nullable();
             $table->bigInteger('driver_id')->unsigned()->nullable(); //Staff ID
-            $table->bigInteger('delivery_person_id')->unsigned()->nullable();
+            $table->bigInteger('assigned_staff_id')->unsigned()->nullable();
 
             $table->string('vehicle_type')->nullable();
             $table->string('make')->nullable();

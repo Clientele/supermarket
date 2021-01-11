@@ -111,7 +111,7 @@
         <div class="vx-row">
           <div class="vx-col w-full">
             <div class="mt-8 flex flex-wrap items-center justify-between">
-              <vs-button @click="removeRole()" type="border" color="danger">Delete Role</vs-button>
+              <vs-button @click="confirmRoleRemoval()" type="border" color="danger">Delete Role</vs-button>
               <vs-button color="success" class="ml-auto mt-2" @click="updateRolePermissions()">Save Changes</vs-button>
              </div>
           </div>
@@ -241,6 +241,18 @@ export default {
       })
 
 
+    },
+
+
+    confirmRoleRemoval() {
+      this.roleDetailsDialog = false;
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'danger',
+        title: `Confirm`,
+        text: 'Are you sure you want to remove this role',
+        accept: this.removeRole
+      })
     },
 
     removeRole(){

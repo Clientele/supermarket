@@ -197,7 +197,7 @@ export default {
       }
     },
     userFormVisible(){
-      return this.$store.state.views.userFormVisible;
+      return this.$store.state.general.userFormVisible;
     }
   },
   watch: {
@@ -207,10 +207,10 @@ export default {
   },
   methods: {
     closeUserForm() {
-      this.$store.commit('views/TOGGLE_USER_FORM', false)
+      this.$store.commit('general/TOGGLE_USER_FORM', false)
     },
     showUserForm() {
-      this.$store.commit('views/TOGGLE_USER_FORM', true)
+      this.$store.commit('general/TOGGLE_USER_FORM', true)
     },
 
     fetchUsers(role) {

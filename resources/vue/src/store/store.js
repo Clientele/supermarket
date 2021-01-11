@@ -15,7 +15,7 @@ Vue.use(Vuex)
 
 import moduleAuth from './auth/moduleAuth.js'
 import moduleECommerce from './eCommerce/moduleECommerce.js'
-import moduleViews from './views_state/moduleViews'
+import moduleGeneral from './general/moduleGeneral'
 
 export default new Vuex.Store({
   getters,
@@ -25,7 +25,7 @@ export default new Vuex.Store({
   modules: {
     auth: moduleAuth,
     eCommerce: moduleECommerce,
-    views: moduleViews
+    general: moduleGeneral
   },
   strict: process.env.NODE_ENV !== 'production'
 

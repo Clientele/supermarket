@@ -6,4 +6,8 @@ export default {
     state.userFormVisible = isVisible
   },
 
+  TOGGLE_GENERAL_NOTIFICATION (state, boolVal) {
+    state.showGeneralNotification = boolVal
+  },
+
 }

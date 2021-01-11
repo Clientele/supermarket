@@ -29,11 +29,17 @@
             <span class="text-danger text-sm"  v-show="errors.has('role_name')">{{ errors.first('role_name') }}</span>
           </div>
 
-          <div class="mt-4">
+          <div class="mt-4 mb-5">
             <label class="vs-input--label">Status</label>
             <v-select v-model="staff.status" :clearable="false" :options="staffStatus" v-validate="'required'" name="status" :dir="$vs.rtl ? 'rtl' : 'ltr'" />
             <span class="text-danger text-sm"  v-show="errors.has('status')">{{ errors.first('status') }}</span>
           </div>
+
+          <span></span>
+          <label class="vs-input--label">Default Depot</label>
+          <v-select v-model="selectedDepot" class=" mb-5" :clearable="false"
+                    :options="availableDepots" label="depot_name" />
+
 
 
         </div>
@@ -73,6 +79,7 @@ export default {
       staff: {
         "id": '',
         "user_id": '',
+        "default_depot_id": '',
         "staff_name": '',
         "phone_number": '',
         "email": '',
@@ -82,7 +89,11 @@ export default {
       },
 
       rolesAvailable: [],
-      staffStatus: [ 'Active', 'Suspended' ]
+      staffStatus: [ 'Active', 'Suspended' ],
+
+      availableDepots: [],
+      selectedDepot: { id: null, depot_name: "Select Depot"}
+
     }
   },
   computed: {
@@ -97,6 +108,7 @@ export default {
         id : this.userId
       }).then((response) => {
           this.staff = response.data.payload.staff;
+          this.selectedDepot = response.data.payload.staff.depot;
          }).catch((error) => {
         console.log(error)
       })
@@ -107,13 +119,14 @@ export default {
 
       let endpoint = '/config/staff/user/add';
       if(Number.isInteger(this.staff.id)){
-          endpoint = '/config/staff/user/update';
-          console.log("Updating...")
+          endpoint = '/config/staff/user/update';console.log("Updating...")
       }
 
+      this.staff.default_depot_id = this.selectedDepot.id;
       console.log(JSON.stringify(this.staff));
-      axios.post( endpoint,
-      this.staff).then((response) => {
+
+
+      axios.post( endpoint, this.staff).then((response) => {
         this.$vs.loading.close();
         this.closeUserForm();
 
@@ -143,8 +156,20 @@ export default {
       })
     },
 
+    fetchDepots() {
+      console.info("fetching depots..");
+      console.info(JSON.stringify(this.selectedDepot));
+
+      axios.get('/resources/assets/depots')
+        .then((response) => {
+          this.availableDepots = response.data.payload.depots.data;
+        }).catch((error) => {
+        console.log(error)
+      })
+    },
+
     closeUserForm() {
-      this.$store.commit('views/TOGGLE_USER_FORM', false)
+      this.$store.commit('general/TOGGLE_USER_FORM', false)
     }
 
   },
@@ -155,6 +180,7 @@ export default {
     }
 
     this.fetchAvailableRoles();
+    this.fetchDepots();
    }
 }
 

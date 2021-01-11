@@ -17,8 +17,9 @@ class CreateDepotsTable extends Migration
             $table->id();
             $table->string('depot_name');
 
+            $table->bigInteger('country_id')->unsigned()->nullable();
             $table->bigInteger('zone_id')->unsigned()->nullable();
-            $table->bigInteger('region_d')->unsigned()->nullable();
+            $table->bigInteger('region_id')->unsigned()->nullable();
             $table->bigInteger('district_id')->unsigned()->nullable();
             $table->bigInteger('place_id')->unsigned()->nullable();
 

@@ -38,6 +38,7 @@
       <vs-button class="mr-6" @click="submitData" :disabled="!isFormValid">Submit</vs-button>
       <vs-button type="border" color="danger" @click="isSidebarActiveLocal = false">Cancel</vs-button>
     </div>
+
   </vs-sidebar>
 </template>
 

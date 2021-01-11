@@ -42,7 +42,7 @@
           </div>
           <!-- / Primary Information - Col 1 -->
 
-          <!-- Information - Col 2 -->
+          <!-- Information - Status, Role, Last seen-->
           <div class="vx-col flex-1" id="account-info-col-2">
             <table>
               <tr>
@@ -72,21 +72,18 @@
 
       </vx-card>
 
+      <!-- Depot & Assets -->
       <div class="vx-row">
         <div class="vx-col lg:w-1/2 w-full">
           <vx-card title="Default Depot" class="mb-base">
-            <table>
+            <table v-if="staff.depot">
               <tr>
                 <td class="font-semibold">Depot Name</td>
-                <td>246bsfgdf</td>
+                <td>{{ staff.depot.depot_name  }}</td>
               </tr>
-              <tr>
-                <td class="font-semibold">Location</td>
-                <td>sthsdhgdf</td>
-              </tr>
-              <tr>
-                <td class="font-semibold">Supervisor</td>
-                <td>argadgads</td>
+              <tr v-if="staff.depot.region">
+                <td class="font-semibold">Region</td>
+                <td>{{ staff.depot.region.region_name }}</td>
               </tr>
             </table>
           </vx-card>
@@ -96,52 +93,23 @@
           <vx-card title="Assets" class="mb-base">
             <table>
               <tr>
-                <td class="font-semibold">Twitter</td>
-                <td>wetdfgdsf</td>
+                <th>Asset Type</th>
+                <th>Particulars</th>
+                <th>Status</th>
               </tr>
-              <tr>
-                <td class="font-semibold">Facebook</td>
-                <td>dgfhsfghsfg</td>
-              </tr>
-              <tr>
-                <td class="font-semibold">Instagram</td>
-                <td>sfgfdbafgd</td>
+              <div style="height: 8px;"></div>
+              <tr v-for="(vehicle, index) in staff.vehicles" :key="index">
+                <td class="font-semibold">{{  vehicle.vehicle_type  }}</td>
+
+                <td> {{  vehicle.make  }} {{  vehicle.licence_plate_number  }} </td>
+
+                <td> <vs-chip class="mx-4"  color="#8a5a44"> {{  vehicle.vehicle_status  }} </vs-chip> </td>
               </tr>
 
             </table>
           </vx-card>
         </div>
       </div>
-
-      <!-- Permissions -->
-      <vx-card>
-
-        <div class="vx-row">
-          <div class="vx-col w-full">
-            <div class="flex items-end px-3">
-              <feather-icon svgClasses="w-6 h-6" icon="LockIcon" class="mr-2" />
-              <span class="font-medium text-lg leading-none">Permissions</span>
-            </div>
-            <vs-divider />
-          </div>
-        </div>
-
-        <div class="block overflow-x-auto">
-          <table class="w-full permissions-table">
-            <tr>
-              <!--
-                You can also use `Object.keys(Object.values(data_local.permissions)[0])` this logic if you consider,
-                our data structure. You just have to loop over above variable to get table headers.
-                Below we made it simple. So, everyone can understand.
-               -->
-              <th class="font-semibold text-base text-left px-3 py-2" v-for="heading in ['Module', 'Read', 'Write', 'Create', 'Delete']" :key="heading">{{ heading }}</th>
-            </tr>
-
-
-          </table>
-        </div>
-
-      </vx-card>
 
 
     </div>
@@ -188,7 +156,7 @@ export default {
   },
   computed: {
     userFormVisible(){
-      return this.$store.state.views.userFormVisible;
+      return this.$store.state.general.userFormVisible;
     }
   },
 
@@ -232,10 +200,10 @@ export default {
     },
 
     showUserForm() {
-      this.$store.commit('views/TOGGLE_USER_FORM', true)
+      this.$store.commit('general/TOGGLE_USER_FORM', true)
     },
     closeUserForm() {
-      this.$store.commit('views/TOGGLE_USER_FORM', false)
+      this.$store.commit('general/TOGGLE_USER_FORM', false)
     },
     navigateToUsers(){
      this.$router.push({ name: 'config-access-user'})
