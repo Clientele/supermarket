@@ -5,34 +5,24 @@
 
 
 <template>
-  <vx-card >
+  <vx-card>
 
     <!--Products Filter -->
     <div class="flex flex-wrap items-center mb-6">
       <div class="flex-grow">
         <div class="flex flex-wrap ">
-          <vs-dropdown vs-trigger-click class="cursor-pointer mr-4">
-            <div  class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-              <span class="mr-2">  Tanzania </span>
-              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-            </div>
-            <!-- <vs-button class="btn-drop" type="line" color="primary" icon-pack="feather" icon="icon-chevron-down"></vs-button> -->
-            <vs-dropdown-menu>
 
-
-              <vs-dropdown-item v-for="(country, index) in  countries" :key="index" @click="fetchProducts(country)">
-                <span>{{ country.name  }}</span>
-              </vs-dropdown-item>
-
-            </vs-dropdown-menu>
-          </vs-dropdown>
+          <v-select class="flex" @input="fetchProducts()" v-model="filteringCategoryId"
+                    :options="allCategories"  name="category_name" label="category_name"
+                    placeholder="Category" :reduce="option => option.id" >
+          </v-select>
           <!--refresh button -->
           <vs-button class="py-0" type="flat" @click="fetchProducts()">Refresh</vs-button>
         </div>
 
       </div>
 
-      <vs-button icon="add"  @click="showProductForm()">Add Product</vs-button>
+      <vs-button icon="add" @click="showProductForm()">Add Product</vs-button>
     </div>
     <!-- [end] Products Filter -->
 
@@ -45,20 +35,30 @@
           <vs-th>Product Name</vs-th>
           <vs-th>Added</vs-th>
           <vs-th>Action</vs-th>
+          <vs-th>Action</vs-th>
         </template>
 
         <template slot-scope="{data}">
           <vs-tr :key="rowIndex" v-for="(tr, rowIndex) in data">
             <vs-td :data="data[rowIndex].product_name">
-              {{data[rowIndex].product_name}}
+              {{ data[rowIndex].product_name }}
+            </vs-td>
+
+            <vs-td :data="data[rowIndex].vendor">
+              {{ data[rowIndex].vendor?  data[rowIndex].vendor.vendor_name : "Unknown Vendor" }}
             </vs-td>
             <vs-td :data="data[rowIndex].created_at">
-              {{data[rowIndex].created_at}}
+              {{ data[rowIndex].created_at }}
             </vs-td>
             <vs-td :data="data[rowIndex].id">
-              <vs-button type="border" color="secondary" class="mr-4" size="small" @click="viewDistricts(data[rowIndex])">Open</vs-button>
-              <vs-button type="border"  class="mr-4" size="small" @click="showProductForm(data[rowIndex])">Edit</vs-button>
-              <vs-button  type="border" color="danger" class="mr-4" size="small" @click="confirmProductRemoval(data[rowIndex])">Remove</vs-button>
+              <vs-button type="border" color="secondary" class="mr-4" size="small"
+                         @click="viewDistricts(data[rowIndex])">Open
+              </vs-button>
+              <vs-button type="border" class="mr-4" size="small" @click="showProductForm(data[rowIndex])">Edit
+              </vs-button>
+              <vs-button type="border" color="danger" class="mr-4" size="small"
+                         @click="confirmProductRemoval(data[rowIndex])">Remove
+              </vs-button>
             </vs-td>
           </vs-tr>
         </template>
@@ -69,46 +69,62 @@
     <!-- User Form -->
     <vs-popup @close="closeProductForm()" fullscreen title="Product Information" :active.sync="productFormDialog">
 
-      <div   class="md:px-6"  >
+      <div class="md:px-6">
 
         <!-- Content Row -->
         <div class="vx-row">
-           <div class="vx-col md:w-1/3 w-1/4">
-            <vs-input class="w-full mt-4" label="Product Name" v-model="productInstance.product_name" v-validate="'required'" name="product_name"  />
-            <span class="text-danger text-sm"  v-show="errors.has('product_name')">{{ errors.first('product_name') }}</span>
+          <div class="vx-col md:w-1/3 w-1/4">
+            <vs-input class="w-full mt-4" label="Product Name" v-model="productInstance.product_name"
+                      v-validate="'required'" name="product_name"/>
+            <span class="text-danger text-sm" v-show="errors.has('product_name')">{{
+                errors.first('product_name')
+              }}</span>
 
-             <div class="mt-4 mb-5" >
-               <label class="vs-input--label">Vendor</label>
-               <v-select v-model="productInstance.vendor_id" :clearable="false"
-                         :options="availableVendors" v-validate="'required'" name="vendor_name" label="vendor_name"
-                         placeholder="Select"  :reduce="option => option.id">
-               </v-select>
+            <div class="mt-4 mb-5">
+              <label class="vs-input--label">Vendor</label>
+              <v-select v-model="selectedVendor" :clearable="false"
+                        :options="availableVendors" v-validate="'required'" name="vendor_name" label="vendor_name"
+                        placeholder="Select" >
+              </v-select>
 
-               <span class="text-danger text-sm"  v-show="errors.has('status')">{{ errors.first('status') }}</span>
-             </div>
+              <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
+            </div>
 
-        </div>
+          </div>
 
           <div class="vx-col md:w-1/3 w-1/4">
-            <div class="mt-4 mb-5" v-for="(category, index) in categoriesArray" :key="index">
+            <div class="mt-4 mb-5" v-for="(category, index) in productCategoriesArray" :key="index">
               <label class="vs-input--label">{{ category.title }}</label>
               <v-select @input="fetchSubCategories(category)" v-model="category.selected_category" :clearable="false"
                         :options="category.sub_categories" v-validate="'required'" name="status" label="category_name"
-                        placeholder="Select"  >
+                        placeholder="Select">
               </v-select>
 
-              <span class="text-danger text-sm"  v-show="errors.has('status')">{{ errors.first('status') }}</span>
+              <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
             </div>
           </div>
 
-      </div>
+          <div class="vx-col md:w-1/3 w-1/4">
+            <h3>Categories</h3>
+            <div class="category-item" v-for="(assignedCategory, index) in assignedCategories" :key="index">
+              <div class="flex flex-wrap" >
+                <p class="mt-1 flex-grow">{{ assignedCategory.category.category_name }}</p>
+                <vs-button type="border" @click="removeAssignedCategory(assignedCategory)"
+                           color="danger" radius icon="close" size="small"></vs-button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
 
         <div class="vx-row mt-12">
           <div class="vx-col w-full">
             <div class="flex items-start flex-col sm:flex-row">
               <!-- <vs-avatar :src="data.avatar" size="80px" class="mr-4" /> -->
               <div>
-                <vs-button ref="saveButton" @click="saveProduct()" color="success" class="mr-4 mb-4">Save Product</vs-button>
+                <vs-button ref="saveButton" @click="saveProduct()" color="success" class="mr-4 mb-4">Save Product
+                </vs-button>
               </div>
             </div>
           </div>
@@ -117,7 +133,6 @@
       </div>
     </vs-popup>
     <!-- [end] User Form -->
-
 
 
   </vx-card>
@@ -131,47 +146,35 @@ export default {
   components: {
     vSelect
   },
-  data () {
+  data() {
     return {
       products: [],
-      productInstance: { id: null,  product_name : null, vendor_id : 1, is_published: false, categories_ids: [] },
+      productInstance: {id: null, product_name: null, vendor_id: 1, is_published: false, categories_ids: []},
       productFormDialog: false,
-
-      districtsVisible: false,
-      districtsFormVisible: false,
-      districtInstance : {id: null,  district_name : null, product_id : null},
-      districts : [
-        {
-          'id': 1,
-          'product_name': 'Kinondoni',
-          'created_at': 'june 4, 2020'
-        }
-      ],
 
       placesVisible: false,
       placesFormVisible: false,
-      placeInstance: {id: null,  place_name : null, district_id : null},
-      places : [],
+      placeInstance: {id: null, place_name: null, district_id: null},
+      places: [],
 
       countries: [
-        { "name": "Tanzania" },
-        { "name": "Kenya" },
-        { "name": "Uganda" },
-        { "name": "Rwanda" },
-        { "name": "Burundi" },
-        { "name": "Congo" }
+        {"name": "Tanzania"},
+        {"name": "Kenya"},
+        {"name": "Uganda"},
+        {"name": "Rwanda"},
+        {"name": "Burundi"},
+        {"name": "Congo"}
       ],
 
-      categoriesArray: [
-        {
-        title: "Main Category",
-        id: null,
-        selected_category: null,
-        selected_category_id: null,
-        sub_categories: [] }
-        ],
+      productCategoriesArray: [ { title: "Main Category",  id: null, selected_category: null, selected_category_id: null, sub_categories: [] } ],
 
-      availableVendors: []
+      availableVendors: [],
+      selectedVendor: null,
+      assignedCategories: [],
+      allCategories: [],
+      filteringCategoryId: null,
+
+      filteringCategoriesArray: [{ title: "Main Category",  id: null, selected_category: null, selected_category_id: null, sub_categories: [] } ]
     }
   },
 
@@ -179,112 +182,170 @@ export default {
 
     /*** Products **/
     fetchProducts() {
-      axios.get('/resources/products/products?category=1').then((response) => {
+      this.products = [];
+      axios.get('/resources/products/products?category_id=' + this.filteringCategoryId)
+        .then((response) => {
         this.products = response.data.payload.products.data;
       }).catch((error) => {
         console.log(error)
       })
     },
 
-    showProductForm(product){
-      this.productInstance = product? product : {};
-      this.productFormDialog = true;
+    fetchProductDetails() {
+      axios.get('/resources/product/details?id=' + this.productInstance.id)
+        .then((response) => {
+          this.productInstance = response.data.payload.product;
+          this.selectedVendor = response.data.payload.product.vendor;
+          this.assignedCategories = response.data.payload.product.categories;
+         }).catch((error) => {
+        console.log(error);
+      });
     },
 
-    saveProduct(){
-      let selectedCategories = this.categoriesArray.map(function (cat) {
-          return cat.selected_category? cat.selected_category.id : null;
+    showProductForm(product) {
+      this.productInstance = product ? product : {};
+      this.productFormDialog = true;
+      if (product) {
+        this.fetchProductDetails();
+      }
+    },
+
+    saveProduct() {
+
+      let selectedCategories = this.productCategoriesArray.map(function (cat) {
+        return cat.selected_category ? cat.selected_category.id : null;
       }).filter(item => !!item);
 
       this.productInstance.categories_ids = selectedCategories;
+      this.productInstance.vendor_id = this.selectedVendor.id;
       console.log(JSON.stringify(this.productInstance));
 
-      axios.post('/products/product/add', this.productInstance)
+      let endpoint = '/config/product/add';
+      if(this.productInstance.id){
+        endpoint = '/config/product/update';
+      }
+
+      axios.post(endpoint, this.productInstance)
         .then((response) => {
           this.productFormDialog = false;
           this.productInstance = {};
+          this.productCategoriesArray = [ { title: "Main Category",  id: null, selected_category: null, selected_category_id: null, sub_categories: [] } ];
           this.fetchProducts();
+          this.getAvailableCategories(0);
         }).catch((error) => {
         console.log(error)
-        })
+      })
     },
 
-    confirmProductRemoval(product){
+    confirmProductRemoval(product) {
       this.productInstance = product;
       this.$vs.dialog({
         type: 'confirm',
         color: 'danger',
         title: `Confirm`,
-        text: 'Are you sure you want to remove '+this.productInstance.product_name,
+        text: 'Are you sure you want to remove ' + this.productInstance.product_name,
         accept: this.removeProduct
       })
     },
 
-    removeProduct(){
-      axios.post('/config/addresses/product/remove', {
+    removeProduct() {
+      axios.post('/products/product/remove', {
         id: this.productInstance.id
       })
         .then((response) => {
           this.fetchProducts();
         }).catch((error) => {
         console.log(error)
-        })
+      })
+    },
+
+
+    removeAssignedCategory(assignedCategory){
+      axios.post('/config/product/assigned/category/remove',{
+        product_id: assignedCategory.product_id,
+        category_id: assignedCategory.category_id
+      })
+        .then((response) => {
+          this.fetchProductDetails();
+        }).catch((error) => {
+        console.log(error);
+      });
     },
 
     /*** Product **/
-    closeProductForm(){
+    closeProductForm() {
       this.productFormDialog = false;
     },
 
+
     /*** Categories Resources **/
-    getAvailableCategories(categoriesIndex){
-       let letCatId = this.categoriesArray[categoriesIndex].id;
-        axios.get('/resources/products/categories?parent_id='+letCatId).then((response) => {
-          this.categoriesArray[categoriesIndex].sub_categories = response.data.payload.categories ;
-        }).catch((error) => {
-          console.log(error);
-        });
-    },
-
-    fetchSubCategories(selectedCategory){
-
-        axios.get('/resources/products/categories?parent_id='+selectedCategory.selected_category.id)
-         .then((response) => {
-          const subCategories = response.data.payload.categories ;
-          if(subCategories.length>0){
-            console.log("Has sub categories");
-            let category = {};
-            category.id = selectedCategory.id;
-            category.title = selectedCategory.selected_category.category_name+" Subcategory";
-            category.selected_category_id = selectedCategory.null;
-            category.sub_categories = subCategories;
-            this.categoriesArray.push(category);
-          }
+    getAvailableCategories(categoriesIndex) {
+      let letCatId = this.productCategoriesArray[categoriesIndex].id;
+      axios.get('/resources/products/categories?parent_id=' + letCatId).then((response) => {
+        this.productCategoriesArray[categoriesIndex].sub_categories = response.data.payload.categories;
        }).catch((error) => {
         console.log(error);
       });
     },
 
-    /*** Vendors Resources **/
-    fetchVendors(){
-      axios.get('/resources/products/vendors/all')
+    fetchSubCategories(selectedCategory) {
+
+      axios.get('/resources/products/categories?parent_id=' + selectedCategory.selected_category.id)
         .then((response) => {
-          this.availableVendors = response.data.payload.vendors ;
+          const subCategories = response.data.payload.categories;
+          if (subCategories.length > 0) {
+            console.log("Has sub categories");
+            let category = {};
+            category.id = selectedCategory.id;
+            category.title = selectedCategory.selected_category.category_name ;
+            category.selected_category_id = selectedCategory.null;
+            category.sub_categories = subCategories;
+            this.productCategoriesArray.push(category);
+          }
         }).catch((error) => {
         console.log(error);
       });
     },
 
+    fetchAllCategories() {
+      axios.get('/resources/products/categories/all')
+        .then((response) => {
+          this.allCategories= response.data.payload.categories;
+        }).catch((error) => {
+        console.log(error);
+      });
+    },
 
-
+    /*** Vendors Resources **/
+    fetchVendors() {
+      axios.get('/resources/products/vendors/all')
+        .then((response) => {
+          this.availableVendors = response.data.payload.vendors;
+        }).catch((error) => {
+        console.log(error);
+      });
+    },
   },
 
   created() {
     this.getAvailableCategories(0);
     this.fetchVendors();
+    this.fetchAllCategories();
   },
   mounted() {
     this.fetchProducts();
   }
 }
 </script>
+
+<style scoped>
+.category-item{
+  padding: 8px 8px;
+  margin-top: 12px;
+  border: 1px solid #ddb892;
+  background-color: #fcf8f4;
+  border-radius: 4px;
+}
+
+
+</style>

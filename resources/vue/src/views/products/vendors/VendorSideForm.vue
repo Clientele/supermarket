@@ -229,7 +229,7 @@ export default {
       this.vendorInstance.district_id =  this.selectedAddress.district_id;
       this.vendorInstance.place_id =  this.selectedAddress.place_id;
 
-      axios.post('/products/vendor/add', this.vendorInstance)
+      axios.post('/config/vendor/add', this.vendorInstance)
         .then((response) => {
           this.$vs.notify({ title: 'Success',  text: 'Vendor Added', color: 'success'})
           this.vendorInstance = {};

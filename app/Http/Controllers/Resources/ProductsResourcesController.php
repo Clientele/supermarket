@@ -53,16 +53,38 @@ class ProductsResourcesController extends GoodBaseController
     /** Products **/
     public function getProducts(Request $request){
 
-        $regId = $request->input('region_id');
-        if(is_numeric($regId)){
-            $products = Product::paginate(500);
+        $catId = $request->input('category_id');
+        if(is_numeric($catId)){
+            $products = Product::whereHas('categories', function($queryBuilder) use($catId){
+                $queryBuilder->where('category_id',$catId);
+            })->with('vendor')->paginate(500);
         }else{
-            $products = Product::paginate(500);
+            $products = Product::with('vendor')->paginate(500);
         }
 
         $responseData['products'] = $products;
         return $this->returnResponse('Products ', $responseData);
     }
+
+    public function getProductDetails(Request $request){
+        $product = Product::where([
+            'id' =>$request->input('id')
+        ])->with('vendor')->first();
+
+        if(!$product){
+            return  $this->returnError("Product not found",[ ""]);
+        }
+        $product->categories;
+
+        foreach ( $product->categories as $category){
+            $category->category;
+        }
+
+        $responseData['product'] = $product;
+        return $this->returnResponse('Product details ', $responseData);
+
+    }
+
 
     /** Categories **/
     public function getCategories(Request $request){
@@ -78,7 +100,12 @@ class ProductsResourcesController extends GoodBaseController
             ])->get();
         }
 
+        $responseData['categories'] = $categories;
+        return $this->returnResponse('Products Categories ', $responseData);
+    }
 
+    public function getAllCategories(Request $request){
+        $categories = ProductCategory::get();
         $responseData['categories'] = $categories;
         return $this->returnResponse('Products Categories ', $responseData);
     }

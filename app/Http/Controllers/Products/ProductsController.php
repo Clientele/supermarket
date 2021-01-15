@@ -57,9 +57,25 @@ class ProductsController extends GoodBaseController
             'id'=>$request->input('id'),
         ])->update([
              'product_name'=>$request->input('product_name'),
-             'thumbnail_img'=> $thumbNailUrl,
+             'vendor_id'=>$request->input('vendor_id'),
+             'thumbnail_img'=> $thumbNailUrl
         ]);
 
+        $product = Product::find($request->input('id'));
+        if(!$product){
+            return $this->returnError("Product Not Found", [" "]);
+        }
+
+        $catIds = $request->input('categories_ids');
+        if(is_array($catIds)){
+            foreach ($catIds as $id){
+                ProductAssignedCategory::create([
+                    'category_id' => $id,
+                    'product_id' => $product->id,
+                    'created_by' =>Auth::id()
+                ]);
+            }
+        }
         return $this->returnResponse('Product Updated',$product);
     }
 
@@ -76,6 +92,15 @@ class ProductsController extends GoodBaseController
         $product = Product::destroy($request->input('id'));
         $variant = ProductVariant::where([ 'product_id' => $request->input('id') ])->delete();
         return $this->returnResponse('Product removed',$product);
+    }
+
+    public function removeAssignedCategory(Request $request){
+        $product = ProductAssignedCategory::where([
+            'product_id' => $request->input('product_id'),
+            'category_id' => $request->input('category_id')
+        ])->delete();
+
+        return $this->returnResponse('Category removed from product',$product);
     }
 
 

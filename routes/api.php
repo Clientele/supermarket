@@ -27,7 +27,7 @@ Route::prefix('v1/auth')->group(function () {
 
 
 /// PRODUCTS
-Route::prefix('v1/products')->group(function () {
+Route::prefix('v1/config')->group(function () {
 
     /*** PRODUCTS CONFIG  ***/
 
@@ -47,13 +47,13 @@ Route::prefix('v1/products')->group(function () {
     Route::post('product/update', 'Products\ProductsController@updateProduct');
     Route::post('product/remove', 'Products\ProductsController@removeProduct');
     Route::post('product/publish/toggle', 'Products\ProductsController@toggleStatus');
+    Route::post('product/assigned/category/remove', 'Products\ProductsController@removeAssignedCategory');
 
     #product variants
     Route::post('product/variant/add', 'Products\ProductsController@addProductVariant');
     Route::post('product/variant/update', 'Products\ProductsController@updateProductVariant');
     Route::post('product/variant/remove', 'Products\ProductsController@removeProductVariant');
     Route::post('product/variant/publish/toggle', 'Products\ProductsController@toggleVariantStatus');
-
 
     /*** VENDORS  ***/
 
@@ -133,6 +133,8 @@ Route::prefix('v1/resources')->group(function () {
         #products
         Route::get('products/products', 'Resources\ProductsResourcesController@getProducts');
         Route::get('products/categories', 'Resources\ProductsResourcesController@getCategories');
+        Route::get('products/categories/all', 'Resources\ProductsResourcesController@getAllCategories');
+        Route::get('product/details', 'Resources\ProductsResourcesController@getProductDetails');
 
         /*** SALES  ***/
         #orders

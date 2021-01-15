@@ -78,7 +78,7 @@ export default {
       rawVendors: [],
       vendorInstance: null,
 
-      itemsPerPage: 4,
+      itemsPerPage: 100,
       isMounted: false,
 
       // Data Sidebar
@@ -142,7 +142,7 @@ export default {
 
     removeVendor () {
       this.$vs.loading({ background: this.backgroundLoading, container: "#vendorLoading", scale: 0.45 })
-      axios.post('/products/vendor/remove', { id : this.vendorInstance.id } )
+      axios.post('/config/vendor/remove', { id : this.vendorInstance.id } )
         .then((response) => {
           this.fetchVendors();
         }).catch((error) => {
