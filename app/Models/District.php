@@ -4,12 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 
 class District extends Model  implements Searchable
 {
     use HasFactory;
+    use SoftDeletes;
+    protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
+
     protected $fillable = [
         'country_id',
         'region_id',
@@ -38,9 +42,6 @@ class District extends Model  implements Searchable
         return $this->belongsTo('App\Models\Region', 'region_id' );
     }
 
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:m',
-    ];
 
 }
 

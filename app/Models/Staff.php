@@ -11,6 +11,7 @@ class Staff extends Model{
     use HasFactory;
     use HasRoles;
     use SoftDeletes;
+    protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
 
     protected $guard_name = 'api';
 

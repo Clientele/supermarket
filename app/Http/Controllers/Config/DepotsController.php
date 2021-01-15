@@ -24,7 +24,7 @@ class DepotsController extends GoodBaseController
             'depot_name'=>$request->input('depot_name'),
             'country_id'=>$request->input('country_id'),
             'zone_id'=>$request->input('zone_id'),
-            'region_d'=>$request->input('region_d'),
+            'region_id'=>$request->input('region_id'),
             'district_id'=>$request->input('district_id'),
             'place_id'=>$request->input('place_id'),
 

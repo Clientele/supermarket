@@ -27,31 +27,31 @@ export default [
     icon: 'PackageIcon',
      items: [
       {
-        url: '/vendors',
+        url: '/products/vendors',
         name: 'Vendors',
         slug: 'chat',
-        icon: 'TruckIcon',
+        icon: 'BriefcaseIcon',
        },
       {
-        url: '/products',
+        url: '/products/products',
         name: 'Product Config',
         slug: 'email',
         icon: 'PackageIcon',
          submenu: [
           {
-            url: '/products/categories',
+            url: '/products/products/categories',
             name: 'Manage Categories',
             slug: 'grid-vuesax',
            },
           {
             url: '/products/products',
-            name: 'Vendors',
+            name: 'Products',
             slug: 'grid-tailwind',
            }
         ]
       },
       {
-        url: '/inventory',
+        url: '/products/inventory',
         name: 'Inventory',
         slug: 'chat',
         icon: 'DatabaseIcon',
@@ -127,7 +127,7 @@ export default [
       },
 
       {
-        url: null,
+        url: "/config/depots",
         name: 'Assets',
         icon: 'TruckIcon',
         submenu: [
@@ -144,8 +144,9 @@ export default [
           }
         ]
        },
+
       {
-        url: null,
+        url: "/config/addresses",
         name: 'Addresses',
         icon: 'MapPinIcon',
         submenu: [

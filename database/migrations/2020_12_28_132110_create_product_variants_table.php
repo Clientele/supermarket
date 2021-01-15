@@ -18,14 +18,16 @@ class CreateProductVariantsTable extends Migration
             $table->id();
             $table->bigInteger('product_id')->unsigned();
             $table->bigInteger('vendor_id')->unsigned();
-            $table->string('product_variant_name');
+            $table->string('variant_name');
 
             $table->integer('restocking_quantity')->default(0);
 
             $table->boolean('is_published');
+
+            $table->string('thumbnail_img')->nullable();
+
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
-
             $table->softDeletes();
             $table->timestamps();
         });
@@ -33,7 +35,6 @@ class CreateProductVariantsTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
      * @return void
      */
     public function down()

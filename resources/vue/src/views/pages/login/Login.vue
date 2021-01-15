@@ -37,8 +37,6 @@
 
 <script>
 import LoginJwt from './LoginJWT.vue'
-import LoginFirebase from './LoginFirebase.vue'
-import LoginAuth0 from './LoginAuth0.vue'
 
 export default {
   components: {

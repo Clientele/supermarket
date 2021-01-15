@@ -50,7 +50,52 @@ const router = new Router({
         },
 
         // =============================================================================
-        // CONFIG ROUTES
+        // 1.0 PRODUCTS ROUTES
+        // =============================================================================
+        {
+          path: '/products/vendors',
+          name: 'products-vendors',
+          component: () => import('@/views/products/vendors/Vendors'),
+          meta: { rule: 'admin' }
+        },
+        {
+          path: '/products/products/categories',
+          name: 'products-products-categories',
+          component: () => import('@/views/products/products/ProductCategories'),
+          meta: { rule: 'admin' }
+        },        {
+          path: '/products/products',
+          name: 'products-products',
+          component: () => import('@/views/products/products/Products'),
+          meta: { rule: 'admin' }
+        },
+        {
+          path: '/products/inventory',
+          name: 'products-vendors',
+          component: () => import('@/views/products/vendors/Vendors'),
+          meta: { rule: 'admin' }
+        },
+
+
+
+        // =============================================================================
+        // 2.0 SALES ROUTES
+        // =============================================================================
+        {
+          path: '/sales/orders',
+          name: 'sales-orders',
+          component: () => import('@/views/config/access/Users'),
+          meta: { rule: 'admin' }
+        },
+        {
+          path: '/sales/customers',
+          name: 'sales-customers',
+          component: () => import('@/views/config/access/Users'),
+          meta: { rule: 'admin' }
+        },
+
+        // =============================================================================
+        // 3.0 CONFIG ROUTES
         // =============================================================================
         //Users
         {
@@ -107,8 +152,6 @@ const router = new Router({
 
       ]
     },
-
-
 
 
     // =============================================================================
@@ -228,38 +271,7 @@ router.afterEach(() => {
 })
 
 router.beforeEach((to, from, next) => {
-  firebase.auth().onAuthStateChanged(() => {
-
-    // get firebase current user
-    const firebaseCurrentUser = firebase.auth().currentUser
-
-    // if (
-    //     to.path === "/pages/login" ||
-    //     to.path === "/pages/forgot-password" ||
-    //     to.path === "/pages/error-404" ||
-    //     to.path === "/pages/error-500" ||
-    //     to.path === "/pages/register" ||
-    //     to.path === "/callback" ||
-    //     to.path === "/pages/comingsoon" ||
-    //     (auth.isAuthenticated() || firebaseCurrentUser)
-    // ) {
-    //     return next();
-    // }
-
-    // If auth required, check login. If login fails redirect to login page
-    if (to.meta.authRequired) {
-      if (!(auth.isAuthenticated() || firebaseCurrentUser)) {
-        router.push({ path: '/pages/login', query: { to: to.path } })
-      }
-    }
-
-    return next()
-    // Specify the current path as the customState parameter, meaning it
-    // will be returned to the application after auth
-    // auth.login({ target: to.path });
-
-  })
-
+  return next()
 })
 
 export default router

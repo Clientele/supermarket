@@ -31,6 +31,30 @@ Route::prefix('v1/products')->group(function () {
 
     /*** PRODUCTS CONFIG  ***/
 
+
+    /***  P R O D U C T S   ***/
+    #vendors
+    Route::post('vendor/add', 'Products\VendorsController@addVendor');
+    Route::post('vendor/remove', 'Products\VendorsController@removeVendor');
+    Route::post('vendor/status/change', 'Products\VendorsController@toggleVendorStatus');
+
+    #categories
+    Route::post('category/add', 'Products\ProductsController@addProductCategory');
+    Route::post('category/remove', 'Products\ProductsController@removeCategory');
+
+    #products
+    Route::post('product/add', 'Products\ProductsController@addProduct');
+    Route::post('product/update', 'Products\ProductsController@updateProduct');
+    Route::post('product/remove', 'Products\ProductsController@removeProduct');
+    Route::post('product/publish/toggle', 'Products\ProductsController@toggleStatus');
+
+    #product variants
+    Route::post('product/variant/add', 'Products\ProductsController@addProductVariant');
+    Route::post('product/variant/update', 'Products\ProductsController@updateProductVariant');
+    Route::post('product/variant/remove', 'Products\ProductsController@removeProductVariant');
+    Route::post('product/variant/publish/toggle', 'Products\ProductsController@toggleVariantStatus');
+
+
     /*** VENDORS  ***/
 
     /*** INVENTORY  ***/
@@ -55,6 +79,7 @@ Route::prefix('v1/config')->group(function () {
 
     Route::group(['middleware' => ['auth:api']], function () {
 
+        /***  S Y S T E M   C O N F I G   ***/
         /*** USERS & ROLES  ***/
         #roles
         Route::post('staff/role/add', 'Config\PermissionsController@addRole');
@@ -100,6 +125,23 @@ Route::prefix('v1/resources')->group(function () {
 
     Route::group(['middleware' => ['auth:api']], function () {
 
+        /*** PRODUCTS  ***/
+        #vendors
+        Route::get('products/vendors', 'Resources\ProductsResourcesController@getVendors');
+        Route::get('products/vendors/all', 'Resources\ProductsResourcesController@getAllVendors');
+
+        #products
+        Route::get('products/products', 'Resources\ProductsResourcesController@getProducts');
+        Route::get('products/categories', 'Resources\ProductsResourcesController@getCategories');
+
+        /*** SALES  ***/
+        #orders
+        Route::get('sales/orders', 'Resources\ProductsResourcesController@getProducts');
+
+        #customers
+        Route::get('sales/customers', 'Resources\ProductsResourcesController@getProducts');
+
+
         /*** USERS & ROLES  ***/
         #roles & permissions
         Route::get('staff/roles/full', 'Resources\StaffResourcesController@getFullAvailableRoles');
@@ -118,7 +160,6 @@ Route::prefix('v1/resources')->group(function () {
 
         #vehicles
         Route::get('assets/vehicles', 'Resources\AssetsResourcesController@getVehicles');
-
 
     });
 

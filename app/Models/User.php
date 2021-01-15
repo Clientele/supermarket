@@ -15,6 +15,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
     use HasRoles;
     use SoftDeletes;
+    protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
 
     protected $guard_name = 'api';
 
@@ -29,7 +30,8 @@ class User extends Authenticatable
         'otp_expires_at',
         'last_seen_at',
 
-        'staff_id'
+        'staff_id',
+        'vendor_id'
     ];
 
     protected $hidden = [
@@ -37,10 +39,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-}
+ }
 
 
 

@@ -11,6 +11,7 @@ use Spatie\Searchable\SearchResult;
 class Region extends Model implements Searchable{
     use HasFactory;
     use SoftDeletes;
+    protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
 
     protected $fillable = [
         'country_id',
@@ -35,9 +36,6 @@ class Region extends Model implements Searchable{
     }
 
 
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:m',
-    ];
 
 }
 

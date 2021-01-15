@@ -40,8 +40,6 @@
           <v-select v-model="selectedDepot" class=" mb-5" :clearable="false"
                     :options="availableDepots" label="depot_name" />
 
-
-
         </div>
       </div>
 

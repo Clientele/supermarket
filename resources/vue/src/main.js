@@ -31,10 +31,6 @@ import './http/requests'
 import '../themeConfig.js'
 
 
-// Firebase
-import '@/firebase/firebaseConfig'
-
-
 // Auth0 Plugin
 import AuthPlugin from './plugins/auth'
 Vue.use(AuthPlugin)
@@ -88,15 +84,6 @@ import VeeValidate from 'vee-validate'
 Vue.use(VeeValidate)
 
 
-// Google Maps
-import * as VueGoogleMaps from 'vue2-google-maps'
-Vue.use(VueGoogleMaps, {
-  load: {
-    // Add your API key here
-    key: 'YOUR_KEY',
-    libraries: 'places' // This is required if you use the Auto complete plug-in
-  }
-})
 
 // Vuejs - Vue wrapper for hammerjs
 import { VueHammer } from 'vue2-hammer'
