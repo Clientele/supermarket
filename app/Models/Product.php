@@ -31,6 +31,10 @@ class Product extends Model
         return $this->hasMany('App\Models\ProductAssignedCategory','product_id');
     }
 
+    public function variants(){
+        return $this->hasMany('App\Models\ProductVariant','product_id');
+    }
+
 
 }
 

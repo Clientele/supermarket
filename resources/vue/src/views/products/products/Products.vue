@@ -5,146 +5,166 @@
 
 
 <template>
-  <vx-card>
 
-    <!--Products Filter -->
+  <div>
+    <!--Categories Filter -->
     <div class="flex flex-wrap items-center mb-6">
       <div class="flex-grow">
         <div class="flex flex-wrap ">
-
-          <v-select class="flex" @input="fetchProducts()" v-model="filteringCategoryId"
-                    :options="allCategories"  name="category_name" label="category_name"
-                    placeholder="Category" :reduce="option => option.id" >
+          <h2 class="font-bold"
+              style="line-height: 48px !important; display:flex;  vertical-align: middle !important;   ">
+            <vs-icon class="inline pt-2 mr-4" size="32px" icon="view_quilt"></vs-icon>
+            Products
+          </h2>
+          <v-select class="flex ml-4" @input="fetchProducts()" v-model="filterCategory"
+                    :options="allCategories" name="category_name" label="category_name" :clearable="false"
+                    placeholder="Category" :reduce="option => option.id">
           </v-select>
-          <!--refresh button -->
-          <vs-button class="py-0" type="flat" @click="fetchProducts()">Refresh</vs-button>
+          <vs-button icon="refresh" class="py-0 ml-4" type="flat" @click="fetchProducts()">Refresh</vs-button>
         </div>
 
       </div>
 
       <vs-button icon="add" @click="showProductForm()">Add Product</vs-button>
     </div>
-    <!-- [end] Products Filter -->
-
-    <!-- Products -->
-    <div style="border: 1px solid #e5e5e5" class="px-6 py-6 rounded">
-      <h4 class="mb-4">Products</h4>
-      <vs-table stripe :data="products">
-
-        <template slot="thead">
-          <vs-th>Product Name</vs-th>
-          <vs-th>Added</vs-th>
-          <vs-th>Action</vs-th>
-          <vs-th>Action</vs-th>
-        </template>
-
-        <template slot-scope="{data}">
-          <vs-tr :key="rowIndex" v-for="(tr, rowIndex) in data">
-            <vs-td :data="data[rowIndex].product_name">
-              {{ data[rowIndex].product_name }}
-            </vs-td>
-
-            <vs-td :data="data[rowIndex].vendor">
-              {{ data[rowIndex].vendor?  data[rowIndex].vendor.vendor_name : "Unknown Vendor" }}
-            </vs-td>
-            <vs-td :data="data[rowIndex].created_at">
-              {{ data[rowIndex].created_at }}
-            </vs-td>
-            <vs-td :data="data[rowIndex].id">
-              <vs-button type="border" color="secondary" class="mr-4" size="small"
-                         @click="viewDistricts(data[rowIndex])">Open
-              </vs-button>
-              <vs-button type="border" class="mr-4" size="small" @click="showProductForm(data[rowIndex])">Edit
-              </vs-button>
-              <vs-button type="border" color="danger" class="mr-4" size="small"
-                         @click="confirmProductRemoval(data[rowIndex])">Remove
-              </vs-button>
-            </vs-td>
-          </vs-tr>
-        </template>
-      </vs-table>
-    </div>
+    <!-- [end] Categories Filter -->
 
 
-    <!-- User Form -->
-    <vs-popup @close="closeProductForm()" fullscreen title="Product Information" :active.sync="productFormDialog">
+    <vx-card>
 
-      <div class="md:px-6">
+      <!-- Products -->
+      <div style="border: 1px solid #e5e5e5" class="px-6 py-6 rounded">
+        <h4 class="mb-4">Products</h4>
+        <vs-table stripe :data="products">
 
-        <!-- Content Row -->
-        <div class="vx-row">
-          <div class="vx-col md:w-1/3 w-1/4">
-            <vs-input class="w-full mt-4" label="Product Name" v-model="productInstance.product_name"
-                      v-validate="'required'" name="product_name"/>
-            <span class="text-danger text-sm" v-show="errors.has('product_name')">{{
-                errors.first('product_name')
-              }}</span>
+          <template slot="thead">
+            <vs-th>Product Name</vs-th>
+            <vs-th>Vendor</vs-th>
+            <vs-th>Added On</vs-th>
+            <vs-th>Action</vs-th>
+            <vs-th> </vs-th>
+          </template>
 
-            <div class="mt-4 mb-5">
-              <label class="vs-input--label">Vendor</label>
-              <v-select v-model="selectedVendor" :clearable="false"
-                        :options="availableVendors" v-validate="'required'" name="vendor_name" label="vendor_name"
-                        placeholder="Select" >
-              </v-select>
+          <template slot-scope="{data}">
+            <vs-tr :key="rowIndex" v-for="(tr, rowIndex) in data">
+              <vs-td :data="data[rowIndex].product_name">
+                {{ data[rowIndex].product_name }}
+              </vs-td>
 
-              <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
-            </div>
-
-          </div>
-
-          <div class="vx-col md:w-1/3 w-1/4">
-            <div class="mt-4 mb-5" v-for="(category, index) in productCategoriesArray" :key="index">
-              <label class="vs-input--label">{{ category.title }}</label>
-              <v-select @input="fetchSubCategories(category)" v-model="category.selected_category" :clearable="false"
-                        :options="category.sub_categories" v-validate="'required'" name="status" label="category_name"
-                        placeholder="Select">
-              </v-select>
-
-              <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
-            </div>
-          </div>
-
-          <div class="vx-col md:w-1/3 w-1/4">
-            <h3>Categories</h3>
-            <div class="category-item" v-for="(assignedCategory, index) in assignedCategories" :key="index">
-              <div class="flex flex-wrap" >
-                <p class="mt-1 flex-grow">{{ assignedCategory.category.category_name }}</p>
-                <vs-button type="border" @click="removeAssignedCategory(assignedCategory)"
-                           color="danger" radius icon="close" size="small"></vs-button>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="vx-row mt-12">
-          <div class="vx-col w-full">
-            <div class="flex items-start flex-col sm:flex-row">
-              <!-- <vs-avatar :src="data.avatar" size="80px" class="mr-4" /> -->
-              <div>
-                <vs-button ref="saveButton" @click="saveProduct()" color="success" class="mr-4 mb-4">Save Product
+              <vs-td :data="data[rowIndex].vendor">
+                {{ data[rowIndex].vendor ? data[rowIndex].vendor.vendor_name : "Unknown Vendor" }}
+              </vs-td>
+              <vs-td :data="data[rowIndex].created_at">
+                {{ data[rowIndex].created_at }}
+              </vs-td>
+              <vs-td :data="data[rowIndex].id">
+                <vs-button type="border" color="secondary" class="mr-4" size="small"
+                           @click="showProductVariants(data[rowIndex])">Open
                 </vs-button>
+                <vs-button type="border" class="mr-4" size="small" @click="showProductForm(data[rowIndex])">Edit
+                </vs-button>
+              </vs-td>
+              <vs-td>
+                <vs-button type="border" color="danger" class="mr-4" size="small"
+                           @click="confirmProductRemoval(data[rowIndex])">Remove
+                </vs-button>
+              </vs-td>
+            </vs-tr>
+          </template>
+        </vs-table>
+      </div>
+      <!-- [end] Products -->
+
+      <!-- Product Form -->
+      <vs-popup @close="closeProductForm()" fullscreen title="Product Information" :active.sync="productFormDialog">
+
+        <div class="md:px-6">
+
+          <!-- Content Row -->
+          <div class="vx-row">
+            <div class="vx-col md:w-1/3 w-1/4">
+              <vs-input class="w-full mt-4" label="Product Name" v-model="productInstance.product_name"
+                        v-validate="'required'" name="product_name"/>
+              <span class="text-danger text-sm" v-show="errors.has('product_name')">{{
+                  errors.first('product_name')
+                }}</span>
+
+              <div class="mt-4 mb-5">
+                <label class="vs-input--label">Vendor</label>
+                <v-select v-model="selectedVendor" :clearable="false"
+                          :options="availableVendors" v-validate="'required'" name="vendor_name" label="vendor_name"
+                          placeholder="Select">
+                </v-select>
+
+                <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
+              </div>
+
+            </div>
+
+            <div class="vx-col md:w-1/3 w-1/4">
+              <div class="mt-4 mb-5" v-for="(category, index) in productCategoriesArray" :key="index">
+                <label class="vs-input--label">{{ category.title }}</label>
+                <v-select @input="fetchSubCategories(category)" v-model="category.selected_category" :clearable="false"
+                          :options="category.sub_categories" v-validate="'required'" name="status" label="category_name"
+                          placeholder="Select">
+                </v-select>
+
+                <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
+              </div>
+            </div>
+
+            <div class="vx-col md:w-1/3 w-1/4">
+              <h3>Categories</h3>
+              <div class="category-item" v-for="(assignedCategory, index) in assignedCategories" :key="index">
+                <div class="flex flex-wrap">
+                  <p class="mt-1 flex-grow">{{ assignedCategory.category.category_name }}</p>
+                  <vs-button type="border" @click="removeAssignedCategory(assignedCategory)"
+                             color="danger" radius icon="close" size="small"></vs-button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="vx-row mt-12">
+            <div class="vx-col w-full">
+              <div class="flex items-start flex-col sm:flex-row">
+                <!-- <vs-avatar :src="data.avatar" size="80px" class="mr-4" /> -->
+                <div>
+                  <vs-button ref="saveButton" @click="saveProduct()" color="success" class="mr-4 mb-4">Save Product
+                  </vs-button>
+                </div>
               </div>
             </div>
           </div>
+
         </div>
+      </vs-popup>
+      <!-- [end] Product Form -->
 
-      </div>
-    </vs-popup>
-    <!-- [end] User Form -->
+      <!-- Product Variants -->
+      <vs-popup @close="closeProductVariantsDialog()" fullscreen title=""
+                :active.sync="productVariantsVisible">
+        <div>
+          <product-variants @closeProductVariants="closeProductVariantsDialog" v-bind:product="productInstance"></product-variants>
+        </div>
+      </vs-popup>
+      <!-- [end] Product Variants -->
 
-
-  </vx-card>
+    </vx-card>
+  </div>
 </template>
 
 <script>
 import axios from "@/axios";
-import vSelect from 'vue-select'
+import vSelect from 'vue-select';
+import ProductVariants from "@/views/products/products/ProductVariants";
 
 export default {
   components: {
-    vSelect
+    vSelect,
+    ProductVariants
   },
   data() {
     return {
@@ -166,15 +186,24 @@ export default {
         {"name": "Congo"}
       ],
 
-      productCategoriesArray: [ { title: "Main Category",  id: null, selected_category: null, selected_category_id: null, sub_categories: [] } ],
-
+      productCategoriesArray: [{
+        title: "Main Category",
+        id: null,
+        selected_category: null,
+        selected_category_id: null,
+        sub_categories: []
+      }],
+      filterCategory: {category_name: 'Category'},
       availableVendors: [],
       selectedVendor: null,
       assignedCategories: [],
       allCategories: [],
-      filteringCategoryId: null,
 
-      filteringCategoriesArray: [{ title: "Main Category",  id: null, selected_category: null, selected_category_id: null, sub_categories: [] } ]
+
+      /** Product variants **/
+      productVariantsVisible: false
+
+
     }
   },
 
@@ -183,10 +212,10 @@ export default {
     /*** Products **/
     fetchProducts() {
       this.products = [];
-      axios.get('/resources/products/products?category_id=' + this.filteringCategoryId)
+      axios.get('/resources/products/products?category_id=' + this.filterCategory)
         .then((response) => {
-        this.products = response.data.payload.products.data;
-      }).catch((error) => {
+          this.products = response.data.payload.products.data;
+        }).catch((error) => {
         console.log(error)
       })
     },
@@ -197,7 +226,7 @@ export default {
           this.productInstance = response.data.payload.product;
           this.selectedVendor = response.data.payload.product.vendor;
           this.assignedCategories = response.data.payload.product.categories;
-         }).catch((error) => {
+        }).catch((error) => {
         console.log(error);
       });
     },
@@ -221,7 +250,7 @@ export default {
       console.log(JSON.stringify(this.productInstance));
 
       let endpoint = '/config/product/add';
-      if(this.productInstance.id){
+      if (this.productInstance.id) {
         endpoint = '/config/product/update';
       }
 
@@ -229,7 +258,13 @@ export default {
         .then((response) => {
           this.productFormDialog = false;
           this.productInstance = {};
-          this.productCategoriesArray = [ { title: "Main Category",  id: null, selected_category: null, selected_category_id: null, sub_categories: [] } ];
+          this.productCategoriesArray = [{
+            title: "Main Category",
+            id: null,
+            selected_category: null,
+            selected_category_id: null,
+            sub_categories: []
+          }];
           this.fetchProducts();
           this.getAvailableCategories(0);
         }).catch((error) => {
@@ -256,12 +291,11 @@ export default {
           this.fetchProducts();
         }).catch((error) => {
         console.log(error)
-      })
+      });
     },
 
-
-    removeAssignedCategory(assignedCategory){
-      axios.post('/config/product/assigned/category/remove',{
+    removeAssignedCategory(assignedCategory) {
+      axios.post('/config/product/assigned/category/remove', {
         product_id: assignedCategory.product_id,
         category_id: assignedCategory.category_id
       })
@@ -272,18 +306,26 @@ export default {
       });
     },
 
-    /*** Product **/
     closeProductForm() {
       this.productFormDialog = false;
     },
 
+    /*** Product variants **/
+    closeProductVariantsDialog() {
+      this.productVariantsVisible = false;
+    },
+
+    showProductVariants(product) {
+      this.productInstance = product;
+      this.productVariantsVisible = true;
+    },
 
     /*** Categories Resources **/
     getAvailableCategories(categoriesIndex) {
       let letCatId = this.productCategoriesArray[categoriesIndex].id;
       axios.get('/resources/products/categories?parent_id=' + letCatId).then((response) => {
         this.productCategoriesArray[categoriesIndex].sub_categories = response.data.payload.categories;
-       }).catch((error) => {
+      }).catch((error) => {
         console.log(error);
       });
     },
@@ -297,7 +339,7 @@ export default {
             console.log("Has sub categories");
             let category = {};
             category.id = selectedCategory.id;
-            category.title = selectedCategory.selected_category.category_name ;
+            category.title = selectedCategory.selected_category.category_name;
             category.selected_category_id = selectedCategory.null;
             category.sub_categories = subCategories;
             this.productCategoriesArray.push(category);
@@ -310,7 +352,7 @@ export default {
     fetchAllCategories() {
       axios.get('/resources/products/categories/all')
         .then((response) => {
-          this.allCategories= response.data.payload.categories;
+          this.allCategories = response.data.payload.categories;
         }).catch((error) => {
         console.log(error);
       });
@@ -339,7 +381,7 @@ export default {
 </script>
 
 <style scoped>
-.category-item{
+.category-item {
   padding: 8px 8px;
   margin-top: 12px;
   border: 1px solid #ddb892;

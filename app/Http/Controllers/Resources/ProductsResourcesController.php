@@ -85,6 +85,20 @@ class ProductsResourcesController extends GoodBaseController
 
     }
 
+    public function getProductVariants(Request $request){
+        Log::debug($request->all());
+        $product = Product::where([
+            'id' =>$request->input('product_id')
+        ])->first();
+
+        if(!$product){
+            return  $this->returnError("Product not found",[""]);
+        }
+
+        $responseData['product_variants'] =  $product->variants;
+        return $this->returnResponse('Product variants ', $responseData);
+
+    }
 
     /** Categories **/
     public function getCategories(Request $request){

@@ -103,58 +103,6 @@ class ProductsController extends GoodBaseController
         return $this->returnResponse('Category removed from product',$product);
     }
 
-
-    /*** Product Variants **/
-    public function addProductVariant(Request $request){
-
-        $product = Product::find($request->input('product_id'));
-        if(!$product){
-            return $this->returnError("Invalid Parent Product", ["Invalid Product"] );
-        }
-
-        $product = ProductVariant::create([
-            'product_id'=>$product->id,
-            'vendor_id'=>$product->vendor_id,
-
-            'variant_name'=>$request->input('variant_name'),
-            'is_published'=> false,
-
-            'thumbnail_img'=> null,
-            'created_by'=> Auth::id()
-        ]);
-
-        return $this->returnResponse('Product Variant Added',$product);
-    }
-
-    public function updateProductVariant(Request $request){
-
-        ///TODO: save image
-        $thumbNailUrl = "";
-
-        $product = ProductVariant::where([
-            'id'=>$request->input('id'),
-        ])->update([
-            'variant_name'=>$request->input('variant_name'),
-            'thumbnail_img'=> $thumbNailUrl,
-        ]);
-
-        return $this->returnResponse('Product Variant Updated',$product);
-    }
-
-    public function toggleVariantStatus(Request $request){
-        $product = ProductVariant::where([
-            'id' => $request->input('id')
-        ])->update([
-            'is_published'=> $request->input('is_published')
-        ]);
-        return $this->returnResponse('Product Variant status changed',$product);
-    }
-
-    public function removeProductVariant(Request $request){
-        $product = ProductVariant::destroy($request->input('id'));
-        return $this->returnResponse('Product variant removed',$product);
-    }
-
     /*** Product Categories **/
     public function addProductCategory(Request $request){
 

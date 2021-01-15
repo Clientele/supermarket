@@ -26,41 +26,6 @@ Route::prefix('v1/auth')->group(function () {
 });
 
 
-/// PRODUCTS
-Route::prefix('v1/config')->group(function () {
-
-    /*** PRODUCTS CONFIG  ***/
-
-
-    /***  P R O D U C T S   ***/
-    #vendors
-    Route::post('vendor/add', 'Products\VendorsController@addVendor');
-    Route::post('vendor/remove', 'Products\VendorsController@removeVendor');
-    Route::post('vendor/status/change', 'Products\VendorsController@toggleVendorStatus');
-
-    #categories
-    Route::post('category/add', 'Products\ProductsController@addProductCategory');
-    Route::post('category/remove', 'Products\ProductsController@removeCategory');
-
-    #products
-    Route::post('product/add', 'Products\ProductsController@addProduct');
-    Route::post('product/update', 'Products\ProductsController@updateProduct');
-    Route::post('product/remove', 'Products\ProductsController@removeProduct');
-    Route::post('product/publish/toggle', 'Products\ProductsController@toggleStatus');
-    Route::post('product/assigned/category/remove', 'Products\ProductsController@removeAssignedCategory');
-
-    #product variants
-    Route::post('product/variant/add', 'Products\ProductsController@addProductVariant');
-    Route::post('product/variant/update', 'Products\ProductsController@updateProductVariant');
-    Route::post('product/variant/remove', 'Products\ProductsController@removeProductVariant');
-    Route::post('product/variant/publish/toggle', 'Products\ProductsController@toggleVariantStatus');
-
-    /*** VENDORS  ***/
-
-    /*** INVENTORY  ***/
-
-});
-
 
 /// SALES
 Route::prefix('v1/sales')->group(function () {
@@ -74,12 +39,44 @@ Route::prefix('v1/sales')->group(function () {
 });
 
 
-/// CONFIGURATIONS
+
+/// P R O D U C T S    C O N F I G S
+Route::prefix('v1/config')->group(function () {
+
+    /*** V E N D O R S  ***/
+    Route::post('vendor/add', 'Products\VendorsController@addVendor');
+    Route::post('vendor/remove', 'Products\VendorsController@removeVendor');
+    Route::post('vendor/status/change', 'Products\VendorsController@toggleVendorStatus');
+
+    /***  P R O D U C T S   ***/
+    #categories
+    Route::post('category/add', 'Products\ProductsController@addProductCategory');
+    Route::post('category/remove', 'Products\ProductsController@removeCategory');
+
+    #products
+    Route::post('product/add', 'Products\ProductsController@addProduct');
+    Route::post('product/update', 'Products\ProductsController@updateProduct');
+    Route::post('product/remove', 'Products\ProductsController@removeProduct');
+    Route::post('product/publish/toggle', 'Products\ProductsController@toggleStatus');
+    Route::post('product/assigned/category/remove', 'Products\ProductsController@removeAssignedCategory');
+
+    #product variants
+    Route::post('product/variant/add', 'Products\ProductsVariantsController@addProductVariant');
+    Route::post('product/variant/update', 'Products\ProductsVariantsController@updateProductVariant');
+    Route::post('product/variant/remove', 'Products\ProductsVariantsController@removeProductVariant');
+    Route::post('product/variant/publish/toggle', 'Products\ProductsVariantsController@toggleVariantStatus');
+
+
+    /*** INVENTORY  ***/
+
+});
+
+
+/// S Y S T E M   C O N F I G
 Route::prefix('v1/config')->group(function () {
 
     Route::group(['middleware' => ['auth:api']], function () {
 
-        /***  S Y S T E M   C O N F I G   ***/
         /*** USERS & ROLES  ***/
         #roles
         Route::post('staff/role/add', 'Config\PermissionsController@addRole');
@@ -135,6 +132,9 @@ Route::prefix('v1/resources')->group(function () {
         Route::get('products/categories', 'Resources\ProductsResourcesController@getCategories');
         Route::get('products/categories/all', 'Resources\ProductsResourcesController@getAllCategories');
         Route::get('product/details', 'Resources\ProductsResourcesController@getProductDetails');
+
+        #variants
+        Route::get('product/variants', 'Resources\ProductsResourcesController@getProductVariants');
 
         /*** SALES  ***/
         #orders

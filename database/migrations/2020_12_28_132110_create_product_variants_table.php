@@ -21,6 +21,7 @@ class CreateProductVariantsTable extends Migration
             $table->string('variant_name');
 
             $table->integer('restocking_quantity')->default(0);
+            $table->string('measuring_unit')->nullable();
 
             $table->boolean('is_published');
 

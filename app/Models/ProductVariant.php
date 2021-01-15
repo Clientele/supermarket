@@ -18,6 +18,8 @@ class ProductVariant extends Model{
 
         'variant_name',
         'restocking_quantity',
+        'measuring_unit',
+
         'is_published',
 
         'thumbnail_img',
