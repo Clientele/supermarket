@@ -41,6 +41,8 @@
 </template>
 
 <script>
+import router from '@/router'
+
 export default {
   data () {
     return {
@@ -65,7 +67,7 @@ export default {
         // this.$vs.loading.close()
 
         this.$vs.notify({
-          title: 'Login Attempt',
+          title: 'Authentication Error',
           text: 'You are already logged in!',
           iconPack: 'feather',
           icon: 'icon-alert-circle',
@@ -77,8 +79,8 @@ export default {
       return true
     },
 
-
     loginJWT () {
+
 
       if (!this.checkLogin()) return
 
@@ -112,6 +114,15 @@ export default {
       if (!this.checkLogin()) return
       this.$router.push('/pages/register').catch(() => {})
     }
+  },
+  mounted() {
+    const token = localStorage.getItem('accessToken');
+    if(token){
+      console.log(token);
+      console.log("Logged in...");
+      router.push(router.currentRoute.query.to || '/');
+    }
+
   }
 }
 

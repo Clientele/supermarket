@@ -40,9 +40,7 @@ import LoginJwt from './LoginJWT.vue'
 
 export default {
   components: {
-    LoginJwt,
-    LoginFirebase,
-    LoginAuth0
+    LoginJwt
   }
 }
 </script>

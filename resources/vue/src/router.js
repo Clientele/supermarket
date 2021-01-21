@@ -70,9 +70,15 @@ const router = new Router({
           meta: { rule: 'admin' }
         },
         {
-          path: '/products/inventory',
-          name: 'products-vendors',
-          component: () => import('@/views/products/vendors/Vendors'),
+          path: '/products/inventory/stock',
+          name: 'products-inventory-stock',
+          component: () => import('@/views/products/inventory/Stock'),
+          meta: { rule: 'admin' }
+        },
+        {
+          path: '/products/inventory/stock/moving',
+          name: 'products-inventory-stock-moving',
+          component: () => import('@/views/products/inventory/Stock'),
           meta: { rule: 'admin' }
         },
 
@@ -81,16 +87,17 @@ const router = new Router({
         // =============================================================================
         // 2.0 SALES ROUTES
         // =============================================================================
-        {
-          path: '/sales/orders',
-          name: 'sales-orders',
-          component: () => import('@/views/config/access/Users'),
-          meta: { rule: 'admin' }
-        },
+
         {
           path: '/sales/customers',
           name: 'sales-customers',
-          component: () => import('@/views/config/access/Users'),
+          component: () => import('@/views/sales/customers/Customers'),
+          meta: { rule: 'admin' }
+        },
+        {
+          path: '/sales/orders',
+          name: 'sales-orders',
+          component: () => import('@/views/sales/orders/Orders'),
           meta: { rule: 'admin' }
         },
 
@@ -173,7 +180,7 @@ const router = new Router({
           }
         },
         {
-          path: '/pages/login',
+          path: '/login',
           name: 'page-login',
           component: () => import('@/views/pages/login/Login.vue'),
           meta: {

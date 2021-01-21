@@ -1,7 +1,6 @@
  <template>
   <div id="page-user-view">
 
-
     <!-- Variant form -->
     <div v-if="productVariantFormVisible" class="mb-6 variant-form">
 
@@ -13,7 +12,6 @@
 
 
       </div>
-
 
       <div class="vx-row">
 
@@ -219,6 +217,8 @@ export default {
       if(Number.isInteger(this.productVariantInstance.id)){
           endpoint = '/config/product/variant/update';console.log("Updating...")
       }
+
+      console.log(endpoint);
 
       axios.post( endpoint, this.productVariantInstance)
         .then((response) => {

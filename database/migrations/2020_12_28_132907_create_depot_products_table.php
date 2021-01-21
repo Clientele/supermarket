@@ -25,7 +25,7 @@ class CreateDepotProductsTable extends Migration
 
             $table->string('batch_number')->nullable();
             $table->dateTime('expiry_date')->nullable();
-            $table->dateTime('receaved_at')->nullable();
+            $table->dateTime('received_at')->nullable();
             $table->bigInteger('receiver_id')->nullable();
 
             $table->bigInteger('created_by')->unsigned()->nullable();

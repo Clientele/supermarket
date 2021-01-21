@@ -1,7 +1,7 @@
 /*=========================================================================================
   File Name: sidebarItems.js
   Description: Sidebar Items list. Add / Remove menu items from here.
-  Strucutre:
+  Structure:
           url     => router path
           name    => name to display in sidebar
           slug    => router path name
@@ -12,10 +12,7 @@
           submenu   => submenu of current item (current item will become dropdown )
                 NOTE: Submenu don't have any icon(you can add icon if u want to display)
           isDisabled  => disable sidebar item/group
-  ----------------------------------------------------------------------------------------
-  Item Name: Vuexy - Vuejs, HTML & Laravel Admin Dashboard Template
-  Author: Pixinvent
-  Author URL: http://www.themeforest.net/user/pixinvent
+
 ==========================================================================================*/
 
 
@@ -57,19 +54,14 @@ export default [
         icon: 'DatabaseIcon',
          submenu: [
           {
-            url: '/inventory/status',
-            name: 'Stock Status',
-            slug: 'grid-vuesax'
+            url: '/products/inventory/stock',
+            name: 'Depot Stock',
+            slug: 'moving-stock'
            },
           {
-            url: '/inventory/receive',
-            name: 'Receive products',
-            slug: 'grid-tailwind'
-           },
-          {
-            url: '/inventory/dispatch',
-            name: 'Tailwind',
-            slug: 'grid-tailwind'
+            url: '/products/inventory/stock/moving',
+            name: 'Moving Stock',
+            slug: 'moving-stock'
            }
         ]
       }

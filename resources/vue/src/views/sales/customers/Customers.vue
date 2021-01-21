@@ -2,26 +2,26 @@
 <template>
   <div id="data-list-list-view" class="data-list-container">
 
-    <vendor-form :isSidebarActive="showVendorFormSidebar" @closeSidebar="toggleDataSidebar" :data="sidebarData" />
+    <customer-form :isSidebarActive="addNewDataSidebar" @closeSidebar="toggleDataSidebar" :data="sidebarData" />
 
-    <vs-table ref="table"  v-model="selectedVendor" pagination :max-items="itemsPerPage" search :data="refinedVendors">
+    <vs-table ref="table" multiple v-model="selected" pagination :max-items="itemsPerPage" search :data="refinedCustomers">
 
       <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
 
         <div class="flex flex-wrap-reverse items-center data-list-btn-container">
 
-          <vs-icon class="mr-2" icon="business_center" size="large" color="primary"></vs-icon>
+          <vs-icon class="mr-2" icon="groups" size="large" color="primary"></vs-icon>
           <h1 class="mr-6">
-            Vendors
+            Customers
           </h1>
-
-          <!-- Add Vendor Button -->
-          <vs-button icon="add" id="vendorLoading" type="border" @click="showVendorForm"
-                     class="mr-4 vs-con-loading__container">Add Vendor</vs-button>
 
           <!-- Filter By Region -->
           <v-select v-model="selectedRegionId" class="mr-6" :clearable="false" :reduce="item => item.id"
                     :options="availableRegions" label="region_name" />
+
+          <!-- Add Customer Button -->
+          <vs-button icon="add" id="customerLoading"  @click="addNewData"
+                     class="mr-4 vs-con-loading__container">Add Customer</vs-button>
 
         </div>
 
@@ -39,7 +39,7 @@
         <vs-tr :data="item" :key="rowIndex" v-for="(item, rowIndex) in data">
 
           <vs-td>
-            <p class="product-name font-medium truncate">{{ item.vendor_name }}</p>
+            <p class="product-name font-medium truncate">{{ item.customer_name  }}</p>
           </vs-td>
 
           <vs-td>
@@ -51,7 +51,7 @@
            </vs-td>
 
           <vs-td class="whitespace-no-wrap">
-            <vs-button color="danger" size="small" type="border" @click="confirmVendorDeletion(item)">Delete</vs-button>
+            <vs-button color="danger" size="small" type="border" @click="confirmCustomerDeletion(item)">Delete</vs-button>
            </vs-td>
 
         </vs-tr>
@@ -62,28 +62,28 @@
 </template>
 
 <script>
-import vendorForm from './VendorSideForm'
+import CustomerForm from './CustomersSideForm'
 import axios from "@/axios";
-import {handle} from "@/http/handler";
 import vSelect from 'vue-select'
+import {handle} from "@/http/handler";
 
 export default {
   components: {
-    vendorForm,
+    CustomerForm,
     vSelect
   },
 
   data () {
     return {
-      selectedVendor: {},
-      rawVendors: [],
-      vendorInstance: null,
+      selected: [],
+      rawCustomers: [],
+      customerInstance: null,
 
-      itemsPerPage: 100,
+      itemsPerPage: 4,
       isMounted: false,
 
       // Data Sidebar
-      showVendorFormSidebar: false,
+      addNewDataSidebar: false,
       sidebarData: {},
 
       selectedRegionId: { "id": null, "region_name": "All Regions" },
@@ -99,101 +99,83 @@ export default {
       return 0
     },
 
-    refinedVendors (){
-      return this.rawVendors.map(function (vendor) {
+    refinedCustomers (){
+      return this.rawCustomers.map(function (customer) {
 
         let name= "";
-        name = vendor.place ? vendor.place.place_name : "";
-        name = vendor.district ? name + " "+vendor.district.district_name : name;
-        name = vendor.region ? name + " "+vendor.region.region_name : name;
+        name = customer.place ? customer.place.place_name : "";
+        name = customer.district ? name + " "+customer.district.district_name : name;
+        name = customer.region ? name + " "+customer.region.region_name : name;
 
-        vendor.location_name = name;
-        return  vendor;
+        customer.location_name = name;
+        return  customer;
       });
     }
 
   },
   methods: {
 
-    fetchVendors(){
-      console.info("fetching vendors..");
+    fetchCustomers(){
+      console.log(JSON.stringify(this.selectedRegionId));
 
-      this.rawVendors = [];
-      this.$vs.loading({ background: this.backgroundLoading, container: "#vendorLoading", scale: 0.45 })
-      axios.get('/resources/products/vendors?region_id='+this.selectedRegionId)
+      this.rawCustomers = [];
+      this.$vs.loading({ background: this.backgroundLoading, container: "#customerLoading", scale: 0.45 })
+      console.info("fetching customers..");
+      axios.get('/resources/sales/customers?region_id='+this.selectedRegionId)
         .then((response) => {
-          this.$vs.loading.close("#vendorLoading > .con-vs-loading")
-          this.rawVendors = response.data.payload.vendors.data;
+          this.rawCustomers = response.data.payload.customers.data;
+          this.$vs.loading.close("#customerLoading > .con-vs-loading")
         }).catch((error) => {
-         this.$vs.loading.close("#vendorLoading > .con-vs-loading")
-        this.$vs.notify({
-          title: 'Error',
-          text: handle(error),
-          iconPack: 'feather',
-          icon: 'icon-alert-circle',
-          color: 'danger'
-        })
-
+        console.log(error);
+        this.handleApiError(error);
       })
     },
 
-    confirmVendorDeletion(vendor){
-      this.vendorInstance = vendor;
+    confirmCustomerDeletion(customer){
+      this.customerInstance = customer;
       this.$vs.dialog({
         type: 'confirm',
         color: 'danger',
         title: `Confirm`,
-        text: 'Are you sure you want to remove '+this.vendorInstance.vendor_name,
-        accept: this.removeVendor
+        text: 'Are you sure you want to remove '+this.customerInstance.customer_name,
+        accept: this.removeCustomer
       })
     },
 
-    removeVendor () {
-      this.$vs.loading({ background: this.backgroundLoading, container: "#vendorLoading", scale: 0.45 })
-      axios.post('/config/vendor/remove', { id : this.vendorInstance.id } )
+    removeCustomer () {
+      this.$vs.loading({ background: this.backgroundLoading, container: "#customerLoading", scale: 0.45 })
+      axios.post('/sales/customer/remove', { id : this.customerInstance.id } )
         .then((response) => {
-          this.fetchVendors();
+          this.fetchCustomers();
+          this.happilyNotify("Customer removed")
         }).catch((error) => {
         console.log(error);
-        this.$vs.loading.close("#vendorLoading > .con-vs-loading");
+        this.$vs.loading.close("#customerLoading > .con-vs-loading");
+        this.handleApiError(error);
+
       })
 
     },
 
-    showVendorForm () {
+    addNewData () {
       this.sidebarData = {}
       this.toggleDataSidebar(true)
     },
 
-    editData (vendorItem) {
-      this.sidebarData = vendorItem
+    editData (customerItem) {
+      this.sidebarData = customerItem
       this.toggleDataSidebar(true)
     },
 
-    getOrderStatusColor (status) {
-      if (status === 'on_hold')   return 'warning'
-      if (status === 'delivered') return 'success'
-      if (status === 'canceled')  return 'danger'
-      return 'primary'
-    },
-
-    getPopularityColor (num) {
-      if (num > 90)  return 'success'
-      if (num > 70)  return 'primary'
-      if (num >= 50) return 'warning'
-      if (num < 50)  return 'danger'
-      return 'primary'
-    },
-
     toggleDataSidebar (val = false) {
-      this.showVendorFormSidebar = val
-      this.fetchVendors();
+      this.addNewDataSidebar = val
+      this.fetchCustomers();
     },
 
     /*** Resources **/
     fetchRegions() {
       console.info("fetching regions..");
-      console.info(JSON.stringify(this.selectedVendor));
+      console.info(JSON.stringify(this.selectedCustomer));
       axios.get('/resources/addresses/regions?country_id=1')
         .then((response) => {
           this.availableRegions = response.data.payload.regions;
@@ -202,15 +184,27 @@ export default {
         }).catch((error) => {
         console.log(error)
       })
+    },
+
+    /** Helpers **/
+    handleApiError(error){
+      this.$vs.notify({
+        title: 'Error',
+        text: handle(error),
+        iconPack: 'feather',
+        icon: 'icon-alert-circle',
+        color: 'danger'
+      })
+    },
+
+    happilyNotify(message){
+      this.$vs.notify({ title: 'Success',  text: message, color: 'success'})
     }
 
   },
   watch: {
     selectedRegionId: function (val) {
-      this.fetchVendors();
-    },
-    selectedVendor: function (newVal){
-      console.log("Selected Vendor: "+JSON.stringify(newVal));
+      this.fetchCustomers();
     }
   },
 
@@ -218,7 +212,7 @@ export default {
     this.fetchRegions();
    },
   mounted () {
-    this.fetchVendors();
+    this.fetchCustomers();
     this.isMounted = true
   }
 }

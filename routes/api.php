@@ -27,14 +27,32 @@ Route::prefix('v1/auth')->group(function () {
 
 
 
+/// I N V E N T O R Y
+Route::prefix('v1/products')->group(function () {
+
+    /*** STOCK  ***/
+     Route::get('inventory/stock', 'Products\InventoryController@getStock');
+     Route::post('inventory/stock/receive', 'Products\InventoryController@receiveStock');
+     Route::get('inventory/stock/product', 'Products\InventoryController@getVariantStocks');
+     Route::get('inventory/stock/variant/breakdown', 'Products\InventoryController@getVariantStocksBreakdown');
+
+});
+
+
 /// SALES
 Route::prefix('v1/sales')->group(function () {
 
     /*** CUSTOMERS  ***/
+    Route::post('customer/add', 'Sales\CustomersController@addCustomer');
+    Route::post('customer/remove', 'Sales\CustomersController@removeCustomer');
 
     /*** ORDERS     ***/
+    Route::post('order/add', 'Sales\CustomersController@addOrder');
+    Route::post('order/remove', 'Sales\CustomersController@removeOrder');
 
     /*** DELIVERIES ***/
+    Route::post('delivery/add', 'Sales\CustomersController@addDelivery');
+    Route::post('delivery/remove', 'Sales\CustomersController@removeDelivery');
 
 });
 
@@ -67,7 +85,6 @@ Route::prefix('v1/config')->group(function () {
     Route::post('product/variant/publish/toggle', 'Products\ProductsVariantsController@toggleVariantStatus');
 
 
-    /*** INVENTORY  ***/
 
 });
 
@@ -141,7 +158,7 @@ Route::prefix('v1/resources')->group(function () {
         Route::get('sales/orders', 'Resources\ProductsResourcesController@getProducts');
 
         #customers
-        Route::get('sales/customers', 'Resources\ProductsResourcesController@getProducts');
+        Route::get('sales/customers', 'Resources\CustomersResourcesController@getCustomers');
 
 
         /*** USERS & ROLES  ***/

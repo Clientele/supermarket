@@ -1,8 +1,3 @@
-<!-- =========================================================================================
-    File Name: TableStriped.vue
-    Description: Rendering default table with striped style
-========================================================================================== -->
-
 
 <template>
 
@@ -22,7 +17,6 @@
           </v-select>
           <vs-button icon="refresh" class="py-0 ml-4" type="flat" @click="fetchProducts()">Refresh</vs-button>
         </div>
-
       </div>
 
       <vs-button icon="add" @click="showProductForm()">Add Product</vs-button>

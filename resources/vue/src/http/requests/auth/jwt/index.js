@@ -23,7 +23,7 @@ export default {
       const originalRequest = config
 
       // if (status === 401) {
-      if (response && response.status === 401) {
+      if (response && response.status === 499) {
         if (!isAlreadyFetchingAccessToken) {
           isAlreadyFetchingAccessToken = true
           store.dispatch('auth/fetchAccessToken')
