@@ -13,8 +13,14 @@ class ProductVariantPrice extends Model{
     protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
 
     protected $fillable = [
-
+        'zone_id',
+        'product_id',
+        'product_variant_id',
+        'amount',
+        'created_by',
+        'deleted_by'
     ];
+
 }
 
 

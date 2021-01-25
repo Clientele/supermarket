@@ -43,10 +43,21 @@ class CustomersController extends GoodBaseController
         return $this->returnResponse('Customer Added', $customer);
     }
 
+    public function verifyCustomer(Request $request){
+
+        $customer = Customer::where('id',$request->input('id'))
+            ->update([ 'verified' => $request->input('value') ]);
+        return $this->returnResponse('Customers ', $customer);
+    }
+
+
     public function removeCustomer(Request $request){
         $customer= Customer::destroy($request->input('id'));
         return $this->returnResponse('Customer removed',$customer);
     }
+
+
+
 
 
 }

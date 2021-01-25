@@ -28,6 +28,8 @@ class CreateCustomersTable extends Migration
             $table->bigInteger('district_id')->unsigned()->nullable();
             $table->bigInteger('place_id')->unsigned()->nullable();
 
+            $table->boolean('verified')->nullable()->default(false);
+
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
 

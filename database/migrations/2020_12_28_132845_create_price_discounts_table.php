@@ -24,8 +24,9 @@ class CreatePriceDiscountsTable extends Migration
             $table->boolean('is_for_one_product')->default(true);
             $table->boolean('is_for_one_variant')->default(false);
 
-            $table->double('percentage');
-            $table->double('minimum_order_value');
+            $table->double('amount',15,0)->nullable()->default(0);
+            $table->double('percentage')->nullable()->default(0);
+            $table->double('minimum_order_value')->nullable()->default(0);
 
             $table->dateTime('starts_at');
             $table->dateTime('ends_at');

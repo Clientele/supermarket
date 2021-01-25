@@ -62,6 +62,11 @@ export default [
             url: '/products/inventory/stock/moving',
             name: 'Moving Stock',
             slug: 'moving-stock'
+           },
+          {
+            url: '/products/inventory/stock/requests',
+            name: 'Stock Requests',
+            slug: 'moving-stock'
            }
         ]
       }
@@ -145,7 +150,11 @@ export default [
           {
             url: '/config/addresses',
             name: 'Places',
-          }
+          },
+          {
+            url: '/config/addresses/zones',
+            name: 'Sales Zones',
+          },
         ]
        },
 

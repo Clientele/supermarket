@@ -17,6 +17,9 @@ class StaffController extends GoodBaseController
     }
 
     public function addStaff(Request $request){
+         $password = rand(111111,999999);
+         Log::debug($password);
+
          if( User::where(['email'=>$request->input('email')])->first() ){
             return $this->returnError("User Exists","") ;
         }
@@ -24,7 +27,7 @@ class StaffController extends GoodBaseController
         $user = User::create([
             'name' => $request->input('staff_name'),
             'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password'))
+            'password' => Hash::make($password)
         ]);
 
         $staff = Staff::create([

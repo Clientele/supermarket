@@ -23,6 +23,8 @@ class CreateProductVariantsTable extends Migration
             $table->integer('restocking_quantity')->default(0);
             $table->string('measuring_unit')->nullable();
 
+            $table->double('base_price',15,0)->default(0)->nullable();
+
             $table->boolean('is_published');
 
             $table->string('thumbnail_img')->nullable();

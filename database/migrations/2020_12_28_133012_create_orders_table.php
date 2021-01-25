@@ -16,12 +16,15 @@ class CreateOrdersTable extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('customer_id')->unsigned()->nullable();
+            $table->bigInteger('sales_person_id')->unsigned()->nullable();
+
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('delivered_by')->unsigned()->nullable();
             $table->boolean('is_delivered')->nullable();
             $table->bigInteger('is_cancelled') ->nullable();
             $table->bigInteger('cancellation_reason') ->nullable();
             $table->bigInteger('cancelled_at') ->nullable();
+            $table->string('order_status') ->nullable();
 
             $table->double('amount_due',15,0)->nullable();
             $table->boolean('is_full_paid')->default(false)->nullable();

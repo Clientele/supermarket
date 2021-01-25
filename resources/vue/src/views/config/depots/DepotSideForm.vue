@@ -21,7 +21,6 @@
         <span class="text-danger text-sm" v-show="errors.has('item-name')">{{ errors.first('name') }}</span>
 
 
-
         <vs-input v-if="!selectedAddress" label="Location" v-model="locationQuery" class="mt-5 w-full" name="location" v-validate="'required'" />
         <span class="text-danger text-sm" v-show="errors.has('location')">{{ errors.first('item-name') }}</span>
 

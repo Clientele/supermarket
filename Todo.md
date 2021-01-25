@@ -18,3 +18,9 @@ Sales Module
    ->assign order to sales person
    ->request stock
    ->make sales
+   
+   
+   
+NB: 
+  -->Loading
+  -->Pagination

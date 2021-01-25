@@ -16,6 +16,7 @@ export const colors = {
   secondary  :'#4895ef',
   grey  :'#f0efeb',
   africa  :'#8a5a44',
+  neutral  :'#8a5a44',
 }
 
 // CONFIGS

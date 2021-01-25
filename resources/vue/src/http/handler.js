@@ -90,18 +90,22 @@ function parseError(statusCode) {
       return "Network Authentication Required";
     }
       break;
+
+    default:
+      return statusCode+ "Request failed"
   }
 }
 
 export function handle(error) {
 
-  if(error.response){
+   if(error.response){
     if(error.response.status==401){
       console.log("redirecting....");
        router.push('/login').catch(() => {})
       return "Not logged in";
     }else{
-     return parseError(error.response.status + " "+ error.response.message);
+     let message = error.response.data? error.response.data.message:   error.response.message;
+     return parseError(error.response.status )+ ": "+message;
     }
   }else{
     console.log(error);

@@ -2,7 +2,7 @@
 <template>
   <div id="data-list-list-view" class="data-list-container">
 
-    <customer-form :isSidebarActive="addNewDataSidebar" @closeSidebar="toggleDataSidebar" :data="sidebarData" />
+    <customer-form :isSidebarActive="showCustomerFormSidebar" @closeSidebar="toggleDataSidebar" :data="sidebarData" />
 
     <vs-table ref="table" multiple v-model="selected" pagination :max-items="itemsPerPage" search :data="refinedCustomers">
 
@@ -20,7 +20,7 @@
                     :options="availableRegions" label="region_name" />
 
           <!-- Add Customer Button -->
-          <vs-button icon="add" id="customerLoading"  @click="addNewData"
+          <vs-button icon="add" id="customerLoading"  @click="showCustomerForm"
                      class="mr-4 vs-con-loading__container">Add Customer</vs-button>
 
         </div>
@@ -30,8 +30,9 @@
       <template slot="thead">
         <vs-th sort-key="name">Name</vs-th>
         <vs-th sort-key="category">Location</vs-th>
-         <vs-th>Edit</vs-th>
-         <vs-th>Remove</vs-th>
+         <vs-th>Action</vs-th>
+         <vs-th>Action</vs-th>
+         <vs-th>Action </vs-th>
       </template>
 
       <template slot-scope="{data}">
@@ -48,6 +49,13 @@
 
           <vs-td class="whitespace-no-wrap">
             <vs-button color="secondary" class="mr-2" size="small" type="border" @click="editData(item)">Edit</vs-button>
+           </vs-td>
+
+          <vs-td class="whitespace-no-wrap">
+            <vs-button color="secondary" class="mr-2" size="small" type="border"
+                       :to="{ name: 'sales-customer-details', params: { customerId: item.id  }}"
+            >Open</vs-button>
+
            </vs-td>
 
           <vs-td class="whitespace-no-wrap">
@@ -83,7 +91,7 @@ export default {
       isMounted: false,
 
       // Data Sidebar
-      addNewDataSidebar: false,
+      showCustomerFormSidebar: false,
       sidebarData: {},
 
       selectedRegionId: { "id": null, "region_name": "All Regions" },
@@ -157,7 +165,7 @@ export default {
 
     },
 
-    addNewData () {
+    showCustomerForm () {
       this.sidebarData = {}
       this.toggleDataSidebar(true)
     },
@@ -168,8 +176,12 @@ export default {
     },
 
     toggleDataSidebar (val = false) {
-      this.addNewDataSidebar = val
+      this.showCustomerFormSidebar = val
       this.fetchCustomers();
+    },
+
+    showCustomerDetails(customer){
+      this.customerInstance = customer;
     },
 
     /*** Resources **/

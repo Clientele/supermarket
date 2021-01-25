@@ -63,7 +63,8 @@ const router = new Router({
           name: 'products-products-categories',
           component: () => import('@/views/products/products/ProductCategories'),
           meta: { rule: 'admin' }
-        },        {
+        },
+        {
           path: '/products/products',
           name: 'products-products',
           component: () => import('@/views/products/products/Products'),
@@ -82,17 +83,36 @@ const router = new Router({
           meta: { rule: 'admin' }
         },
 
+        {
+          path: '/products/inventory/stock/requests',
+          name: 'products-inventory-stock-requests',
+          component: () => import('@/views/products/inventory/requests/StockRequests'),
+          meta: { rule: 'admin' }
+        },
+        {
+          path: '/products/inventory/stock/request/details',
+          name: 'products-inventory-stock-request-details',
+          component: () => import('@/views/products/inventory/requests/RequestDetails'),
+          meta: { rule: 'admin' }
+        },
+
 
 
         // =============================================================================
         // 2.0 SALES ROUTES
         // =============================================================================
-
         {
           path: '/sales/customers',
           name: 'sales-customers',
           component: () => import('@/views/sales/customers/Customers'),
           meta: { rule: 'admin' }
+        },
+        {
+          path: '/sales/customer/details',
+          name: 'sales-customer-details',
+          component: () => import('@/views/sales/customers/CustomerDetails'),
+          meta: { rule: 'admin' },
+          props: true
         },
         {
           path: '/sales/orders',
@@ -154,6 +174,14 @@ const router = new Router({
             rule: 'admin',
             pageTitle: 'Addresses'
           }
+        },
+        {
+          path: '/config/addresses/zones',
+          name: 'config-addresses-zones',
+          component: () => import('@/views/config/addresses/SalesZones'),
+          meta: {
+            rule: 'admin'
+           }
         },
 
 

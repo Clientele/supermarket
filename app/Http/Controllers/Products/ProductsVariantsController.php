@@ -35,6 +35,7 @@ class ProductsVariantsController extends GoodBaseController
             'vendor_id'=>$product->vendor_id,
 
             'variant_name'=>$request->input('variant_name'),
+            'base_price'=>$request->input('base_price'),
             'measuring_unit'=>$request->input('measuring_unit'),
             'restocking_quantity'=>$request->input('restocking_quantity'),
             'is_published'=> false,
@@ -55,6 +56,7 @@ class ProductsVariantsController extends GoodBaseController
             'id'=>$request->input('id'),
         ])->update([
             'variant_name'=>$request->input('variant_name'),
+            'base_price'=>$request->input('base_price'),
             'restocking_quantity'=>$request->input('restocking_quantity'),
             'measuring_unit'=>$request->input('measuring_unit'),
             'thumbnail_img'=> $thumbNailUrl,

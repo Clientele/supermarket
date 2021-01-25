@@ -8,6 +8,7 @@ use App\Models\Place;
 use App\Models\Region;
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +20,65 @@ class AddressesController extends GoodBaseController
     public function __construct(){
 
     }
+
+    /*** Regions **/
+    public function addSalesZone(Request $request){
+
+        $region = Zone::updateOrCreate([
+            'id' => $request->input('id'),
+        ],[
+            'country_id' => $request->input('country_id'),
+            'zone_name' => $request->input('zone_name'),
+            'created_by' => Auth::id()
+        ]);
+
+        return $this->returnResponse('Zone added',$region);
+    }
+
+    public function updateSalesZone(Request $request){
+
+        $region = Region::where([
+            'id' => $request->input('id'),
+        ])->update([
+            'country_id' => $request->input('country_id'),
+            'region_name' => $request->input('region_name')
+        ]);
+
+        return $this->returnResponse('Region updated',$region);
+    }
+
+    public function removeSalesZone(Request $request){
+
+        Region::where([
+            'id' => $request->input('id')
+         ])->update([
+            'deleted_by' => Auth::id()
+         ]);
+        Region::destroy($request->input('id'));
+
+        return $this->returnResponse('Region removed',"");
+    }
+
+    public function updateZone(Request $request){
+
+     if(!is_array($request->input('district_ids'))){
+            return $this->returnError('District ids required',"",422);
+        }
+
+      $district = District::whereIn('id', $request->input('district_ids') )
+          ->update( ['zone_id' => $request->input('zone_id') ]);
+
+        return $this->returnResponse('Zone updated',$district);
+    }
+
+    public function removeDistrictFromZone(Request $request){
+
+      $district = District::where('id', $request->input('id') )
+          ->update( ['zone_id' => null ]);
+
+        return $this->returnResponse('Zone updated',$district);
+    }
+
 
     /*** Regions **/
     public function addRegion(Request $request){

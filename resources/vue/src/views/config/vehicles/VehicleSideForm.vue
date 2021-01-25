@@ -189,7 +189,6 @@ export default {
     fetchStaff() {
       console.info("fetching staff..");
       console.info(JSON.stringify(this.selectedDepot));
-
       axios.post('/resources/staff/get')
         .then((response) => {
           this.availableStaff = response.data.payload.staff;

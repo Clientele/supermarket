@@ -11,6 +11,7 @@ use App\Models\Place;
 use App\Models\Region;
 use App\Models\Staff;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
@@ -41,11 +42,36 @@ class AddressesResourcesController extends GoodBaseController
         return $this->returnResponse('Regions', $responseData);
     }
 
+
+    /*** Zones **/
+    public function getSalesZone(Request $request){
+        $zones =  Zone::get();
+        $responseData['zones'] = $zones;
+        return $this->returnResponse('Zones', $responseData);
+    }
+
+    public function getZoneDistrict(Request $request){
+        $districts =  District::where([
+            'zone_id' => $request->input('zone_id')
+        ])->get();
+        $responseData['districts'] = $districts;
+        return $this->returnResponse('Districts in zone', $responseData);
+    }
+
+
+
+
     /*** Districts **/
     public function getDistricts(Request $request){
-        $districts =  District::where([
-            'region_id'=> $request->input('region_id')
-        ])->get();
+        if(is_numeric($request->input('region_id'))){
+            $districts =  District::where([
+                'region_id'=> $request->input('region_id')
+            ])->get();
+        }else{
+            $districts =  District:: get();
+        }
+
+
         $responseData['districts'] = $districts;
         return $this->returnResponse('Districts', $responseData);
     }

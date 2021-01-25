@@ -30,11 +30,18 @@ Route::prefix('v1/auth')->group(function () {
 /// I N V E N T O R Y
 Route::prefix('v1/products')->group(function () {
 
-    /*** STOCK  ***/
+      /*** STOCK  ***/
      Route::get('inventory/stock', 'Products\InventoryController@getStock');
      Route::post('inventory/stock/receive', 'Products\InventoryController@receiveStock');
      Route::get('inventory/stock/product', 'Products\InventoryController@getVariantStocks');
      Route::get('inventory/stock/variant/breakdown', 'Products\InventoryController@getVariantStocksBreakdown');
+
+      /*** STOCK REQUESTS  ***/
+     Route::post('inventory/stock/request', 'Products\StockRequestsController@requestStock');
+     Route::get('inventory/stock/requests', 'Products\StockRequestsController@getStockRequests');
+     Route::get('inventory/stock/request', 'Products\StockRequestsController@getStockRequestDetails');
+
+
 
 });
 
@@ -45,10 +52,13 @@ Route::prefix('v1/sales')->group(function () {
     /*** CUSTOMERS  ***/
     Route::post('customer/add', 'Sales\CustomersController@addCustomer');
     Route::post('customer/remove', 'Sales\CustomersController@removeCustomer');
+    Route::post('customer/verify', 'Sales\CustomersController@verifyCustomer');
 
     /*** ORDERS     ***/
-    Route::post('order/add', 'Sales\CustomersController@addOrder');
-    Route::post('order/remove', 'Sales\CustomersController@removeOrder');
+    Route::post('order/add', 'Sales\OrdersController@addOrder');
+    Route::post('order/remove', 'Sales\OrdersController@removeOrder');
+    Route::post('order/staff', 'Sales\OrdersController@setStaff');
+    Route::post('order/cancel', 'Sales\OrdersController@cancelOrder');
 
     /*** DELIVERIES ***/
     Route::post('delivery/add', 'Sales\CustomersController@addDelivery');
@@ -114,6 +124,12 @@ Route::prefix('v1/config')->group(function () {
         Route::post('assets/vehicle/add', 'Config\VehiclesController@addVehicle');
 
         /*** ADDRESSES  ***/
+        #zones
+        Route::post('addresses/zone/add', 'Config\AddressesController@addSalesZone');
+        Route::post('addresses/zone/remove', 'Config\AddressesController@removeSalesZone');
+        Route::post('addresses/zone/update', 'Config\AddressesController@updateZone');
+        Route::post('addresses/zone/district/remove', 'Config\AddressesController@removeDistrictFromZone');
+
         #regions
         Route::post('addresses/region/add', 'Config\AddressesController@addRegion');
         Route::post('addresses/region/update', 'Config\AddressesController@updateRegion');
@@ -155,13 +171,16 @@ Route::prefix('v1/resources')->group(function () {
 
         /*** SALES  ***/
         #orders
-        Route::get('sales/orders', 'Resources\ProductsResourcesController@getProducts');
+        Route::get('sales/orders', 'Resources\OrdersResourcesController@getOrders');
+        Route::get('sales/order', 'Resources\OrdersResourcesController@getOrderDetails');
 
         #customers
         Route::get('sales/customers', 'Resources\CustomersResourcesController@getCustomers');
+        Route::get('sales/customer/find', 'Resources\CustomersResourcesController@findCustomer');
+        Route::get('sales/customer/details', 'Resources\CustomersResourcesController@getCustomerDetails');
+        Route::get('sales/customer/orders', 'Resources\CustomersResourcesController@getCustomerOrders');
 
-
-        /*** USERS & ROLES  ***/
+        /*** ACCESS CONTROL  ***/
         #roles & permissions
         Route::get('staff/roles/full', 'Resources\StaffResourcesController@getFullAvailableRoles');
         Route::get('staff/roles/all', 'Resources\StaffResourcesController@getAvailableRoles');
@@ -172,6 +191,7 @@ Route::prefix('v1/resources')->group(function () {
         Route::post('staff/get', 'Resources\StaffResourcesController@getStaffByRole');
         Route::post('staff/details', 'Resources\StaffResourcesController@getStaffDetails');
         Route::get('staff/no_role', 'Resources\StaffResourcesController@getStaffWithNoRole');
+
 
         /*** ASSETS  ***/
         #depots
@@ -188,6 +208,9 @@ Route::prefix('v1/resources')->group(function () {
     /*** ADDRESSES  ***/
     Route::get('addresses/countries', 'Resources\AddressesResourcesController@getCountries');
     Route::get('addresses/regions', 'Resources\AddressesResourcesController@getRegions');
+    Route::get('addresses/zones', 'Resources\AddressesResourcesController@getSalesZone');
+    Route::get('addresses/zone/districts', 'Resources\AddressesResourcesController@getZoneDistrict');
+
     Route::get('addresses/districts', 'Resources\AddressesResourcesController@getDistricts');
     Route::get('addresses/places', 'Resources\AddressesResourcesController@getPlaces');
     Route::post('addresses/find', 'Resources\AddressesResourcesController@findAddress');

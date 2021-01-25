@@ -178,10 +178,6 @@
     <!-- [end] Variant stocks -->
 
 
-
-
-
-
   </div>
 </template>
 

@@ -25,9 +25,15 @@ class Customer extends Model
         'district_id',
         'place_id',
 
+        'verified',
+
         'created_by',
         'deleted_by'
     ];
+
+    public function creator(){
+        return $this->belongsTo('App\Models\User', 'created_by' );
+    }
 
     public function country(){
         return $this->belongsTo('App\Models\Country', 'country_id' );

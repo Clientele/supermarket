@@ -24,6 +24,13 @@
               {{errors.first('variant_name') }}
             </span>
 
+            <!-- Variant Base Price -->
+            <vs-input class="w-full mt-4" label="Base Price" v-model="productVariantInstance.base_price"
+                      v-validate="'required'" name="base_price"/>
+            <span class="text-danger text-sm" v-show="errors.has('base_price')">
+              {{errors.first('base_price') }}
+            </span>
+
             <!-- Restocking Quantity  -->
             <vs-input class="w-full mt-4" label="Restocking Quantity" v-model="productVariantInstance.restocking_quantity"
                       v-validate="'required'" name="product_name"/>
@@ -41,6 +48,9 @@
           </div>
 
           <div class="vx-col md:w-1/3 w-1/4">
+            <div class="flex-grow">
+              <h3>Prices</h3>
+            </div>
           </div>
 
           <div class="vx-col md:w-1/3 w-1/4">
@@ -78,7 +88,7 @@
     </div>
     <!-- [end] Variant form -->
 
-    <div>
+    <div v-else>
      <!-- Heading -->
      <div class="flex flex-wrap items-center mb-6">
        <div class="flex-grow">
@@ -171,6 +181,7 @@ export default {
       productVariantFormVisible: false,
       productVariantInstance: {
         variant_name : '',
+        base_price : '',
         restocking_quantity: '',
         measuring_unit: ''
       }
