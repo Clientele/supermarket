@@ -73,13 +73,13 @@ const router = new Router({
         {
           path: '/products/inventory/stock',
           name: 'products-inventory-stock',
-          component: () => import('@/views/products/inventory/Stock'),
+          component: () => import('@/views/products/inventory/depots/Stock'),
           meta: { rule: 'admin' }
         },
         {
-          path: '/products/inventory/stock/moving',
-          name: 'products-inventory-stock-moving',
-          component: () => import('@/views/products/inventory/Stock'),
+          path: '/products/inventory/stock/mobile',
+          name: 'products-inventory-stock-mobile',
+          component: () => import('@/views/products/inventory/mobile/Stock'),
           meta: { rule: 'admin' }
         },
 
@@ -93,7 +93,8 @@ const router = new Router({
           path: '/products/inventory/stock/request/details',
           name: 'products-inventory-stock-request-details',
           component: () => import('@/views/products/inventory/requests/RequestDetails'),
-          meta: { rule: 'admin' }
+          meta: { rule: 'admin' },
+          props: true
         },
 
 
@@ -119,6 +120,12 @@ const router = new Router({
           name: 'sales-orders',
           component: () => import('@/views/sales/orders/Orders'),
           meta: { rule: 'admin' }
+        },  {
+          path: '/sales/order/details',
+          name: 'sales-order-details',
+          component: () => import('@/views/sales/orders/OrderDetails'),
+          meta: { rule: 'admin' },
+          props: true
         },
 
         // =============================================================================

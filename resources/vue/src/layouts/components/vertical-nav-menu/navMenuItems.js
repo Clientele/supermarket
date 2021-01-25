@@ -59,9 +59,9 @@ export default [
             slug: 'moving-stock'
            },
           {
-            url: '/products/inventory/stock/moving',
-            name: 'Moving Stock',
-            slug: 'moving-stock'
+            url: '/products/inventory/stock/mobile',
+            name: 'Mobile Stock',
+            slug: 'mobile-stock'
            },
           {
             url: '/products/inventory/stock/requests',

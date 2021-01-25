@@ -63,8 +63,11 @@ function parseError(statusCode) {
     case 413:
     {
       return "Payload Too Large";
-    }
-      break;
+    }break;
+    case 422:
+    {
+      return "Could not process request";
+    }break;
 
     case 429:
     {
@@ -92,7 +95,7 @@ function parseError(statusCode) {
       break;
 
     default:
-      return statusCode+ "Request failed"
+      return "Error Code:"+statusCode
   }
 }
 
@@ -105,7 +108,7 @@ export function handle(error) {
       return "Not logged in";
     }else{
      let message = error.response.data? error.response.data.message:   error.response.message;
-     return parseError(error.response.status )+ ": "+message;
+     return message+" -"+parseError(error.response.status ) ;
     }
   }else{
     console.log(error);

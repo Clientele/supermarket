@@ -9,16 +9,19 @@
           <h2 class="font-bold"
               style="line-height: 48px !important; display:flex;  vertical-align: middle !important;   ">
             <vs-icon class="inline pt-2 mr-4" size="32px" icon="view_quilt"></vs-icon>
-            Stock Requests
+            Depot Stock
           </h2>
+          <v-select class="flex ml-4" @input="fetchStock()" v-model="selectedCategory"
+                    :options="availalbleCategories" name="category_name" label="category_name" :clearable="false"
+                    placeholder="Category" :reduce="option => option.id">
+          </v-select>
 
-
-          <v-select class="flex ml-4" @input="fetchStockRequests()" v-model="selectedDepot"
+          <v-select class="flex ml-4" @input="fetchStock()" v-model="selectedDepot"
                     :options="availableDepots" name="depot_name" label="depot_name" :clearable="false"
                     placeholder="Depot"  >
           </v-select>
 
-          <vs-button  icon="refresh" class="py-0 ml-4" type="flat" @click="fetchStockRequests()">Refresh</vs-button>
+          <vs-button icon="refresh" class="py-0 ml-4" type="flat" @click="fetchStock()">Refresh</vs-button>
         </div>
       </div>
 
@@ -28,52 +31,61 @@
     <!-- List -->
     <vx-card>
 
-      <!-- Stock Requests -->
+      <!-- Products -->
       <div style="" class="px-6 py-6 rounded">
 
-         <vs-table  @selected="showRequestDetails" stripe   :data="stockRequests" v-model="selectedRequest">
+
+         <vs-table  @selected="showVariantsStocks" stripe   :data="products" v-model="selectedProduct">
 
           <template slot="thead">
-            <vs-th>Staff </vs-th>
-            <vs-th> Date </vs-th>
-            <vs-th> Approval </vs-th>
-            <vs-th> Dispatch Status </vs-th>
-            </template>
+            <vs-th>Product </vs-th>
+            <vs-th> Remaining QTY </vs-th>
+            <vs-th>  </vs-th>
+            <vs-th> </vs-th>
+            <vs-th> </vs-th>
+            <vs-th> </vs-th>
+            <vs-th> </vs-th>
+          </template>
 
           <template slot-scope="{data}">
-            <vs-tr :data="item" :key="rowIndex" v-for="(item, rowIndex) in data">
+            <vs-tr :data="tr" :key="rowIndex" v-for="(tr, rowIndex) in data">
 
               <vs-td>
-                {{ data[rowIndex].staff ? data[rowIndex].staff.staff_name : "Unknown Staff" }}
+                {{ data[rowIndex].product_name }}
               </vs-td>
 
               <vs-td>
-                <span style="color: #0d77e4; font-weight: bold"> {{ data[rowIndex].created_at }} </span>
+                <span style="color: #0d77e4; font-weight: bold"> {{ data[rowIndex].remaining_quantity }} </span>
               </vs-td>
 
-              <vs-td  >
-                 <vs-chip :color="item.approved? `#cdf7ec`:`#fff4f6`">
-                   <span v-bind:class="item.approved? `success-text`:`danger-text`"  style=" font-weight: bold; margin-left: 4px;">
-                    {{ item.approved? 'Approved' : item.rejected? 'Rejected' : 'Not Approved' }}
-                   </span>
-                </vs-chip>
-              </vs-td>
-
-              <vs-td>
-                <vs-chip :color="item.dispatched? `#cdf7ec`:`#f9eae4`">
-                   <span v-bind:class="item.dispatched? `success-text`:`neutral-text`"  style=" font-weight: bold; margin-left: 4px;">
-                          {{ item.dispatched? 'Dispatched' : 'Not Dispatched' }}
+              <vs-td  v-for="(variant,index) in data[rowIndex].variants" :key="index">
+                <span v-if="index>=3"> <span v-if="index===3"> More </span> </span>
+                <vs-chip v-else color="#e7f1fc">
+                  <span  style="color: #084789"> {{ variant.variant_name }}: </span>
+                  <span style="color: #084789; font-weight: bold; margin-left: 4px;">
+                    {{ variant.remaining_quantity }}
                   </span>
                 </vs-chip>
               </vs-td>
+
 
             </vs-tr>
           </template>
         </vs-table>
       </div>
-      <!-- [end] stockRequests -->
+      <!-- [end] Products -->
 
 
+      <!-- Product Variants -->
+      <vs-popup @close="closeProductVariantsDialog()" fullscreen title=""
+                :active.sync="productVariantsVisible">
+        <div>
+          <stock-details @closeProductVariants="closeProductVariantsDialog"
+                         v-bind:depot="selectedDepot"
+                         v-bind:product="productInstance"></stock-details>
+        </div>
+      </vs-popup>
+      <!-- [end] Product Variants -->
 
     </vx-card>
     <!-- List -->
@@ -84,13 +96,17 @@
 <script>
 import axios from "@/axios";
 import vSelect from 'vue-select';
+import StockDetails from "@/views/products/inventory/depots/StockDetails";
 
 export default {
   components: {
-    vSelect},
+    vSelect,
+    StockDetails
+  },
   data() {
     return {
-      stockRequests: [],
+
+      products: [],
       productInstance: { id: null, product_name: null, vendor_id: 1, is_published: false, categories_ids: [] },
       productFormDialog: false,
 
@@ -114,13 +130,13 @@ export default {
       /** Product variants **/
       productVariantsVisible: false,
 
-      availableCategories: [],
+      availalbleCategories: [],
       selectedCategory: {category_name: 'All Categories'},
 
       availableDepots: [],
       selectedDepot: { depot_name: "All Depots" },
 
-      selectedRequest: {},
+      selectedProduct: {},
 
 
     }
@@ -128,23 +144,28 @@ export default {
 
   methods: {
 
-    /*** stockRequests **/
-    fetchStockRequests() {
-      this.stockRequests = [];
-      let endpoint = '/products/inventory/stock/requests?depot_id=';
+    /*** Products **/
+    fetchStock() {
+      this.products = [];
+      let endpoint = '/products/inventory/stock?category_id=' + this.selectedCategory
+                     +"&depot_id=" + this.selectedDepot.id ;
       axios.get(endpoint)
         .then((response) => {
-          this.stockRequests = response.data.payload.requests.data;
+          this.products = response.data.payload.products.data;
         }).catch((error) => {
         console.log(error)
       })
     },
 
-    showRequestDetails( ) {
-       this.$router.push({
-         name: 'products-inventory-stock-request-details',
-         params: { selectedRequest: this.selectedRequest }
-       });
+    showVariantsStocks( ) {
+      console.info("Handling selection...");
+      if(this.selectedDepot.id==null){
+        this.$vs.notify({ time: 3000, color: 'danger', title: 'No Depot',  text: "Select depot before selecting product" });
+        return ;
+      }
+
+      this.productInstance = this.selectedProduct;
+      this.productVariantsVisible = true;
     },
 
     closeProductForm() {
@@ -154,7 +175,7 @@ export default {
     /*** Product variants **/
     closeProductVariantsDialog() {
       this.productVariantsVisible = false;
-      this.fetchStockRequests();
+      this.fetchStock();
     },
 
     showProductVariants(product) {
@@ -194,8 +215,8 @@ export default {
     fetchAvailableCategories() {
       axios.get('/resources/products/categories/all')
         .then((response) => {
-          this.availableCategories = response.data.payload.categories;
-          this.availableCategories.push(this.selectedCategory);
+          this.availalbleCategories = response.data.payload.categories;
+          this.availalbleCategories.push(this.selectedCategory);
 
         }).catch((error) => {
         console.log(error);
@@ -235,7 +256,7 @@ export default {
   },
 
   mounted() {
-    this.fetchStockRequests();
+    this.fetchStock();
   }
 }
 </script>
@@ -247,17 +268,6 @@ export default {
   border: 1px solid #ddb892;
   background-color: #fcf8f4;
   border-radius: 4px;
-}
-
-.danger-text{
-  color: #d90429;
-}
-
-.success-text{
-  color: #048060;
-}
-.neutral-text{
-  color: #80656a;
 }
 
 

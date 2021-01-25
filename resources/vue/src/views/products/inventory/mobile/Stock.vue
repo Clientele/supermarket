@@ -9,7 +9,7 @@
           <h2 class="font-bold"
               style="line-height: 48px !important; display:flex;  vertical-align: middle !important;   ">
             <vs-icon class="inline pt-2 mr-4" size="32px" icon="view_quilt"></vs-icon>
-            Depot Stock
+            Mobile Stock
           </h2>
           <v-select class="flex ml-4" @input="fetchStock()" v-model="selectedCategory"
                     :options="availalbleCategories" name="category_name" label="category_name" :clearable="false"
@@ -96,7 +96,7 @@
 <script>
 import axios from "@/axios";
 import vSelect from 'vue-select';
-import StockDetails from "@/views/products/inventory/StockDetails";
+import StockDetails from "@/views/products/inventory/mobile/StockDetails";
 
 export default {
   components: {

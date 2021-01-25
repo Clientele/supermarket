@@ -23,6 +23,65 @@
 
     </div>
 
+    <!-- orders table-->
+    <vs-card>
+      <vs-table ref="table" v-model="selectedOrder" pagination :max-items="100" search :data="orders">
+
+        <template slot="thead">
+          <vs-th >#</vs-th>
+          <vs-th  >Customer</vs-th>
+          <vs-th  >Address</vs-th>
+          <vs-th  >Sales Person</vs-th>
+          <vs-th  >Status</vs-th>
+          <vs-th>Action</vs-th>
+        </template>
+
+        <template slot-scope="{data}">
+          <tbody>
+          <vs-tr :data="item" :key="rowIndex" v-for="(item, rowIndex) in data">
+
+            <vs-td>
+              <p class="product-name font-medium truncate">{{ item.id }}</p>
+            </vs-td>
+
+            <vs-td>
+              <p class="product-name font-medium truncate">{{ item.customer ? item.customer.customer_name : " " }}</p>
+            </vs-td>
+
+            <vs-td>
+              <p class="product-category">
+                {{ item.place ? item.place.place_name : " " }}
+                {{ item.district ? item.district.district_name : " " }}
+                {{ item.region ? item.region.region_name : " " }}
+              </p>
+            </vs-td>
+
+            <vs-td>
+              <vs-chip color="secondary" v-if="item.staff">
+                <vs-avatar color="secondary" icon-pack="feather" icon="icon-user"/>
+                {{ item.staff.staff_name }}
+              </vs-chip>
+              <vs-chip color="grey" v-else> No Salesman</vs-chip>
+            </vs-td>
+
+            <vs-td>
+              <span v-bind:class="item.is_cancelled? `text-danger` : `text-primary` "> {{ item.order_status }}</span>
+            </vs-td>
+
+
+            <vs-td class="whitespace-no-wrap">
+              <vs-button color="secondary" class="mr-2" size="small" type="border" @click="showOrderDetails()">View
+              </vs-button>
+            </vs-td>
+
+
+          </vs-tr>
+          </tbody>
+        </template>
+      </vs-table>
+
+    </vs-card>
+    <!-- [end] orders table-->
 
     <!-- Order Form -->
     <vs-popup @close="closeOrderForm()" fullscreen title="New Order" :active.sync="orderFormDialog">
@@ -307,9 +366,6 @@ import {handle} from "@/http/handler";
 import Table from "@/views/ui-elements/table/Table";
 
 export default {
-  props: {
-    passedOrder : Object
-  },
   components: {
     Table,
     vSelect
@@ -708,16 +764,10 @@ export default {
 
   },
 
-  created() {
-    if(this.passedOrder!=null){
-      console.log("orderId:"+this.passedOrder.id);
-      this.fetchOrderDetails();
-      this.fetchStaff();
-    }else{
-      console.info("Order id not found, going back")
-      this.$router.go(-1);
-    }
 
+  created() {
+    this.fetchProducts();
+    this.fetchStaff();
   },
   mounted() {
     this.fetchOrders();
