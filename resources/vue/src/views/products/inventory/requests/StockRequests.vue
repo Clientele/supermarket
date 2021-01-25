@@ -22,6 +22,11 @@
         </div>
       </div>
 
+      <!-- Add Order Button -->
+      <vs-button icon="add" id="customerLoading" @click="showRequestForm"
+                 class="mr-4 vs-con-loading__container">Request Stock
+      </vs-button>
+
     </div>
     <!-- [end] Categories Filter -->
 
@@ -73,10 +78,100 @@
       </div>
       <!-- [end] stockRequests -->
 
-
-
     </vx-card>
     <!-- List -->
+
+    <!-- Order Form -->
+    <vs-popup @close="closeRequestForm()" fullscreen title="Request Stock" :active.sync="orderFormDialog">
+
+      <div class="md:px-6">
+
+        <!-- Content Row -->
+        <div class="vx-row">
+
+          <!--product picker -->
+          <div class="vx-col md:w-1/3 w-1/4">
+
+            <div class="mx-6 px-6">
+              <h3>Pick Product</h3>
+              <!-- Product -->
+              <div class="mt-4 mb-5">
+                <label class="vs-input--label">Product</label>
+                <v-select @input="fetchProductVariants()" v-model="selectedOrderProduct" :clearable="false"
+                          :options="products" v-validate="'required'" name="Product" label="product_name"
+                          placeholder="Select">
+                </v-select>
+                <span class="text-danger text-sm" v-show="errors.has('Product')">{{ errors.first('Product') }}</span>
+              </div>
+
+              <!-- Product Variant-->
+              <div class="mt-4 mb-5">
+                <label class="vs-input--label">Product Variant</label>
+                <v-select v-model="selectedOrderProductVariant" :clearable="false" :options="productVariants"
+                          v-validate="'required'" name="Variant" label="variant_name"
+                          placeholder="Select">
+                </v-select>
+                <span class="text-danger text-sm" v-show="errors.has('Variant')">{{ errors.first('Variant') }}</span>
+              </div>
+
+              <div class="mt-4 mb-5">
+                <vs-input class="w-full mt-4" label="Quantity" v-model="quantity"
+                          v-validate="'required'" name="quantity"/>
+                <span class="text-danger text-sm" v-show="errors.has('quantity')">
+                   {{ errors.first('quantity') }} </span>
+              </div>
+
+
+              <div v-if="selectedOrderProduct && selectedOrderProductVariant && quantity>0">
+                <vs-button ref="saveButton" @click="addProductToCart()" color="secondary" class="mr-4 mb-4">
+                  Add to cart
+                </vs-button>
+              </div>
+            </div>
+
+          </div>
+          <!-- [end] product picker -->
+
+          <!-- Cart contents -->
+          <div class="vx-col md:w-1/3 w-1/4">
+            <h3>Selected products</h3>
+            <div class="category-itemm" v-for="(cartProduct, index) in cartProducts" :key="index">
+              <vs-card class="my-6">
+                <div class="flex flex-wrap">
+                  <p class="mt-1 flex-grow">
+                    {{ cartProduct.product.product_name }}
+                    {{ cartProduct.productVariant.variant_name }},
+                    QTY: {{ cartProduct.quantity }}
+                  </p>
+                  <vs-button type="border" color="danger" @click="removeFromCart(index)"
+                             radius icon="close" size="small"></vs-button>
+                </div>
+              </vs-card>
+            </div>
+
+            <div v-if="cartProducts.length>0">
+              <vs-button ref="saveButton" @click="submitRequest()" color="success" class="mr-4 mb-4">
+                Submit Request
+              </vs-button>
+            </div>
+          </div>
+          <!-- [end] Cart contents -->
+
+        </div>
+
+        <div class="vx-row mt-12">
+          <div class="vx-col w-full">
+            <div class="flex items-start flex-col sm:flex-row">
+              <!-- <vs-avatar :src="data.avatar" size="80px" class="mr-4" /> -->
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </vs-popup>
+    <!-- [end] Order Form -->
+
 
   </div>
 </template>
@@ -84,6 +179,7 @@
 <script>
 import axios from "@/axios";
 import vSelect from 'vue-select';
+import {handle} from "@/http/handler";
 
 export default {
   components: {
@@ -122,6 +218,16 @@ export default {
 
       selectedRequest: {},
 
+      /**Requesting **/
+      orderFormDialog: false,
+      cartProducts: [],
+      quantity: 1,
+      selectedOrderProduct: null,
+      selectedOrderProductVariant: null,
+
+      products: [],
+      productVariants: []
+
 
     }
   },
@@ -150,6 +256,59 @@ export default {
     closeProductForm() {
       this.productFormDialog = false;
     },
+
+    /*** Requesting **/
+    showRequestForm( ) {
+      this.orderFormDialog = true;
+     },
+    closeRequestForm() {
+      this.orderFormDialog = false;
+    },
+    addProductToCart() {
+      let cartProduct = {
+        product: this.selectedOrderProduct,
+        productVariant: this.selectedOrderProductVariant,
+        quantity: this.quantity
+      };
+
+      this.selectedOrderProduct = null;
+      this.selectedOrderProductVariant = null;
+      this.quantity = 1;
+
+      this.cartProducts.push(cartProduct)
+    },
+
+    removeFromCart(index) {
+      console.log(index)
+      delete this.cartProducts.splice(index, 1);
+    },
+
+    submitRequest() {
+
+      let variants = this.cartProducts.map(function (cartItem) {
+        return {
+          variant_id: cartItem.productVariant.id,
+          quantity: cartItem.quantity
+        }
+      });
+
+      let requestData = {
+        depot_id: null,
+        product_variants: variants
+      };
+      console.log(JSON.stringify(requestData))
+
+      axios.post('/products/inventory/stock/request', requestData)
+        .then((response) => {
+          this.closeRequestForm();
+          this.happilyNotify("Request Sent");
+          this.fetchStockRequests();
+         }).catch((error) => {
+        console.log(error);
+        this.handleApiError(error);
+      })
+    },
+
 
     /*** Product variants **/
     closeProductVariantsDialog() {
@@ -225,6 +384,47 @@ export default {
       })
     },
 
+    fetchProducts() {
+      axios.get('/resources/products/products?category_id=')
+        .then((response) => {
+          this.products = response.data.payload.products.data;
+        }).catch((error) => {
+        console.log(error)
+      })
+    },
+
+    fetchProductVariants() {
+      this.productVariants = [];
+      this.selectedOrderProductVariant = null;
+      axios.get('/resources/product/variants?product_id=' + this.selectedOrderProduct.id)
+        .then((response) => {
+          this.productVariants = response.data.payload.product_variants;
+        }).catch((error) => {
+        console.log(error);
+        this.handleApiError(error);
+      })
+    },
+
+    /** Helpers **/
+    handleApiError(error) {
+      this.$vs.notify({
+        title: 'Error',
+        text: handle(error),
+        iconPack: 'feather',
+        icon: 'icon-alert-circle',
+        color: 'danger'
+      })
+    },
+
+    happilyNotify(message) {
+      this.$vs.notify({title: 'Success', text: message, color: 'success'})
+    },
+
+    sadlyNotify(message) {
+      this.$vs.notify({title: 'Error', text: message, color: 'danger', position: 'bottom-left'})
+    },
+
+
   },
 
   created() {
@@ -232,7 +432,8 @@ export default {
     this.fetchAvailableVendors();
     this.fetchAvailableCategories();
     this.fetchAvailableDepots();
-  },
+    this.fetchProducts();
+    },
 
   mounted() {
     this.fetchStockRequests();

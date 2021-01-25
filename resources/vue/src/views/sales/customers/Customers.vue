@@ -4,7 +4,7 @@
 
     <customer-form :isSidebarActive="showCustomerFormSidebar" @closeSidebar="toggleDataSidebar" :data="sidebarData" />
 
-    <vs-table ref="table" multiple v-model="selected" pagination :max-items="itemsPerPage" search :data="refinedCustomers">
+    <vs-table ref="table"  @selected="showCustomerDetails()" v-model="selectedCustomer" pagination :max-items="itemsPerPage" search :data="refinedCustomers">
 
       <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
 
@@ -31,8 +31,7 @@
         <vs-th sort-key="name">Name</vs-th>
         <vs-th sort-key="category">Location</vs-th>
          <vs-th>Action</vs-th>
-         <vs-th>Action</vs-th>
-         <vs-th>Action </vs-th>
+          <vs-th>Action </vs-th>
       </template>
 
       <template slot-scope="{data}">
@@ -51,12 +50,6 @@
             <vs-button color="secondary" class="mr-2" size="small" type="border" @click="editData(item)">Edit</vs-button>
            </vs-td>
 
-          <vs-td class="whitespace-no-wrap">
-            <vs-button color="secondary" class="mr-2" size="small" type="border"
-                       :to="{ name: 'sales-customer-details', params: { customerId: item.id  }}"
-            >Open</vs-button>
-
-           </vs-td>
 
           <vs-td class="whitespace-no-wrap">
             <vs-button color="danger" size="small" type="border" @click="confirmCustomerDeletion(item)">Delete</vs-button>
@@ -89,6 +82,7 @@ export default {
 
       itemsPerPage: 4,
       isMounted: false,
+      selectedCustomer: null,
 
       // Data Sidebar
       showCustomerFormSidebar: false,
@@ -180,8 +174,11 @@ export default {
       this.fetchCustomers();
     },
 
-    showCustomerDetails(customer){
-      this.customerInstance = customer;
+    showCustomerDetails(){
+      if(this.showCustomerFormSidebar===true){
+        return ;
+      }
+      this.$router.push({ name: 'sales-customer-details', params: { customerId: this.selectedCustomer.id  }});
     },
 
     /*** Resources **/

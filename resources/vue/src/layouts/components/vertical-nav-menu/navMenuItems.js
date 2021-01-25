@@ -68,6 +68,7 @@ export default [
             name: 'Stock Requests',
             slug: 'moving-stock'
            }
+
         ]
       }
     ]
@@ -88,14 +89,8 @@ export default [
         url: '/sales/orders',
         name: 'Orders',
         slug: 'chat',
-        icon: 'MessageSquareIcon',
-       },
-      {
-        url: '/sales/deliveries',
-        name: 'Deliveries',
-        slug: 'email',
         icon: 'ShoppingCartIcon',
-        },
+       }
      ]
   },
 

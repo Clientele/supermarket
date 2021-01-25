@@ -79,8 +79,15 @@ const router = new Router({
         {
           path: '/products/inventory/stock/mobile',
           name: 'products-inventory-stock-mobile',
-          component: () => import('@/views/products/inventory/mobile/Stock'),
+          component: () => import('@/views/products/inventory/mobile/MobileStock'),
           meta: { rule: 'admin' }
+        },
+        {
+          path: '/products/inventory/stock/mobile/details',
+          name: 'products-inventory-stock-mobile-details',
+          component: () => import('@/views/products/inventory/mobile/TruckedStockDetails'),
+          meta: { rule: 'admin' },
+          props: true
         },
 
         {

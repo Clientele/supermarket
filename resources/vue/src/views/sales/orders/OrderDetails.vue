@@ -3,251 +3,26 @@
 
     <div class="flex flex-wrap-reverse items-center flex-grow justify-between mb-6">
 
-      <div class="flex flex-wrap-reverse items-center data-list-btn-container">
-
+      <div class="flex  ">
         <vs-icon class="mr-2" icon="shopping_cart" size="large" color="primary"></vs-icon>
         <h1 class="mr-6">
-          Orders
+          Order Details
         </h1>
-
-        <!-- Filter By Region -->
-        <v-select v-model="selectedOrderRegionId" class="mr-6" :clearable="false" :reduce="item => item.id"
-                  :options="availableRegions" label="region_name"/>
-
-        <!-- Add Order Button -->
-        <vs-button icon="add" id="customerLoading" @click="showOrderForm"
-                   class="mr-4 vs-con-loading__container">Add Order
-        </vs-button>
-
       </div>
 
+      <vs-button v-if="!(selectedOrder.is_cancelled)"   @click="rejectOrder()" color="warning"> Cancel Order</vs-button>
+      <vs-chip v-else color="danger" >Order Cancelled </vs-chip>
     </div>
 
-    <!-- orders table-->
-    <vs-card>
-      <vs-table ref="table" v-model="selectedOrder" pagination :max-items="100" search :data="orders">
-
-        <template slot="thead">
-          <vs-th >#</vs-th>
-          <vs-th  >Customer</vs-th>
-          <vs-th  >Address</vs-th>
-          <vs-th  >Sales Person</vs-th>
-          <vs-th  >Status</vs-th>
-          <vs-th>Action</vs-th>
-        </template>
-
-        <template slot-scope="{data}">
-          <tbody>
-          <vs-tr :data="item" :key="rowIndex" v-for="(item, rowIndex) in data">
-
-            <vs-td>
-              <p class="product-name font-medium truncate">{{ item.id }}</p>
-            </vs-td>
-
-            <vs-td>
-              <p class="product-name font-medium truncate">{{ item.customer ? item.customer.customer_name : " " }}</p>
-            </vs-td>
-
-            <vs-td>
-              <p class="product-category">
-                {{ item.place ? item.place.place_name : " " }}
-                {{ item.district ? item.district.district_name : " " }}
-                {{ item.region ? item.region.region_name : " " }}
-              </p>
-            </vs-td>
-
-            <vs-td>
-              <vs-chip color="secondary" v-if="item.staff">
-                <vs-avatar color="secondary" icon-pack="feather" icon="icon-user"/>
-                {{ item.staff.staff_name }}
-              </vs-chip>
-              <vs-chip color="grey" v-else> No Salesman</vs-chip>
-            </vs-td>
-
-            <vs-td>
-              <span v-bind:class="item.is_cancelled? `text-danger` : `text-primary` "> {{ item.order_status }}</span>
-            </vs-td>
-
-
-            <vs-td class="whitespace-no-wrap">
-              <vs-button color="secondary" class="mr-2" size="small" type="border" @click="showOrderDetails()">View
-              </vs-button>
-            </vs-td>
-
-
-          </vs-tr>
-          </tbody>
-        </template>
-      </vs-table>
-
-    </vs-card>
-    <!-- [end] orders table-->
-
-    <!-- Order Form -->
-    <vs-popup @close="closeOrderForm()" fullscreen title="New Order" :active.sync="orderFormDialog">
-
-      <div class="md:px-6">
-
-        <!-- Content Row -->
-        <div class="vx-row">
-          <div class="vx-col md:w-1/3 w-1/4">
-
-            <!--Customer -->
-            <div class="mt-4 mb-5">
-              <!-- customer -->
-              <h3>Customer</h3>
-              <vs-input v-if="!selectedOrderCustomer" v-model="customerQuery" class="mt-5 w-full" name="location"
-                        v-validate="'required'"/>
-
-              <!-- customers results -->
-              <div v-for="(customer,index) in customers" :key="index"
-                   @click="pickCustomer(customer)" class="location-item px-2 py-2 rounded mt-4">
-                <ul>
-                  <li>{{ customer.customer_name }} {{ customer.email }}</li>
-                  <li>{{ customer.phone_number_1 }} {{ customer.phone_number_2 }}</li>
-                  <li>
-                    {{ customer.region ? customer.region.region_name : " " }}
-                    {{ customer.district ? customer.district.distrcit_name : " " }}
-                    {{ customer.place ? customer.place.place_name : " " }}
-                  </li>
-                </ul>
-              </div>
-
-              <!-- selectedOrder customer -->
-              <div class="selectedOrder-address px-2 py-2 rounded mt-4" v-if="selectedOrderCustomer">
-                <div class="flex flex-wrap items-center">
-                  <div class="flex-grow">
-                    {{ selectedOrderCustomer.customer_name }}
-                  </div>
-                  <vs-button @click="removeCustomer()" color="danger" type="flat" icon-pack="feather"
-                             icon="icon-x"></vs-button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Delivery Address -->
-            <div class="mt-4 mb-5">
-              <h3>Delivery Address</h3>
-
-              <vs-input v-if="!selectedOrderAddress" v-model="locationQuery" class="mt-5 w-full" name="location"
-                        v-validate="'required'"/>
-              <span class="text-danger text-sm" v-show="errors.has('location')">{{ errors.first('item-name') }}</span>
-
-              <!-- Address result -->
-              <div v-for="(address,index) in addresses" :key="index"
-                   @click="pickAddress(address)" class="location-item px-2 py-2 rounded mt-4">
-                <ul>
-                  <li>{{ address.location_name }}</li>
-                </ul>
-              </div>
-
-              <!-- selectedOrder address -->
-              <div class="selectedOrder-address px-2 py-2 rounded mt-4" v-if="selectedOrderAddress">
-                <div class="flex flex-wrap items-center">
-                  <div class="flex-grow">
-                    {{ selectedOrderAddress.location_name }}
-                  </div>
-                  <vs-button @click="removeAddress()" color="danger" type="flat" icon-pack="feather"
-                             icon="icon-x"></vs-button>
-                </div>
-              </div>
-
-            </div>
-            <!-- [end] Delivery Address -->
-
-          </div>
-
-          <!--product picker -->
-          <div class="vx-col md:w-1/3 w-1/4">
-
-            <div class="mx-6 px-6">
-              <h3>Pick Product</h3>
-              <!-- Product -->
-              <div class="mt-4 mb-5">
-                <label class="vs-input--label">Product</label>
-                <v-select @input="fetchProductVariants()" v-model="selectedOrderProduct" :clearable="false"
-                          :options="products" v-validate="'required'" name="Product" label="product_name"
-                          placeholder="Select">
-                </v-select>
-                <span class="text-danger text-sm" v-show="errors.has('Product')">{{ errors.first('Product') }}</span>
-              </div>
-
-              <!-- Product Variant-->
-              <div class="mt-4 mb-5">
-                <label class="vs-input--label">Product Variant</label>
-                <v-select v-model="selectedOrderProductVariant" :clearable="false" :options="productVariants"
-                          v-validate="'required'" name="Variant" label="variant_name"
-                          placeholder="Select">
-                </v-select>
-                <span class="text-danger text-sm" v-show="errors.has('Variant')">{{ errors.first('Variant') }}</span>
-              </div>
-
-              <div class="mt-4 mb-5">
-                <vs-input class="w-full mt-4" label="Quantity" v-model="quantity"
-                          v-validate="'required'" name="quantity"/>
-                <span class="text-danger text-sm" v-show="errors.has('quantity')">
-                   {{ errors.first('quantity') }} </span>
-              </div>
-
-
-              <div v-if="selectedOrderProduct && selectedOrderProductVariant && quantity>0">
-                <vs-button ref="saveButton" @click="addProductToCart()" color="secondary" class="mr-4 mb-4">
-                  Add to cart
-                </vs-button>
-              </div>
-            </div>
-
-          </div>
-          <!-- [end] product picker -->
-
-          <!-- Cart contents -->
-          <div class="vx-col md:w-1/3 w-1/4">
-            <h3>Cart</h3>
-            <div class="category-item" v-for="(cartProduct, index) in cartProducts" :key="index">
-              <vs-card class="my-6">
-                <div class="flex flex-wrap">
-                  <p class="mt-1 flex-grow">
-                    {{ cartProduct.product.product_name }}
-                    {{ cartProduct.productVariant.variant_name }},
-                    QTY: {{ cartProduct.quantity }}
-                  </p>
-                  <vs-button type="border" color="danger" @click="removeFromCart(index)"
-                             radius icon="close" size="small"></vs-button>
-                </div>
-              </vs-card>
-            </div>
-
-            <div v-if="cartProducts.length>0">
-              <vs-button ref="saveButton" @click="submitOrder()" color="success" class="mr-4 mb-4">
-                Submit Order
-              </vs-button>
-            </div>
-          </div>
-          <!-- [end] Cart contents -->
-
-        </div>
-
-        <div class="vx-row mt-12">
-          <div class="vx-col w-full">
-            <div class="flex items-start flex-col sm:flex-row">
-              <!-- <vs-avatar :src="data.avatar" size="80px" class="mr-4" /> -->
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </vs-popup>
-    <!-- [end] Order Form -->
-
-    <!-- Order details -->
-    <vs-popup @close="closeOrderDetails()" fullscreen title="Order Details" :active.sync="orderDetailsVisible">
-      <div style="min-height: 100vh;">
+    <vs-card >
+      <div   class="px-6 py-12">
         <div class="vx-row">
 
           <!-- Customer info -->
-          <div class="vx-col md:w-1/3">
-            <div class="mb-6">
+          <div class="vx-col md:w-1/2">
+
+            <!-- Customer info -->
+            <div class="mb-2 ">
               <span class="font-bold">Customer</span>
             </div>
             <div>
@@ -267,7 +42,7 @@
                   <td class="pr-6">Email</td>
                   <td>
                     {{ selectedOrder.customer ? selectedOrder.customer.email : "Email" }}
-                   </td>
+                  </td>
                 </tr>
                 <tr>
                   <td class="pr-6">Address</td>
@@ -280,21 +55,52 @@
               </table>
             </div>
 
-            <vs-button v-if="!(selectedOrder.is_cancelled)" class="mt-12" @click="rejectOrder()" color="danger"> Cancel Order</vs-button>
+            <!-- Sales person -->
+            <div class="mb-6">
+              <div class="mb-2 mt-6">
+                <span class="font-bold">Sales Person</span>
+              </div>
+              <table>
+                <tr>
+                  <td class="pr-6">Name</td>
+                  <td>
+                    <span v-bind:class="!(selectedOrder.staff) ? `danger--text`:`blue--text`" >{{ selectedOrder.staff ? selectedOrder.staff.staff_name : "No sales person" }}</span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="pr-6">Phone</td>
+                  <td> {{ selectedOrder.staff ? selectedOrder.staff.phone_number : "No Phone" }}</td>
+                </tr>
+              </table>
+
+              <div style="max-width: 320px" class="mt-4 mb-5 small-form">
+                <h6 class="mb-4"> {{selectedOrder.staff? "Change":"Assign" }} Sales Person</h6>
+                <v-select @input="setSalesPerson()" v-model="selectedStaff" :clearable="false"
+                          :options="availableStaff" v-validate="'required'" name="Staff" label="staff_name"
+                          placeholder="Select">
+                </v-select>
+                <span class="text-danger text-sm" v-show="errors.has('Staff')">{{ errors.first('Staff') }}</span>
+              </div>
+            </div>
+
           </div>
 
+
           <!-- Ordered product -->
-          <div class="vx-col md:w-1/3 " v-if="selectedOrder.order_products">
+          <div class="vx-col md:w-1/2 " v-if="selectedOrder.order_products">
             <div class="mb-6">
               <span class="font-bold">Ordered Products</span>
             </div>
 
-            <vx-card class="overflow-hidden mb-6"
-                     v-for="(orderProduct,index) in selectedOrder.order_products">
+            <vx-card class="overflow-hidden mb-6" v-for="(orderProduct,index) in selectedOrder.order_products"
+                     :key="index">
               <div slot="no-body">
                 <div class="p-6 flex justify-between flex-row-reverse items-center">
-                  <feather-icon :icon="`PackageIcon`" class="p-3 inline-flex rounded-full text-primary"
-                                :style="{background: `rgba(var(--vs-primary),.15)`}"></feather-icon>
+                  <vs-button v-if="!(selectedOrder.is_cancelled)" color="secondary"
+                             @click="showAvailableProductsToDeliver(orderProduct)" class="p-3 inline-flex" >Deliver Products</vs-button>
+                  <vs-chip v-else color="black" class=" inline-flex" >Order Cancelled </vs-chip>
+
                   <div class="truncate">
                     <h3 class="mb-1 font-bold">
                       {{ orderProduct.product ? orderProduct.product.product_name : "" }}
@@ -310,50 +116,65 @@
 
               </div>
             </vx-card>
-
-          </div>
-
-          <!-- Sales person -->
-          <div class="vx-col md:w-1/3 " v-if="selectedOrder.order_products">
-            <div class="mb-6">
-              <span class="font-bold">Sales Person</span>
-            </div>
-            <table>
-              <tr>
-                <td class="pr-6">Name</td>
-                <td>{{ selectedOrder.staff ? selectedOrder.staff.staff_name : "No sales person" }}</td>
-              </tr>
-
-              <tr>
-                <td class="pr-6">Phone</td>
-                <td> {{ selectedOrder.staff ? selectedOrder.staff.phone_number : "No Phone" }}</td>
-              </tr>
-            </table>
-
-            <div class="mt-4 mb-5">
-              <label class="vs-input--label">Update Sales Person</label>
-              <v-select @input="setSalesPerson()" v-model="selectedStaff" :clearable="false"
-                        :options="availableStaff" v-validate="'required'" name="Staff" label="staff_name"
-                        placeholder="Select">
-              </v-select>
-              <span class="text-danger text-sm" v-show="errors.has('Staff')">{{ errors.first('Staff') }}</span>
-            </div>
           </div>
 
         </div>
       </div>
-    </vs-popup>
-    <!-- [end] Order details -->
+    </vs-card>
 
-    <!-- Cancel Form -->
-    <vs-prompt title="Cancellation Reason" :accept-text="`Continue`" :cancel-text="`Cancel`"
-               @cancel="cancellationReason=null" color="secondary"
-               @accept="rejectOrder()"
-               :active.sync="cancellationForm">
-      <div>
-        <vs-input placeholder="Reason"  v-model="cancellationReason" class="mt-3 w-full"/>
+    <!-- Delivery Form -->
+    <
+    <!-- Dispatch Form -->
+    <vs-prompt :title="`Delivery`" :accept-text="`Delivery`" :cancel-text="`Cancel`"
+               :color="`#118ab2`"
+               @cancel="selectedTruckedProduct= null"
+               @accept="deliverProduct()"
+               :active.sync="deliveryForm">
+
+      <!-- headings -->
+      <h4 class="my-6" v-if="selectedTruckedProduct">Quantity to deliver</h4>
+      <h4 class="my-6" v-else >Select stock</h4>
+
+
+      <!-- input -->
+      <div class="mb-6" v-if="selectedTruckedProduct">
+        <vs-input placeholder="Quantity" vs-placeholder="Quantity" v-model="quantityToDeliver" class="mt-3 w-full"/>
       </div>
+
+      <!-- stocks -->
+      <div v-if="selectedTruckedProduct"  class="product-item-active">
+        <p>
+          {{ selectedTruckedProduct.product? selectedTruckedProduct.product.product_name : "" }}
+          {{ selectedTruckedProduct.variant? selectedTruckedProduct.variant.variant_name : "" }}
+        </p>
+        <p>Remaining: {{ selectedTruckedProduct.remaining_quantity}} </p>
+        <p>Created at: {{ selectedTruckedProduct.created_at }} </p>
+      </div>
+
+      <div v-else>
+       <div @click="selectedTruckedProduct=truckedProduct"
+            class="product-item"
+            v-for="(truckedProduct, index) in availableTruckedProducts" :key="index">
+
+         <div>
+           <p>
+             {{ truckedProduct.product? truckedProduct.product.product_name : "" }}
+             {{ truckedProduct.variant? truckedProduct.variant.variant_name : "" }}
+           </p>
+           <p>Remaining: {{ truckedProduct.remaining_quantity}} </p>
+         </div>
+       </div>
+     </div>
+
+
+      <div class="my-6" v-if="availableTruckedProducts.length===0">
+        <span style="color: #e60000">No stock available in requested depot </span>
+      </div>
+
+
     </vs-prompt>
+    <!-- [end] Dispatch Form -->
+
     <!-- [end] Cancel Form -->
 
   </div>
@@ -366,6 +187,9 @@ import {handle} from "@/http/handler";
 import Table from "@/views/ui-elements/table/Table";
 
 export default {
+  props: {
+    passedOrder : Object
+  },
   components: {
     Table,
     vSelect
@@ -387,7 +211,7 @@ export default {
       selectedOrderRegionId: {"id": null, "region_name": "All Regions"},
       availableRegions: [],
 
-      orderFormDialog: false,
+      deliveryForm: false,
       cartProducts: [],
       quantity: 1,
       selectedOrderProduct: null,
@@ -408,7 +232,13 @@ export default {
       selectedStaff: {},
 
       cancellationReason: '',
-      cancellationForm: false
+      cancellationForm: false,
+
+      /**Order delivery **/
+      selectedOrderedProduct: null,
+      selectedTruckedProduct: null,
+      availableTruckedProducts: [],
+      quantityToDeliver: null
 
     }
   },
@@ -422,11 +252,6 @@ export default {
     },
     customerQuery(query) {
       this.searchCustomer();
-    },
-    selectedOrder(order) {
-      if (!this.orderDetailsVisible) {
-        this.showOrderDetails();
-      }
     }
   },
 
@@ -487,25 +312,9 @@ export default {
 
   methods: {
 
-    fetchOrders() {
-      console.log(JSON.stringify(this.selectedOrderRegionId));
-
-      this.rawCustomers = [];
-      this.$vs.loading({background: this.backgroundLoading, container: "#customerLoading", scale: 0.45})
-      console.info("fetching customers..");
-      axios.get('/resources/sales/orders?region_id=' + this.selectedOrderRegionId)
-        .then((response) => {
-          this.orders = response.data.payload.orders.data;
-          this.$vs.loading.close("#customerLoading > .con-vs-loading")
-        }).catch((error) => {
-        console.log(error);
-        this.handleApiError(error);
-      })
-    },
-
     fetchOrderDetails() {
       console.info("fetching details..");
-      axios.get('/resources/sales/order?id=' + this.selectedOrder.id)
+      axios.get('/resources/sales/order?id=' + this.passedOrder.id)
         .then((response) => {
           this.selectedOrder = response.data.payload.order;
         }).catch((error) => {
@@ -514,90 +323,42 @@ export default {
       })
     },
 
-    confirmCustomerDeletion(customer) {
-      this.customerInstance = customer;
-      this.$vs.dialog({
-        type: 'confirm',
-        color: 'danger',
-        title: `Confirm`,
-        text: 'Are you sure you want to remove ' + this.customerInstance.customer_name,
-        accept: this.removeCustomer
-      })
-    },
+    showAvailableProductsToDeliver(orderedProduct = {}) {
+      this.selectedOrderedProduct = orderedProduct;
 
-    showOrderForm(order = {}) {
-      this.orderFormDialog = true;
-      this.orderInstance = order;
-    },
-
-    closeOrderForm() {
-      this.orderFormDialog = false;
-    },
-
-    addProductToCart() {
-      let cartProduct = {
-        product: this.selectedOrderProduct,
-        productVariant: this.selectedOrderProductVariant,
-        quantity: this.quantity
-      };
-
-      this.selectedOrderProduct = null;
-      this.selectedOrderProductVariant = null;
-      this.quantity = 1;
-
-      this.cartProducts.push(cartProduct)
-    },
-
-    removeFromCart(index) {
-      console.log(index)
-      delete this.cartProducts.splice(index, 1);
-    },
-
-    submitOrder() {
-      if (!this.selectedOrderCustomer) {
-        this.sadlyNotify("Select customer")
-        return;
-      }
-      if (!this.selectedOrderAddress) {
-        this.sadlyNotify("Select address")
-        return;
+      if(this.selectedOrderedProduct.delivered_quantity  >= this.selectedOrderedProduct.ordered_quantity ){
+        this.happilyNotify("Order Already fulfilled");
+        return ;
       }
 
-      let variants = this.cartProducts.map(function (cartItem) {
-        return {
-          id: cartItem.productVariant.id,
-          quantity: cartItem.quantity
-        }
-      });
-
-      let orderData = {
-        customer_id: this.selectedOrderCustomer.id,
-        region_id: this.selectedOrderAddress.region_id,
-        district_id: this.selectedOrderAddress.district_id,
-        place_id: this.selectedOrderAddress.place_id,
-        product_variants: variants
-      };
-      console.log(JSON.stringify(orderData))
-
-      axios.post('/sales/order/add', orderData)
+      this.deliveryForm = true;
+      axios.post('/sales/order/delivery/available',
+        {order_product_id: this.selectedOrderedProduct.id })
         .then((response) => {
-          this.closeOrderForm();
-          this.happilyNotify("Order Added");
-          this.fetchOrders();
-        }).catch((error) => {
+             this.availableTruckedProducts = response.data.payload;
+           }).catch((error) => {
         console.log(error);
         this.handleApiError(error);
       })
     },
 
-
-    showOrderDetails() {
-      this.orderDetailsVisible = true;
-      this.fetchOrderDetails();
-    },
-
-    closeOrderDetails() {
-      this.orderDetailsVisible = false;
+    deliverProduct(){
+      axios.post('/sales/order/delivery/deliver',
+        {
+          order_product_id: this.selectedOrderedProduct.id,
+          trucked_product_id: this.selectedTruckedProduct.id,
+          quantity: this.quantityToDeliver,
+        })
+        .then((response) => {
+          this.selectedTruckedProduct = null;
+          this.selectedOrderedProduct = null;
+          this.quantity = null;
+          this.happilyNotify("Product delivered");
+          this.fetchOrderDetails();
+        }).catch((error) => {
+        console.log(error);
+        this.handleApiError(error);
+      })
     },
 
     /**Sales person **/
@@ -640,19 +401,6 @@ export default {
 
 
     /*** Resources **/
-    fetchRegions() {
-      console.info("fetching regions..");
-      console.info(JSON.stringify(this.selectedOrderCustomer));
-      axios.get('/resources/addresses/regions?country_id=1')
-        .then((response) => {
-          this.availableRegions = response.data.payload.regions;
-          this.availableRegions.unshift({"id": null, "region_name": "All Regions"});
-
-        }).catch((error) => {
-        console.log(error)
-      })
-    },
-
     fetchProducts() {
       axios.get('/resources/products/products?category_id=')
         .then((response) => {
@@ -764,20 +512,55 @@ export default {
 
   },
 
-
   created() {
-    this.fetchProducts();
     this.fetchStaff();
   },
   mounted() {
-    this.fetchOrders();
     this.isMounted = true
+
+    if(this.passedOrder!=null){
+      console.log("orderId:"+this.passedOrder.id);
+      this.fetchOrderDetails();
+    }else{
+      console.info("Order id not found, going back")
+      this.$router.go(-1);
+    }
   }
 }
 </script>
 
 
 <style lang="scss">
+.small-form{
+  padding: 16px;
+  background-color: #edfafe;
+  border: 1px solid #b7e9f9;
+  border-radius: 6px;
+}
+.danger--text{
+  color: #e60000;
+}
+
+.blue--text{
+  color: #00aaff;
+}
+.product-item{
+  background-color: #f8fcff;
+  padding: 12px;
+  border: 1px solid #bde0fe;
+  margin-bottom: 32px;
+}
+
+.product-item-active{
+  background-color: #eaf7f0;
+  padding: 12px;
+  border: 1px solid #95d5b2;
+  margin-bottom: 32px;
+}
+
+div.product-item-active:hover, div.product-item:hover {
+  cursor: pointer;
+}
 
 .vs-card--content {
   font-size: 1em !important;

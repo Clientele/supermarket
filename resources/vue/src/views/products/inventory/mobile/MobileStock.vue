@@ -8,20 +8,17 @@
         <div class="flex flex-wrap ">
           <h2 class="font-bold"
               style="line-height: 48px !important; display:flex;  vertical-align: middle !important;   ">
-            <vs-icon class="inline pt-2 mr-4" size="32px" icon="view_quilt"></vs-icon>
+            <vs-icon  class="inline pt-2 mr-4" size="32px" icon="local_shipping"></vs-icon>
             Mobile Stock
           </h2>
-          <v-select class="flex ml-4" @input="fetchStock()" v-model="selectedCategory"
-                    :options="availalbleCategories" name="category_name" label="category_name" :clearable="false"
-                    placeholder="Category" :reduce="option => option.id">
-          </v-select>
 
-          <v-select class="flex ml-4" @input="fetchStock()" v-model="selectedDepot"
+
+          <v-select class="flex ml-4" @input="fetchStaffWithStock()" v-model="selectedDepot"
                     :options="availableDepots" name="depot_name" label="depot_name" :clearable="false"
                     placeholder="Depot"  >
           </v-select>
 
-          <vs-button icon="refresh" class="py-0 ml-4" type="flat" @click="fetchStock()">Refresh</vs-button>
+          <vs-button icon="refresh" class="py-0 ml-4" type="flat" @click="fetchStaffWithStock()">Refresh</vs-button>
         </div>
       </div>
 
@@ -31,15 +28,15 @@
     <!-- List -->
     <vx-card>
 
-      <!-- Products -->
+      <!-- staffWithStock -->
       <div style="" class="px-6 py-6 rounded">
 
 
-         <vs-table  @selected="showVariantsStocks" stripe   :data="products" v-model="selectedProduct">
+         <vs-table @selected="showTruckedStock()" stripe   :data="staffWithStock" v-model="selectedStaff">
 
           <template slot="thead">
-            <vs-th>Product </vs-th>
-            <vs-th> Remaining QTY </vs-th>
+            <vs-th>Sales Person </vs-th>
+            <vs-th> Products </vs-th>
             <vs-th>  </vs-th>
             <vs-th> </vs-th>
             <vs-th> </vs-th>
@@ -51,19 +48,17 @@
             <vs-tr :data="tr" :key="rowIndex" v-for="(tr, rowIndex) in data">
 
               <vs-td>
-                {{ data[rowIndex].product_name }}
+                {{ data[rowIndex].staff_name }}
               </vs-td>
 
-              <vs-td>
-                <span style="color: #0d77e4; font-weight: bold"> {{ data[rowIndex].remaining_quantity }} </span>
-              </vs-td>
+              <vs-td  v-for="(truckedProduct,index) in data[rowIndex].trucked_products" :key="index">
 
-              <vs-td  v-for="(variant,index) in data[rowIndex].variants" :key="index">
-                <span v-if="index>=3"> <span v-if="index===3"> More </span> </span>
+                <span v-if="index>=3"> <span v-if="index===3"> More products </span> </span>
+
                 <vs-chip v-else color="#e7f1fc">
-                  <span  style="color: #084789"> {{ variant.variant_name }}: </span>
+                  <span  style="color: #084789"> {{ truckedProduct.product? truckedProduct.product.product_name : "" }}: </span>
                   <span style="color: #084789; font-weight: bold; margin-left: 4px;">
-                    {{ variant.remaining_quantity }}
+                    {{ truckedProduct.remaining_quantity }}
                   </span>
                 </vs-chip>
               </vs-td>
@@ -73,16 +68,14 @@
           </template>
         </vs-table>
       </div>
-      <!-- [end] Products -->
+      <!-- [end] staffWithStock -->
 
 
       <!-- Product Variants -->
       <vs-popup @close="closeProductVariantsDialog()" fullscreen title=""
                 :active.sync="productVariantsVisible">
         <div>
-          <stock-details @closeProductVariants="closeProductVariantsDialog"
-                         v-bind:depot="selectedDepot"
-                         v-bind:product="productInstance"></stock-details>
+
         </div>
       </vs-popup>
       <!-- [end] Product Variants -->
@@ -96,17 +89,15 @@
 <script>
 import axios from "@/axios";
 import vSelect from 'vue-select';
-import StockDetails from "@/views/products/inventory/mobile/StockDetails";
 
 export default {
   components: {
-    vSelect,
-    StockDetails
-  },
+    vSelect
+   },
   data() {
     return {
 
-      products: [],
+      staffWithStock: [],
       productInstance: { id: null, product_name: null, vendor_id: 1, is_published: false, categories_ids: [] },
       productFormDialog: false,
 
@@ -136,7 +127,7 @@ export default {
       availableDepots: [],
       selectedDepot: { depot_name: "All Depots" },
 
-      selectedProduct: {},
+      selectedStaff: {},
 
 
     }
@@ -144,28 +135,22 @@ export default {
 
   methods: {
 
-    /*** Products **/
-    fetchStock() {
-      this.products = [];
-      let endpoint = '/products/inventory/stock?category_id=' + this.selectedCategory
-                     +"&depot_id=" + this.selectedDepot.id ;
+    /*** staffWithStock **/
+    fetchStaffWithStock() {
+      this.staffWithStock = [];
+      let endpoint = '/products/inventory/stock/mobile?depot_id=' + this.selectedDepot.id ;
+      console.log(JSON.stringify(this.selectedDepot));
+      console.log(endpoint);
       axios.get(endpoint)
         .then((response) => {
-          this.products = response.data.payload.products.data;
-        }).catch((error) => {
+          this.staffWithStock = response.data.payload.staff.data;
+         }).catch((error) => {
         console.log(error)
       })
     },
 
-    showVariantsStocks( ) {
-      console.info("Handling selection...");
-      if(this.selectedDepot.id==null){
-        this.$vs.notify({ time: 3000, color: 'danger', title: 'No Depot',  text: "Select depot before selecting product" });
-        return ;
-      }
-
-      this.productInstance = this.selectedProduct;
-      this.productVariantsVisible = true;
+    showTruckedStock(){
+      this.$router.push({name: 'products-inventory-stock-mobile-details', params: { staff : this.selectedStaff}})
     },
 
     closeProductForm() {
@@ -175,7 +160,7 @@ export default {
     /*** Product variants **/
     closeProductVariantsDialog() {
       this.productVariantsVisible = false;
-      this.fetchStock();
+      this.fetchStaffWithStock();
     },
 
     showProductVariants(product) {
@@ -184,15 +169,6 @@ export default {
     },
 
     /*** Categories Resources **/
-    getAvailableCategories(categoriesIndex) {
-      let letCatId = this.productCategoriesArray[categoriesIndex].id;
-      axios.get('/resources/products/categories?parent_id=' + letCatId).then((response) => {
-        this.productCategoriesArray[categoriesIndex].sub_categories = response.data.payload.categories;
-      }).catch((error) => {
-        console.log(error);
-      });
-    },
-
     fetchSubCategories(selectedCategory) {
       axios.get('/resources/products/categories?parent_id=' + selectedCategory.selected_category.id)
         .then((response) => {
@@ -212,36 +188,17 @@ export default {
     },
 
     /*** Resources **/
-    fetchAvailableCategories() {
-      axios.get('/resources/products/categories/all')
-        .then((response) => {
-          this.availalbleCategories = response.data.payload.categories;
-          this.availalbleCategories.push(this.selectedCategory);
-
-        }).catch((error) => {
-        console.log(error);
-      });
-    },
-
-    fetchAvailableVendors() {
-      axios.get('/resources/products/vendors/all')
-        .then((response) => {
-          this.availableVendors = response.data.payload.vendors;
-        }).catch((error) => {
-        console.log(error);
-      });
-    },
-
     fetchAvailableDepots() {
       console.info("fetching depots..");
-      console.info(JSON.stringify(this.selectedDepot));
 
       axios.get('/resources/assets/depots')
         .then((response) => {
           this.availableDepots = response.data.payload.depots.data;
           this.availableDepots.push(this.selectedDepot);
           this.selectedDepot = this.availableDepots[0];
-         }).catch((error) => {
+          this.fetchStaffWithStock();
+
+        }).catch((error) => {
         console.log(error)
       })
     },
@@ -249,14 +206,11 @@ export default {
   },
 
   created() {
-    this.getAvailableCategories(0);
-    this.fetchAvailableVendors();
-    this.fetchAvailableCategories();
-    this.fetchAvailableDepots();
+       this.fetchAvailableDepots();
   },
 
   mounted() {
-    this.fetchStock();
+    //this.fetchStaffWithStock();
   }
 }
 </script>

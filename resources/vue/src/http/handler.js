@@ -102,7 +102,9 @@ function parseError(statusCode) {
 export function handle(error) {
 
    if(error.response){
-    if(error.response.status==401){
+     console.log(JSON.stringify(error.response.data.message));
+
+     if(error.response.status==401){
       console.log("redirecting....");
        router.push('/login').catch(() => {})
       return "Not logged in";
@@ -110,7 +112,8 @@ export function handle(error) {
      let message = error.response.data? error.response.data.message:   error.response.message;
      return message+" -"+parseError(error.response.status ) ;
     }
-  }else{
+
+   }else{
     console.log(error);
   }
 

@@ -81,7 +81,7 @@
       <!-- [end] stockRequests -->
 
 
-      <!-- Role Form -->
+      <!-- Dispatch Form -->
       <vs-prompt :title="`Dispatch`" :accept-text="`Dispatch`" :cancel-text="`Cancel`"
                   :color="`#118ab2`"
                  @cancel="selectedDepotProduct= null"
@@ -99,7 +99,15 @@
         </div>
 
         <!-- stocks -->
-        <div @click="selectedDepotProduct=depotProduct"
+        <div v-if="selectedDepotProduct" class="product-item-active">
+          <p>
+            {{ selectedDepotProduct.product? selectedDepotProduct.product.product_name : "" }}
+            {{ selectedDepotProduct.variant? selectedDepotProduct.variant.variant_name : "" }}
+          </p>
+          <p>Remaining: {{ selectedDepotProduct.remaining_quantity}} </p>
+        </div>
+
+        <div v-else @click="selectedDepotProduct=depotProduct"
              v-bind:class="selectedDepotProduct ? `product-item-active`: `product-item`"
                 v-for="(depotProduct, index) in availableStockProducts" :key="index">
           <p>
@@ -115,7 +123,7 @@
 
 
       </vs-prompt>
-      <!-- [end] Role Form -->
+      <!-- [end] Dispatch Form -->
 
 
     </vx-card>
@@ -213,6 +221,12 @@ export default {
         this.happilyNotify("Request fulfilled");
         return ;
       }
+
+      if(!(this.stockRequest.approved===1)){
+        this.sadlyNotify("Request Not Approved");
+        return ;
+      }
+
       this.dispatchFormDialog = true;
       this.getAvailableProducts();
     },
