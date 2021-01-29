@@ -116,7 +116,6 @@ class ProductsVariantsController extends GoodBaseController{
         return $this->returnResponse("Product variant removed","");
     }
 
-
     /*** Product Variants Price **/
     public function addVariantPrice(Request $request){
         ProductVariantPrice::where([
@@ -129,6 +128,7 @@ class ProductsVariantsController extends GoodBaseController{
             'product_variant_id' => $request->input('product_variant_id'),
             'amount' => $request->input('amount')
         ]);
+
         return $this->returnResponse("Add Variant price",$variantPrice);
     }
 
@@ -138,5 +138,6 @@ class ProductsVariantsController extends GoodBaseController{
     }
 
 }
+
 
 

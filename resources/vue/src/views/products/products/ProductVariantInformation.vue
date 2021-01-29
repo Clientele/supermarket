@@ -18,82 +18,94 @@
 
       <div class="mt-5">
          <vs-tabs alignment="fixed">
+
+           <!-- Primary information -->
           <vs-tab label="Primary Information">
-            <!-- Variant information -->
-            <div class="vx-col md:w-1/4 w-1/5">
-              <div class="flex flex-wrap">
-                <div class="flex-grow">
-                  <h3>Primary Info</h3>
-                </div>
 
-              </div>
+           <vs-row  >
+             <!-- Variant information -->
+             <div class="vx-col md:w-1/4  ">
+               <div class="flex flex-wrap mt-12">
+                 <div class="flex-grow">
+                   <h3>Primary Info</h3>
+                 </div>
+               </div>
 
-
-              <!-- Variant Name -->
-              <vs-input class="w-full mt-4" label="Variant Name" v-model="productVariantInstance.variant_name"
-                        v-validate="'required'" name="name"/>
-              <span class="text-danger text-sm" v-show="errors.has('name')">
+               <!-- Variant Name -->
+               <vs-input class="w-full mt-4" label="Variant Name" v-model="productVariantInstance.variant_name"
+                         v-validate="'required'" name="name"/>
+               <span class="text-danger text-sm" v-show="errors.has('name')">
               {{ errors.first('name') }}
             </span>
 
-              <!-- Variant Base Price -->
-              <vs-input class="w-full mt-4" label="Base Price" v-model="productVariantInstance.base_price"
-                        v-validate="'required'" name="price"/>
-              <span class="text-danger text-sm" v-show="errors.has('price')">
+               <!-- Variant Base Price -->
+               <vs-input class="w-full mt-4" label="Base Price" v-model="productVariantInstance.base_price"
+                         v-validate="'required'" name="price"/>
+               <span class="text-danger text-sm" v-show="errors.has('price')">
               {{ errors.first('price') }}
             </span>
 
-              <!-- Restocking Quantity  -->
-              <vs-input class="w-full mt-4" label="Restocking Quantity"
-                        v-model="productVariantInstance.restocking_quantity"
-                        v-validate="'required'" name="name"/>
-              <span class="text-danger text-sm" v-show="errors.has('quantity')">
+               <!-- Restocking Quantity  -->
+               <vs-input class="w-full mt-4" label="Restocking Quantity"
+                         v-model="productVariantInstance.restocking_quantity"
+                         v-validate="'required'" name="name"/>
+               <span class="text-danger text-sm" v-show="errors.has('quantity')">
               {{ errors.first('quantity') }}
             </span>
 
-              <!-- Measurement Unit -->
-              <div style="height: 12px"></div>
-              <span>Measurement Unit </span>
-              <v-select v-model="productVariantInstance.measuring_unit" :clearable="false"
-                        :options="measurementUnits" v-validate="'required'" name="unit"
-                        placeholder="Select">
-              </v-select>
-              <span class="text-danger text-sm" v-show="errors.has('unit')">
+               <!-- Measurement Unit -->
+               <div style="height: 12px"></div>
+               <span>Measurement Unit </span>
+               <v-select v-model="productVariantInstance.measuring_unit" :clearable="false"
+                         :options="measurementUnits" v-validate="'required'" name="unit"
+                         placeholder="Select">
+               </v-select>
+               <span class="text-danger text-sm" v-show="errors.has('unit')">
               {{ errors.first('unit') }}
             </span>
 
 
-              <div class="flex items-start flex-col sm:flex-row mt-12">
-                <div>
-                  <vs-button type="border" @click="closeVariantDialog()" color="danger" class="mr-4 mb-4">Cancel
-                  </vs-button>
+               <!-- Save buttons -->
+               <div class="flex items-start flex-col sm:flex-row mt-12">
+                 <div>
+                   <vs-button type="border" @click="closeVariantDialog()" color="danger" class="mr-4 mb-4">Cancel
+                   </vs-button>
 
-                  <vs-button ref="saveButton" @click="saveProductVariant()" color="success" class="mr-4 mb-4">Save
-                  </vs-button>
-                </div>
-              </div>
+                   <vs-button ref="saveButton" @click="saveProductVariant()" color="success" class="mr-4 mb-4">Save
+                   </vs-button>
+                 </div>
+               </div>
 
 
-            </div>
-            <!-- [end] Variant information -->
+             </div>
 
-          </vs-tab>
+             <!-- [end] Variant information -->
+             <div class="vx-col md:w-1/8"></div>
 
-          <vs-tab label="Variant Prices">
+             <!-- Description -->
+             <div class="vx-col md:w-1/4  pl-12 pt-12">
+               <div class="flex flex-wrap">
+                 <div class="flex-grow">
+                   <div style="height: 12px"></div>
+                   <span>Variant description </span>
+                   <div class="mt-2">
+                     <vs-textarea height="256px" counter="1024"
+                                  label="Description"
+                                  v-model="productVariantInstance.description" />
+                   </div>
+                 </div>
+               </div>
+             </div>
+
+           </vs-row>
+
+           </vs-tab>
+
+           <!-- Variant Prices -->
+           <vs-tab label="Variant Prices">
             <!-- Variant description & prices-->
             <div class="vx-col md:w-1/3 w-1/4 px-12" v-if="productVariantInstance" >
 
-              <!-- Description -->
-              <div v-if="!variantPriceForm" class="flex flex-wrap">
-                <div class="flex-grow">
-                  <h3>Variant Description</h3>
-                  <div class="mt-6">
-                    <vs-textarea height="256px" counter="1024"
-                                 label="Description"
-                                 v-model="productVariantInstance.description" />
-                  </div>
-                </div>
-              </div>
 
               <!-- Variant Prices -->
               <div class="mt-12">
@@ -108,7 +120,7 @@
               </div>
 
               <!-- Price form -->
-              <div class="image-form-div" v-if="variantPriceForm">
+              <div class="image-form-div my-6" v-if="variantPriceForm">
                 <h4> Price information</h4>
 
                 <!-- Sales zone -->
@@ -129,7 +141,7 @@
 
                 <div class="flex flex-wrap">
                   <vs-button class="mr-4" color="warning" @click="variantPriceForm=false">Cancel</vs-button>
-                  <vs-button color="secondary" @click="saveVariantPrice">Upload</vs-button>
+                  <vs-button color="secondary" @click="saveVariantPrice">Save</vs-button>
                 </div>
               </div>
               <!-- [end] Price form -->
@@ -183,9 +195,9 @@
 
           </vs-tab>
 
-          <vs-tab label="Variant Images">
-            <!-- Variant images -->
-            <div class="vx-col md:w-1/3 w-1/4">
+           <!-- Variant images -->
+           <vs-tab label="Variant Images">
+            <div class=" mt-12">
               <div class="flex flex-wrap mb-6">
                 <div class="flex-grow">
                   <h3>Images</h3>
@@ -220,7 +232,7 @@
               <div v-if="!imageInHold">
                 <div  class="pt-4 mb-6" v-if="productVariantInstance" >
                   <vs-row>
-                    <vs-col class="md:w-1/3"  style="border: 1px solid #e1e1e1"
+                    <vs-col class="md:w-1/6"  style="border: 1px solid #e1e1e1"
                             v-for="(productImage,index) in productVariantInstance.images"  :key="index">
                       <div class="px-4 py-4"  @click="confirmImageRemoval(productImage)">
                         <img
@@ -232,23 +244,25 @@
                 </div>
               </div>
 
-              <div v-else class="px-12 py-12" style="border: 1px solid #e2e2e2">
+              <div v-else class="px-12 pt-6" style="border: 1px solid #e2e2e2; max-width: 320px" >
+
+                <div class="flex flex-wrap justify-between ">
+                  <vs-button type="border"  class="px-4 py-2" @click="imageInHold=null" color="secondary">
+                    Close
+                  </vs-button>
+
+                  <vs-button   class="px-4 py-2" @click="removeProductImage" color="danger">
+                    Delete Image
+                  </vs-button>
+                </div>
+                <vs-divider></vs-divider>
+
                 <div class="flex flex-wrap justify-center">
-                  <div style="max-width: 192px">
+                  <div >
                     <img
                       :src="imageInHold?imageInHold.url :'' "
                       alt="content-img" class="responsive card-img-top">
                   </div>
-                </div>
-                <vs-divider></vs-divider>
-                <div class="flex flex-wrap justify-between mt-4">
-                  <vs-button  @click="imageInHold=null" color="secondary">
-                    Close
-                  </vs-button>
-
-                  <vs-button  @click="removeProductImage" color="danger">
-                    Remove
-                  </vs-button>
                 </div>
               </div>
 
