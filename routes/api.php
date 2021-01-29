@@ -30,17 +30,23 @@ Route::prefix('v1/auth')->group(function () {
 /// I N V E N T O R Y
 Route::prefix('v1/products')->group(function () {
 
-      /*** STOCK  ***/
+      /*** DEPOT STOCK  ***/
      Route::get('inventory/stock', 'Products\InventoryController@getStock');
      Route::post('inventory/stock/receive', 'Products\InventoryController@receiveStock');
      Route::get('inventory/stock/product', 'Products\InventoryController@getVariantStocks');
      Route::get('inventory/stock/variant/breakdown', 'Products\InventoryController@getVariantStocksBreakdown');
 
-      /*** STOCK REQUESTS  ***/
+     /*** MOBILE STOCK  ***/
+     Route::get('inventory/stock/mobile', 'Products\MobileInventoryController@stockBySalesPeople');
+     Route::get('inventory/stock/mobile/staff', 'Products\MobileInventoryController@getStaffStock');
+
+    /*** STOCK REQUESTS  ***/
      Route::post('inventory/stock/request', 'Products\StockRequestsController@requestStock');
      Route::get('inventory/stock/requests', 'Products\StockRequestsController@getStockRequests');
      Route::get('inventory/stock/request', 'Products\StockRequestsController@getStockRequestDetails');
-
+     Route::post('inventory/stock/request/approve', 'Products\StockRequestsController@approveRequest');
+     Route::post('inventory/stock/request/available', 'Products\StockRequestsController@getAvailableDepotProducts');
+     Route::post('inventory/stock/request/dispatch', 'Products\StockRequestsController@dispatchRequest');
 
 
 });
@@ -59,6 +65,10 @@ Route::prefix('v1/sales')->group(function () {
     Route::post('order/remove', 'Sales\OrdersController@removeOrder');
     Route::post('order/staff', 'Sales\OrdersController@setStaff');
     Route::post('order/cancel', 'Sales\OrdersController@cancelOrder');
+    Route::post('order/item/reject', 'Sales\OrdersController@rejectOrderItem');
+
+    Route::post('order/delivery/available', 'Sales\OrdersController@getAvailableTruckedProducts');
+    Route::post('order/delivery/deliver', 'Sales\OrdersController@deliverProduct');
 
     /*** DELIVERIES ***/
     Route::post('delivery/add', 'Sales\CustomersController@addDelivery');
@@ -87,12 +97,19 @@ Route::prefix('v1/config')->group(function () {
     Route::post('product/remove', 'Products\ProductsController@removeProduct');
     Route::post('product/publish/toggle', 'Products\ProductsController@toggleStatus');
     Route::post('product/assigned/category/remove', 'Products\ProductsController@removeAssignedCategory');
+    Route::post('product/image/update', 'Products\ProductsController@updateProductImage');
 
     #product variants
     Route::post('product/variant/add', 'Products\ProductsVariantsController@addProductVariant');
     Route::post('product/variant/update', 'Products\ProductsVariantsController@updateProductVariant');
     Route::post('product/variant/remove', 'Products\ProductsVariantsController@removeProductVariant');
     Route::post('product/variant/publish/toggle', 'Products\ProductsVariantsController@toggleVariantStatus');
+    Route::post('product/variant/image/update', 'Products\ProductsVariantsController@updateVariantImage');
+    Route::post('product/variant/image/remove', 'Products\ProductsVariantsController@removeVariantImage');
+
+    #product variant prices
+    Route::post('product/variant/price/add', 'Products\ProductsVariantsController@addVariantPrice');
+    Route::post('product/variant/price/remove', 'Products\ProductsVariantsController@removeVariantPrice');
 
 
 
@@ -168,6 +185,7 @@ Route::prefix('v1/resources')->group(function () {
 
         #variants
         Route::get('product/variants', 'Resources\ProductsResourcesController@getProductVariants');
+        Route::get('product/variant/details', 'Resources\ProductsResourcesController@getVariantDetails');
 
         /*** SALES  ***/
         #orders

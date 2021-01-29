@@ -19,8 +19,6 @@ Sales Module
    ->request stock
    ->make sales
    
-   
-   
 NB: 
   -->Loading
   -->Pagination

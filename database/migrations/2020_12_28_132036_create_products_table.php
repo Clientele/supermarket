@@ -17,12 +17,14 @@ class CreateProductsTable extends Migration
             $table->id();
             $table->bigInteger('vendor_id')->nullable();
             $table->string('product_name');
+            $table->text('product_description')->nullable();
             $table->boolean('is_published')->default(false);
 
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
 
             $table->string('thumbnail_img')->nullable();
+            $table->string('img_url')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

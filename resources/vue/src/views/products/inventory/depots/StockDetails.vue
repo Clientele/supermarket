@@ -83,6 +83,7 @@
 
         <template slot="thead">
           <vs-th>Batch #</vs-th>
+          <vs-th>Expiry Date</vs-th>
           <vs-th>Reception Date</vs-th>
           <vs-th>Received QTY</vs-th>
           <vs-th>Remaining QTY</vs-th>
@@ -94,6 +95,7 @@
           <vs-tr :key="rowIndex" v-for="(tr, rowIndex) in data">
 
             <vs-td  > {{ data[rowIndex].batch_number }}</vs-td>
+            <vs-td  > {{ data[rowIndex].expiry_date }}</vs-td>
             <vs-td  > {{ data[rowIndex].received_at }}</vs-td>
             <vs-td > {{ data[rowIndex].received_quantity }}</vs-td>
             <vs-td > {{ data[rowIndex].remaining_quantity }}</vs-td>

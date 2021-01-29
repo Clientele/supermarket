@@ -13,6 +13,7 @@ use App\Models\PriceDiscount;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantPrice;
+use App\Models\TruckedProduct;
 use App\Models\User;
 use App\Models\Vendor;
 use Carbon\Carbon;
@@ -48,6 +49,7 @@ class OrdersController extends GoodBaseController
 
         $order = Order::create([
             'customer_id' => $request->input('customer_id'),
+            'sales_person_id' => Auth::user()->staff_id,
 
             'delivery_zone_id' => $district->zone_id,
             'delivery_region_d' => $request->input('region_id'),
@@ -112,9 +114,9 @@ class OrdersController extends GoodBaseController
     public function setStaff(Request $request)
     {
         $order = Order::where([
-            'id'=>$request->input('id')
+            'id' => $request->input('id')
         ])->update([
-            'sales_person_id'=>$request->input('staff_id')
+            'sales_person_id' => $request->input('staff_id')
         ]);
         return $this->returnResponse('Order updated', $order);
     }
@@ -128,13 +130,71 @@ class OrdersController extends GoodBaseController
     public function cancelOrder(Request $request)
     {
         $order = Order::where([
-            'id'=>$request->input('id')
+            'id' => $request->input('id')
         ])->update([
-            'is_cancelled'=> true,
-            'order_status'=> "Cancelled",
-            'cancellation_reason'=> $request->input('cancellationReason'),
+            'is_cancelled' => true,
+            'order_status' => "Cancelled",
+            'cancellation_reason' => $request->input('cancellationReason'),
         ]);
         return $this->returnResponse('Order updated', $order);
+    }
+
+    public function rejectOrderItem(Request $request)
+    {
+        $order = OrderProduct::where([
+            'id' => $request->input('id')
+        ])->update([
+            'is_rejected' => true
+        ]);
+        return $this->returnResponse('Order product updated', $order);
+    }
+
+
+    /*** Delivery **/
+    public function getAvailableTruckedProducts(Request $request)
+    {
+        $orderProduct = OrderProduct::find($request->input('order_product_id'));
+
+        if (!$orderProduct) {
+            return $this->returnError("Order product not found", [], 422);
+        }
+
+        $truckedProducts = TruckedProduct::where([
+            'product_variant_id' => $orderProduct->product_variant_id
+        ])
+            ->where('remaining_quantity', '>', 0)
+            ->with(['product', 'variant'])->take(3)->get();
+
+        return $this->returnResponse("Available trucked products", $truckedProducts);
+    }
+
+    public function deliverProduct(Request $request)
+    {
+        $deliveredQuantity = $request->input('quantity');
+        $orderProduct = OrderProduct::find($request->input('order_product_id'));
+        if (!$orderProduct) {
+            return $this->returnError("Order product not found", [], 422);
+        }
+
+        $truckedProduct = TruckedProduct::find($request->input('trucked_product_id'));
+        if (!$truckedProduct) {
+            return $this->returnError("Trucked product not found", [], 422);
+        }
+
+        if ($truckedProduct->remaining_quantity < $deliveredQuantity) {
+            $rem = $truckedProduct->remaining_quantity;
+            return $this->returnError("Only " . $rem . " products Remained", [], 422);
+        }
+
+        $quantityToDeliver = $orderProduct->ordered_quantity - $orderProduct->delivered_quantity;
+        if ($deliveredQuantity > $quantityToDeliver) {
+            return $this->returnError("Only " . $quantityToDeliver . " remained to deliver", [], 422);
+        }
+
+        $orderProduct->increment('delivered_quantity', $deliveredQuantity);
+        $truckedProduct->decrement('remaining_quantity', $deliveredQuantity);
+
+        return $this->returnResponse("Product delivered", $truckedProduct);
     }
 
 

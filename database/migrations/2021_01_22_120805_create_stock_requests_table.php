@@ -16,6 +16,7 @@ class CreateStockRequestsTable extends Migration
         Schema::create('stock_requests', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('staff_id')->unsigned();
+            $table->bigInteger('depot_id')->unsigned()->nullable();
             $table->bigInteger('created_by')->unsigned();
 
             $table->boolean('approved')->nullable()->default(false);

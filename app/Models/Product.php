@@ -16,11 +16,13 @@ class Product extends Model
         'vendor_id',
         'product_name',
         'is_published',
+        'product_description',
 
         'created_by',
         'deleted_by',
 
-        'thumbnail_img'
+        'thumbnail_img',
+        'img_url'
     ];
 
     public function vendor(){

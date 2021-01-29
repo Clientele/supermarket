@@ -45,6 +45,10 @@ class OrdersResourcesController extends GoodBaseController
         $order = Order::where([ 'id' => $request->input('id') ])
                   ->with(['staff','customer','region','district','place','order_products'])->first();
 
+        if(!$order){
+            return $this->returnError('Order not found', " ",422);
+        }
+
         foreach ($order->order_products as $orderProduct){
             $orderProduct->product;
             $orderProduct->variant;

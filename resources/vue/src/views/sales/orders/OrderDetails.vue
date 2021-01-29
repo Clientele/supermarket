@@ -10,7 +10,7 @@
         </h1>
       </div>
 
-      <vs-button v-if="!(selectedOrder.is_cancelled)"   @click="rejectOrder()" color="warning"> Cancel Order</vs-button>
+      <vs-button v-if="!(selectedOrder.is_cancelled)"   @click="confirmOrderCancellation()" color="warning"> Cancel Order</vs-button>
       <vs-chip v-else color="danger" >Order Cancelled </vs-chip>
     </div>
 
@@ -97,9 +97,13 @@
                      :key="index">
               <div slot="no-body">
                 <div class="p-6 flex justify-between flex-row-reverse items-center">
-                  <vs-button v-if="!(selectedOrder.is_cancelled)" color="secondary"
+                  <vs-button v-if="!(selectedOrder.is_cancelled) && !(orderProduct.is_rejected) && !(orderProduct.delivered_quantity >= orderProduct.ordered_quantity)"
+                             color="secondary"
                              @click="showAvailableProductsToDeliver(orderProduct)" class="p-3 inline-flex" >Deliver Products</vs-button>
-                  <vs-chip v-else color="black" class=" inline-flex" >Order Cancelled </vs-chip>
+                  <vs-chip v-else-if="selectedOrder.is_cancelled" color="black" class=" inline-flex" >Order Cancelled </vs-chip>
+                  <vs-chip v-else-if="orderProduct.is_rejected" color="grey" class=" inline-flex" >Product Rejected </vs-chip>
+                  <vs-chip v-if="(orderProduct.delivered_quantity >= orderProduct.ordered_quantity)"
+                           color="success" class=" inline-flex" >Fulfiled </vs-chip>
 
                   <div class="truncate">
                     <h3 class="mb-1 font-bold">
@@ -110,6 +114,9 @@
                       <li>Quantity {{ orderProduct.ordered_quantity }}</li>
                       <li>Delivered: {{ orderProduct.delivered_quantity }}</li>
                       <li>@TSH{{ orderProduct.selling_price }}</li>
+                      <li v-if="!(selectedOrder.is_cancelled) && !(orderProduct.is_rejected) && !(orderProduct.delivered_quantity >= orderProduct.ordered_quantity)">
+                        <vs-button @click="confirmOrderItemRejection(orderProduct)" class="mt-4 py-1 px-2" type="border">Reject Item</vs-button>
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -123,7 +130,7 @@
     </vs-card>
 
     <!-- Delivery Form -->
-    <
+
     <!-- Dispatch Form -->
     <vs-prompt :title="`Delivery`" :accept-text="`Delivery`" :cancel-text="`Cancel`"
                :color="`#118ab2`"
@@ -382,6 +389,16 @@ export default {
       this.cancellationForm = true;
     },
 
+    confirmOrderCancellation() {
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'danger',
+        title: `Confirm`,
+        text: 'Are you sure you want to cancel this order',
+        accept: this.rejectOrder
+      })
+    },
+
     rejectOrder() {
       axios.post('/sales/order/cancel', {
         id: this.selectedOrder.id,
@@ -391,6 +408,33 @@ export default {
           if (response.data.success) {
             this.customers = response.data.payload.customers;
             this.happilyNotify("Updated");
+            this.fetchOrderDetails();
+          }
+        }).catch((error) => {
+        console.log(error);
+        this.handleApiError(error);
+      })
+    },
+
+    confirmOrderItemRejection(orderItem) {
+      this.selectedOrderProduct = orderItem;
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'danger',
+        title: `Confirm`,
+        text: 'Are you sure you want to reject this item',
+        accept: this.rejectOrderItem
+      })
+    },
+
+
+    rejectOrderItem() {
+      axios.post('/sales/order/item/reject', {
+        id: this.selectedOrderProduct.id
+      })
+        .then((response) => {
+          if (response.data.success) {
+            this.happilyNotify("Order updated");
             this.fetchOrderDetails();
           }
         }).catch((error) => {

@@ -47,6 +47,13 @@ const router = new Router({
           meta: {
             rule: 'admin'
           }
+        },        {
+          path: '/home',
+          name: 'home-2',
+          component: () => import('./views/DashboardAnalytics.vue'),
+          meta: {
+            rule: 'admin'
+          }
         },
 
         // =============================================================================

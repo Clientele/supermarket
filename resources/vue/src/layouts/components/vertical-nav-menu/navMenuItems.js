@@ -119,7 +119,7 @@ export default [
       },
 
       {
-        url: "/config/depots",
+        url: null,
         name: 'Assets',
         icon: 'TruckIcon',
         submenu: [
@@ -138,7 +138,7 @@ export default [
        },
 
       {
-        url: "/config/addresses",
+        url: null,
         name: 'Addresses',
         icon: 'MapPinIcon',
         submenu: [

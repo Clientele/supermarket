@@ -23,7 +23,9 @@ class ProductVariant extends Model{
 
         'is_published',
 
+        'description',
         'thumbnail_img',
+        'img_url',
 
         'created_by',
         'deleted_by'
@@ -35,6 +37,14 @@ class ProductVariant extends Model{
 
     public function product(){
         return $this->belongsTo('App\Models\Product','product_id');
+    }
+
+    public function images(){
+        return $this->hasMany('App\Models\ProductImage','product_variant_id');
+    }
+
+    public function prices(){
+        return $this->hasMany('App\Models\ProductVariantPrice','product_variant_id');
     }
 
 

@@ -18,9 +18,23 @@ class StockRequestProduct extends Model
           'staff_id',
           'created_by',
           'quantity',
+          'dispatched_quantity',
           'rejected',
           'rejection_reason'
         ];
+
+
+    public function request(){
+        return $this->belongsTo('App\Models\StockRequest', 'request_id' );
+    }
+
+    public function product(){
+        return $this->belongsTo('App\Models\Product', 'product_id' );
+    }
+
+    public function variant(){
+        return $this->belongsTo('App\Models\ProductVariant', 'product_variant_id' );
+    }
 
 
 }

@@ -27,7 +27,9 @@ class CreateProductVariantsTable extends Migration
 
             $table->boolean('is_published');
 
+            $table->text('description')->nullable();
             $table->string('thumbnail_img')->nullable();
+            $table->string('img_url')->nullable();
 
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();

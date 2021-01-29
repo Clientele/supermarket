@@ -156,7 +156,7 @@ export default {
   },
   methods: {
 
-    /*** Regions **/
+    /*** Sales Zones **/
     fetchZones() {
       axios.get('/resources/addresses/zones').then((response) => {
         this.zones = response.data.payload.zones;

@@ -14,6 +14,7 @@ class StockRequest extends Model
 
     protected $fillable = [
         'staff_id',
+        'depot_id',
         'created_by',
         'approved',
         'dispatched',
@@ -21,7 +22,7 @@ class StockRequest extends Model
     ];
 
 
-    public function request_product(){
+    public function request_products(){
         return $this->hasMany('App\Models\StockRequestProduct', 'request_id' );
     }
 

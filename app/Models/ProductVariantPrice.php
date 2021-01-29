@@ -21,6 +21,15 @@ class ProductVariantPrice extends Model{
         'deleted_by'
     ];
 
+    public function zone(){
+        return $this->belongsTo('App\Models\Zone', 'zone_id' );
+    }
+
+    public function variant(){
+        return $this->belongsTo('App\Models\ProductVariant', 'product_variant_id' );
+    }
+
+
 }
 
 

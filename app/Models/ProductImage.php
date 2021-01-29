@@ -12,8 +12,13 @@ class ProductImage extends Model{
     protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
 
     protected $fillable = [
-
+        'product_id',
+        'product_variant_id',
+        'url',
+        'created_by',
+        'deleted_by'
     ];
+
 }
 
 

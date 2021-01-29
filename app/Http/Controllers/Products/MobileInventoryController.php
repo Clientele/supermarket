@@ -7,109 +7,47 @@ use App\Models\Depot;
 use App\Models\DepotProduct;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\Staff;
+use App\Models\TruckedProduct;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class InventoryController extends GoodBaseController
+class MobileInventoryController extends GoodBaseController
 {
 
     public function __construct(){
     }
 
-    public function receiveStock(Request $request){
-
-        $productVariant = ProductVariant::find($request->input('product_variant_id'));
-        if(!$productVariant){
-          return $this->returnError('Product Variant Not Found'," ",404);
-        }
-
-       $depotProduct =   DepotProduct::create([
-            'depot_id' => $request->input('depot_id'),
-            'vendor_id' => $productVariant->vendor_id ,
-            'product_id' => $productVariant->product_id,
-            'product_variant_id' => $productVariant->id,
-
-            'received_quantity' => $request->input('received_quantity'),
-            'remaining_quantity' => $request->input('received_quantity'),
-
-            'batch_number' => $request->input('batch_number'),
-            'expiry_date' => Carbon::parse($request->input('expiry_date')),
-            'received_at' => Carbon::now(),
-            'receiver_id' => Auth::id(),
-            'created_by' => Auth::id(),
-         ]);
-
-         return $this->returnResponse('Depot Product Added', $depotProduct);
-    }
-
-    public function getStock(Request $request){
+    public function stockBySalesPeople(Request $request)
+    {
 
         $depotId = $request->input('depot_id');
         $catId = $request->input('category_id');
 
-        $categoryQuery = " category_id > 0";
-        if(is_numeric($catId)){
-            $categoryQuery  = " category_id = ".$catId." ";
-        }
+        $staff = Staff::where(['default_depot_id' => $depotId])
+            ->whereHas('trucked_products', function ($query) {
+                $query->where('remaining_quantity', '>', '0');
+            })->with('trucked_products')->paginate(20);
 
-        $depotQuery = " depot_id > 0";
-        if(is_numeric($depotId)){
-            $depotQuery  = " depot_id = ".$depotId." ";
-        }
-
-        $products = Product::whereHas('categories', function($queryBuilder) use($categoryQuery){
-            $queryBuilder->whereRaw($categoryQuery);
-        })->with('variants')->paginate(500);
-
-        foreach ($products as $product) {
-            $product->remaining_quantity = DepotProduct::where(['product_id' => $product->id])
-                                            ->whereRaw($depotQuery)
-                                            ->sum('remaining_quantity');
-
-            foreach ($product->variants as $variant) {
-                $variant->remaining_quantity = DepotProduct::where(['product_variant_id' => $variant->id])
-                                                ->whereRaw($depotQuery)
-                                                ->sum('remaining_quantity');
+        foreach ($staff as $person) {
+            foreach ($person->trucked_products as $truckedProduct) {
+                $truckedProduct->product;
             }
         }
-
-        $responseData['products'] = $products;
+        $responseData['staff'] = $staff;
         return $this->returnResponse('Products ', $responseData);
     }
 
-    public function getVariantStocks(Request $request){
-
-        $depotId = $request->input('depot_id');
-        $depotQuery = " depot_id > 0";
-        if(is_numeric($depotId)){
-            $depotQuery  = " depot_id = ".$depotId." ";
-        }
-
-        $productVariants = ProductVariant::where([
-            'product_id'=>$request->input('product_id'),
-        ])->get();
-
-         foreach ($productVariants as $variant) {
-            $variant->remaining_quantity = DepotProduct::where(['product_variant_id' => $variant->id])
-                ->whereRaw($depotQuery)
-                ->sum('remaining_quantity');
-         }
-
-        $responseData['variants'] = $productVariants;
-        return $this->returnResponse('Product Stock ', $responseData);
-    }
-
-    public function getVariantStocksBreakdown(Request $request){
-        $variant = ProductVariant::find($request->input('variant_id'));
-        if(!$variant){
-            return $this->returnError('Product Variant Not found', "", 404);
-        }
-        $responseData['depot_products'] = DepotProduct::where(['product_variant_id' => $variant->id])->get();
-        return $this->returnResponse('Product Variant Depot Stock', $responseData);
-
+    public function getStaffStock(Request $request)
+    {
+        $staffId = $request->input('staff_id');
+        $stocks = TruckedProduct::where(['staff_id' => $staffId])->with('product','variant')->paginate(20);
+        $responseData['trucked_stock'] = $stocks;
+        return $this->returnResponse('Trucked Stock ', $responseData);
     }
 
 

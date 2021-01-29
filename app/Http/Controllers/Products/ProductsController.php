@@ -10,14 +10,17 @@ use App\Models\ProductCategory;
 use App\Models\ProductVariant;
 use App\Models\User;
 use App\Models\Vendor;
+use App\PropertyImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends GoodBaseController
 {
 
     public function __construct(){
-
+        sleep(2);
     }
 
     /*** Products **/
@@ -26,9 +29,10 @@ class ProductsController extends GoodBaseController
         $product = Product::create([
             'vendor_id'=>$request->input('vendor_id'),
             'product_name'=>$request->input('product_name'),
+            'product_description'=>$request->input('product_description'),
             'is_published'=> false,
 
-            'thumbnail_img'=> null,
+            'thumbnail_img'=> "https://image.flaticon.com/icons/png/512/916/916762.png",
             'created_by'=> Auth::id()
         ]);
 
@@ -49,16 +53,13 @@ class ProductsController extends GoodBaseController
 
     public function updateProduct(Request $request){
 
-        ///TODO: save image
-        $thumbNailUrl = "";
-
         $product = Product::where([
             'id'=>$request->input('id'),
         ])->update([
              'product_name'=>$request->input('product_name'),
-             'vendor_id'=>$request->input('vendor_id'),
-             'thumbnail_img'=> $thumbNailUrl
-        ]);
+             'product_description'=>$request->input('product_description'),
+             'vendor_id'=>$request->input('vendor_id')
+         ]);
 
         $product = Product::find($request->input('id'));
         if(!$product){
@@ -76,6 +77,21 @@ class ProductsController extends GoodBaseController
             }
         }
         return $this->returnResponse('Product Updated',$product);
+    }
+
+    public function updateProductImage(Request $request){
+
+        $folder = 'public/products';
+        $storedPath = $request->file('file')->store($folder, 's3');
+
+        $product = Product::where([
+            'id'=>$request->input('id'),
+        ])->update([
+             'thumbnail_img'=>  $storedPath,
+             'img_url'=>  Storage::disk('s3')->url($storedPath)
+         ]);
+
+        return $this->returnResponse('Product image updated',$product);
     }
 
     public function toggleStatus(Request $request){

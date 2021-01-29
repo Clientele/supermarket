@@ -1,4 +1,4 @@
- 
+
 
 <template>
   <div>
@@ -34,7 +34,7 @@
                               :class="[`text-success`, {'mb-4': false}]"
                               :style="{background: `rgba(var(--vs-success),.15)`}"></feather-icon>
                 <div class="truncate">
-                  <h3 class="mb-1 ">{{ role.name }}</h3>
+                  <h5 class="mb-1 ">{{ role.name }}</h5>
                   <span>{{ role.member_count }} Users</span> <br/>
                   <span>{{ role.role_permissions.length }} Permissions</span>
                 </div>
@@ -85,14 +85,16 @@
                   Below we made it simple. So, everyone can understand.
                  -->
                 <th class="font-semibold text-base text-left px-3 py-2"
-                    v-for="heading in ['Module', 'View', 'Create', 'Update', 'Delete']" :key="heading">{{ heading }}
+                    v-for="heading in ['Module' ]" :key="heading">{{ heading }}
                 </th>
               </tr>
 
               <tr v-for="(values, permissionsName) in permissionsDataModel" :key="permissionsName">
                 <td class="px-3 py-2">{{ permissionsName }}</td>
                 <td v-for="(permission, name) in values" class="px-3 py-2" :key="name+permission">
-                  <vs-checkbox v-model="values[name]"/>
+                  <div class="flex ">
+                    <vs-checkbox v-model="values[name]" />    {{  name }}
+                  </div>
                 </td>
               </tr>
             </table>
@@ -103,10 +105,14 @@
         <!-- Save & Reset Button -->
         <div class="vx-row">
           <div class="vx-col w-full">
-            <div class="mt-8 flex flex-wrap items-center justify-between">
-              <vs-button @click="confirmRoleRemoval()" type="border" color="danger">Delete Role</vs-button>
-              <vs-button color="success" class="ml-auto mt-2" @click="updateRolePermissions()">Save Changes</vs-button>
-             </div>
+            <div class="mt-8 flex flex-wrap items-center  ">
+              <div class="flex-grow">
+                <vs-button class="mr-6" @click="roleDetailsDialog=false" type="border" color="warning">Cancel</vs-button>
+                <vs-button color="success" class="ml-auto mt-2" @click="updateRolePermissions()">Save Changes</vs-button>
+              </div>
+              <vs-button @click="confirmRoleRemoval()"  color="danger">Delete Role</vs-button>
+
+            </div>
           </div>
         </div>
       </div>
@@ -154,8 +160,9 @@ export default {
   },
   methods: {
     showRoleNameDialog() {
-      this.roleNameForm = true;
+      this.selectedRole = {};
       this.selectedRole.role_permissions = [];
+      this.roleNameForm = true;
     },
 
     viewRoleDetails(role) {
@@ -164,25 +171,36 @@ export default {
 
       console.log(JSON.stringify(this.selectedRole.role_permissions));
       this.permissionsDataModel = {
-        users: {
+        Users: {
           view: this.selectedRole.role_permissions.includes('View Users'),
           create: this.selectedRole.role_permissions.includes('Create Users'),
           update: this.selectedRole.role_permissions.includes('Update Users'),
           delete: this.selectedRole.role_permissions.includes('Delete Users')
         },
-        posts: {
-          view: false,
-          create: false,
-          update: false,
-          delete: false
+        Vendors: {
+          "View": false,
+          "Register": false,
+          "Update": false,
+          "Remove": false
         },
-        comments: {
-          view: false,
-          create: false,
-          update: false,
-          delete: false
-        }
-      }
+        Products: {
+          "View": false,
+          "Add": false,
+          "Update": false,
+          "Remove": false
+        },
+        "Product Categories": {
+          "View": false,
+          "Add": false,
+          "Update": false,
+          "Delete": false
+        },
+        Inventory: { "View Stock": false, "Issue stock": false, "Receive" : false,  "Remove": false},
+        Depots: { "View": false, "Add": false, "Update": false,  "Remove": false},
+        Vehicles: { "View": false, "Add": false, "Update": false,  "Remove": false},
+        Addresses: { "View": false, "Create": false, "Update": false,  "Remove": false},
+        "Reports module": { "View": false    },
+       }
 
     },
 

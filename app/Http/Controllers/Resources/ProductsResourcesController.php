@@ -6,12 +6,15 @@ use App\Http\Controllers\GoodBaseController;
 use App\Models\Depot;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantPrice;
 use App\Models\Staff;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -74,6 +77,7 @@ class ProductsResourcesController extends GoodBaseController
         if(!$product){
             return  $this->returnError("Product not found",[ ""]);
         }
+
         $product->categories;
 
         foreach ( $product->categories as $category){
@@ -84,6 +88,26 @@ class ProductsResourcesController extends GoodBaseController
         return $this->returnResponse('Product details ', $responseData);
 
     }
+
+    /***Variants **/
+    public function getVariantDetails(Request $request){
+        $variant = ProductVariant::where([
+            'id' =>$request->input('id')
+        ])->with('images','prices')->first();
+
+        if(!$variant){
+            return  $this->returnError("Product not found",[ ""]);
+        }
+
+        foreach ($variant->prices as $price){
+            $price->zone;
+        }
+
+        $responseData['variant'] = $variant;
+        return $this->returnResponse('Variant details ', $responseData);
+
+    }
+
 
     public function getProductVariants(Request $request){
         Log::debug($request->all());

@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\StockRequest;
 use App\Models\StockRequestProduct;
+use App\Models\TruckedProduct;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,8 +19,8 @@ use Illuminate\Support\Facades\Log;
 class StockRequestsController extends GoodBaseController
 {
 
-    public function __construct()
-    {
+    public function __construct(){
+
     }
 
 
@@ -30,25 +31,27 @@ class StockRequestsController extends GoodBaseController
             return $this->returnError("An array of product variants is required  ", "", 422);
         }
 
-        $staff =  Auth::user()->staff ;
-        if(!($staff)){
+        $staff = Auth::user()->staff;
+        if (!($staff)) {
             return $this->returnError("Only staff can request products", "", 422);
         }
 
-        $depot = Depot::find($request->input('depot_id'));
+        $depotID = $request->input('depot_id');
+        $depot = Depot::find( is_numeric($depotID)? $depotID : $staff->default_depot_id);
         if (!$depot) {
             return $this->returnError("Depot not found  ", "", 422);
         }
 
         $stockRequest = StockRequest::create([
             'staff_id' => $staff->id,
+            'depot_id' => $depot->id,
             'created_by' => Auth::id(),
         ]);
 
         $variants = $request->input('product_variants');
         foreach ($variants as $variant) {
             $productVariant = ProductVariant::find($variant['variant_id']);
-            if(!$productVariant){
+            if (!$productVariant) {
                 return $this->returnError("Product variant not found  ", "", 422);
             }
 
@@ -64,24 +67,127 @@ class StockRequestsController extends GoodBaseController
         }
 
         $responseData['requests'] = $stockRequest;
-        return $this->returnResponse('Stock Requests', $responseData);
+        return $this->returnResponse('Stock Requested', $responseData);
     }
 
     public function getStockRequests(Request $request)
     {
-        $stockRequests = StockRequest::with(['staff','request_product'])->paginate(20);
+        $stockRequests = StockRequest::with(['staff'])->latest()->paginate(20);
         $responseData['requests'] = $stockRequests;
         return $this->returnResponse('Stock Requests ', $responseData);
     }
 
-    public function getStockRequestDetails(Request $request){
-        $request = StockRequest::find($request->input('id'))
-            ->with(['request_product','request_product'])->first();
-        $responseData['request'] = $request;
+    public function getStockRequestDetails(Request $request)
+    {
+         $productRequest = StockRequest::where([
+             'id'=>$request->input('id')
+         ])->with(['staff', 'request_products'])->first();
+
+        if(!$productRequest){
+          return $this->returnError("Request not found","",422) ;
+        }
+
+        foreach ($productRequest->request_products as $request_product) {
+            $request_product->product;
+            $request_product->variant;
+        }
+
+        $responseData['request'] = $productRequest;
         return $this->returnResponse('Stock Request ', $responseData);
     }
 
+    public function approveRequest(Request $request)
+    {
+         $productRequest = StockRequest::where([
+             'id'=>$request->input('id')
+         ])->update([
+             'approved'=>true
+         ]);
+
+         return $this->returnResponse('Stock Request ', $productRequest);
+    }
+
+    public function getAvailableDepotProducts(Request $request){
+
+        $requestedProduct = StockRequestProduct::find($request->input('requested_product_id'));
+
+         if(!$requestedProduct){
+            return $this->returnError("Requests  not found","",422);
+        }
+
+        $depotRemainingProducts =  DepotProduct::where([
+            'depot_id'=>$request->input('depot_id'),
+            'product_variant_id'=> $requestedProduct->product_variant_id
+        ])->where('remaining_quantity','>',0)
+            ->orderBy('expiry_date','DESC')
+            ->with(['product','variant'])->take('5')->get();
+
+        return $this->returnResponse("Products",$depotRemainingProducts);
+
+    }
+
+    public function dispatchRequest(Request $request){
+
+        $quantity = $request->input('quantity') ;
+
+        $requestedProduct = StockRequestProduct::find($request->input('requested_product_id'));
+        if(!$requestedProduct){
+            return $this->returnError("Products","",422);
+        }
+
+        $depotProduct =  DepotProduct::find($request->input('depot_product_id'));
+        if(!$depotProduct){
+            return $this->returnError("Depot product not found","",422);
+        }
+
+        if($depotProduct->remaining_quantity < $quantity ) {
+            return $this->returnError("Not enough stock","",422);
+        }
+
+
+        $remained = ($requestedProduct->quantity - $requestedProduct->dispatched_quantity);
+        if($quantity > $remained ){
+             return $this->returnError("Only ".$remained." remained","",422);
+        }
+
+        $requestedProduct->request;
+        if(!($requestedProduct->request)){
+            return $this->returnError("Could not determine receiving staff ","",422);
+        }
+
+
+        $truckedProduct =  TruckedProduct::create([
+           'original_depot_id' => $depotProduct->depot_id,
+           'product_id'=> $depotProduct->product_id,
+           'product_variant_id'=> $depotProduct->product_variant_id,
+           'staff_id'=> $requestedProduct->request->staff_id,
+
+           'received_quantity' =>  $quantity,
+           'remaining_quantity' =>  $quantity,
+           'created_by' => Auth::id()
+         ]);
+
+        $depotProduct->decrement('remaining_quantity',$quantity);
+        $requestedProduct->increment('dispatched_quantity',$quantity);
+
+        /**Update request status **/
+        $stockRequest = StockRequest::find($requestedProduct->request_id);
+        $undispatchedRequests =StockRequestProduct::where(['request_id'=>$stockRequest->id])
+            ->whereColumn('quantity','!=','dispatched_quantity')
+            ->get();
+
+        if(count($undispatchedRequests)==0){
+            $stockRequest-> dispatched = true;
+            $stockRequest->save();
+        }
+
+        return $this->returnResponse("Dispatched",$truckedProduct);
+
+    }
 
 }
+
+
+
 
 

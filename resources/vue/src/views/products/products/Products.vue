@@ -23,15 +23,15 @@
     </div>
     <!-- [end] Categories Filter -->
 
-
     <vx-card>
 
       <!-- Products -->
       <div style="border: 1px solid #e5e5e5" class="px-6 py-6 rounded">
         <h4 class="mb-4">Products</h4>
-        <vs-table stripe :data="products">
+        <vs-table v-model="productInstance" stripe :data="products" @selected="showProductVariants">
 
           <template slot="thead">
+            <vs-th>Thumbnail</vs-th>
             <vs-th>Product Name</vs-th>
             <vs-th>Vendor</vs-th>
             <vs-th>Added On</vs-th>
@@ -40,21 +40,26 @@
           </template>
 
           <template slot-scope="{data}">
-            <vs-tr :key="rowIndex" v-for="(tr, rowIndex) in data">
+            <vs-tr :data="item" :key="rowIndex" v-for="(item, rowIndex) in data">
+              <vs-td>
+                <div style="max-width: 32px">
+                  <img :src="item.img_url? item.img_url : item.thumbnail_img "
+                       alt="product-image" class="responsive card-img-top">
+                </div>
+              </vs-td>
+
+
               <vs-td :data="data[rowIndex].product_name">
-                {{ data[rowIndex].product_name }}
+                {{ item.product_name }}
               </vs-td>
 
               <vs-td :data="data[rowIndex].vendor">
-                {{ data[rowIndex].vendor ? data[rowIndex].vendor.vendor_name : "Unknown Vendor" }}
+                {{ item.vendor ? data[rowIndex].vendor.vendor_name : "Unknown Vendor" }}
               </vs-td>
               <vs-td :data="data[rowIndex].created_at">
-                {{ data[rowIndex].created_at }}
+                {{ item.created_at }}
               </vs-td>
-              <vs-td :data="data[rowIndex].id">
-                <vs-button type="border" color="secondary" class="mr-4" size="small"
-                           @click="showProductVariants(data[rowIndex])">Open
-                </vs-button>
+              <vs-td :data="item.id">
                 <vs-button type="border" class="mr-4" size="small" @click="showProductForm(data[rowIndex])">Edit
                 </vs-button>
               </vs-td>
@@ -74,14 +79,21 @@
 
         <div class="md:px-6">
 
-          <!-- Content Row -->
+          <!-- Name & Description-->
           <div class="vx-row">
             <div class="vx-col md:w-1/3 w-1/4">
               <vs-input class="w-full mt-4" label="Product Name" v-model="productInstance.product_name"
                         v-validate="'required'" name="product_name"/>
-              <span class="text-danger text-sm" v-show="errors.has('product_name')">{{
-                  errors.first('product_name')
-                }}</span>
+              <span class="text-danger text-sm" v-show="errors.has('name')">{{ errors.first('name') }}</span>
+
+              <div class="mt-6">
+                <vs-textarea label="Product description" v-model="productInstance.product_description" />
+              </div>
+            </div>
+            <!-- [end] Name & Description-->
+
+            <!-- ProductCategory options -->
+            <div class="vx-col md:w-1/3 w-1/4">
 
               <div class="mt-4 mb-5">
                 <label class="vs-input--label">Vendor</label>
@@ -93,9 +105,6 @@
                 <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
               </div>
 
-            </div>
-
-            <div class="vx-col md:w-1/3 w-1/4">
               <div class="mt-4 mb-5" v-for="(category, index) in productCategoriesArray" :key="index">
                 <label class="vs-input--label">{{ category.title }}</label>
                 <v-select @input="fetchSubCategories(category)" v-model="category.selected_category" :clearable="false"
@@ -106,7 +115,9 @@
                 <span class="text-danger text-sm" v-show="errors.has('status')">{{ errors.first('status') }}</span>
               </div>
             </div>
+            <!-- [end] ProductCategory option -->
 
+            <!-- Assigned categories -->
             <div class="vx-col md:w-1/3 w-1/4">
               <h3>Categories</h3>
               <div class="category-item" v-for="(assignedCategory, index) in assignedCategories" :key="index">
@@ -116,7 +127,6 @@
                              color="danger" radius icon="close" size="small"></vs-button>
                 </div>
               </div>
-
             </div>
 
           </div>
@@ -141,7 +151,7 @@
       <vs-popup @close="closeProductVariantsDialog()" fullscreen title=""
                 :active.sync="productVariantsVisible">
         <div>
-          <product-variants @closeProductVariants="closeProductVariantsDialog" v-bind:product="productInstance"></product-variants>
+          <product-details @closeProductVariants="closeProductVariantsDialog" v-bind:product="productInstance"></product-details>
         </div>
       </vs-popup>
       <!-- [end] Product Variants -->
@@ -153,17 +163,25 @@
 <script>
 import axios from "@/axios";
 import vSelect from 'vue-select';
-import ProductVariants from "@/views/products/products/ProductVariants";
+import ProductDetails from "@/views/products/products/ProductDetails";
+import {handle} from "@/http/handler";
 
 export default {
   components: {
     vSelect,
-    ProductVariants
+    ProductDetails
   },
   data() {
     return {
       products: [],
-      productInstance: {id: null, product_name: null, vendor_id: 1, is_published: false, categories_ids: []},
+      productInstance: {
+        id: null,
+        product_name: null,
+        product_description: null,
+        vendor_id: 1,
+        is_published: false,
+        categories_ids: []
+      },
       productFormDialog: false,
 
       placesVisible: false,
@@ -195,8 +213,7 @@ export default {
 
 
       /** Product variants **/
-      productVariantsVisible: false
-
+      productVariantsVisible: false,
 
     }
   },
@@ -205,22 +222,30 @@ export default {
 
     /*** Products **/
     fetchProducts() {
+      this.$vs.loading({ color: 'secondary' })
       this.products = [];
       axios.get('/resources/products/products?category_id=' + this.filterCategory)
         .then((response) => {
+          this.$vs.loading.close();
           this.products = response.data.payload.products.data;
         }).catch((error) => {
+        this.$vs.loading.close();
+        this.handleApiError(error)
         console.log(error)
       })
     },
 
     fetchProductDetails() {
+      this.$vs.loading({ color: 'secondary' })
       axios.get('/resources/product/details?id=' + this.productInstance.id)
         .then((response) => {
+          this.$vs.loading.close();
           this.productInstance = response.data.payload.product;
           this.selectedVendor = response.data.payload.product.vendor;
           this.assignedCategories = response.data.payload.product.categories;
         }).catch((error) => {
+        this.$vs.loading.close();
+        this.handleApiError(error)
         console.log(error);
       });
     },
@@ -229,11 +254,13 @@ export default {
       this.productInstance = product ? product : {};
       this.productFormDialog = true;
       if (product) {
+        this.handleApiError(error)
         this.fetchProductDetails();
       }
     },
 
     saveProduct() {
+      this.$vs.loading({ color: 'secondary' })
 
       let selectedCategories = this.productCategoriesArray.map(function (cat) {
         return cat.selected_category ? cat.selected_category.id : null;
@@ -250,6 +277,7 @@ export default {
 
       axios.post(endpoint, this.productInstance)
         .then((response) => {
+          this.$vs.loading.close();
           this.productFormDialog = false;
           this.productInstance = {};
           this.productCategoriesArray = [{
@@ -261,7 +289,9 @@ export default {
           }];
           this.fetchProducts();
           this.getAvailableCategories(0);
+          this.happilyNotify("Product saved");
         }).catch((error) => {
+        this.handleApiError(error)
         console.log(error)
       })
     },
@@ -284,6 +314,7 @@ export default {
         .then((response) => {
           this.fetchProducts();
         }).catch((error) => {
+        this.handleApiError(error)
         console.log(error)
       });
     },
@@ -296,6 +327,7 @@ export default {
         .then((response) => {
           this.fetchProductDetails();
         }).catch((error) => {
+        this.handleApiError(error)
         console.log(error);
       });
     },
@@ -309,8 +341,10 @@ export default {
       this.productVariantsVisible = false;
     },
 
-    showProductVariants(product) {
-      this.productInstance = product;
+    showProductVariants() {
+      if(this.productFormDialog){
+        return ;
+      }
       this.productVariantsVisible = true;
     },
 
@@ -320,6 +354,7 @@ export default {
       axios.get('/resources/products/categories?parent_id=' + letCatId).then((response) => {
         this.productCategoriesArray[categoriesIndex].sub_categories = response.data.payload.categories;
       }).catch((error) => {
+        this.handleApiError(error)
         console.log(error);
       });
     },
@@ -339,6 +374,7 @@ export default {
             this.productCategoriesArray.push(category);
           }
         }).catch((error) => {
+        this.handleApiError(error)
         console.log(error);
       });
     },
@@ -348,6 +384,7 @@ export default {
         .then((response) => {
           this.allCategories = response.data.payload.categories;
         }).catch((error) => {
+        this.handleApiError(error)
         console.log(error);
       });
     },
@@ -358,9 +395,30 @@ export default {
         .then((response) => {
           this.availableVendors = response.data.payload.vendors;
         }).catch((error) => {
+        this.handleApiError(error)
         console.log(error);
       });
     },
+
+    /** Helpers **/
+    handleApiError(error) {
+      this.$vs.notify({
+        title: 'Error',
+        text: handle(error),
+        iconPack: 'feather',
+        icon: 'icon-alert-circle',
+        color: 'danger'
+      })
+    },
+
+    happilyNotify(message) {
+      this.$vs.notify({title: 'Success', text: message, color: 'success'})
+    },
+
+    sadlyNotify(message) {
+      this.$vs.notify({title: 'Error', text: message, color: 'danger', position: 'bottom-left'})
+    },
+
   },
 
   created() {

@@ -7,20 +7,21 @@ use App\Models\Depot;
 use App\Models\Product;
 use App\Models\ProductAssignedCategory;
 use App\Models\ProductCategory;
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
+use App\Models\ProductVariantPrice;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
-class ProductsVariantsController extends GoodBaseController
-{
+class ProductsVariantsController extends GoodBaseController{
 
     public function __construct(){
 
     }
-
 
     /*** Product Variants **/
     public function addProductVariant(Request $request){
@@ -41,6 +42,8 @@ class ProductsVariantsController extends GoodBaseController
             'is_published'=> false,
 
             'thumbnail_img'=> null,
+            'description'=> $request->input('description'),
+            'img_url'=> "https://image.flaticon.com/icons/png/512/916/916762.png",
             'created_by'=> Auth::id()
         ]);
 
@@ -49,9 +52,6 @@ class ProductsVariantsController extends GoodBaseController
 
     public function updateProductVariant(Request $request){
 
-        ///TODO: save image
-        $thumbNailUrl = "";
-
         $product = ProductVariant::where([
             'id'=>$request->input('id'),
         ])->update([
@@ -59,7 +59,7 @@ class ProductsVariantsController extends GoodBaseController
             'base_price'=>$request->input('base_price'),
             'restocking_quantity'=>$request->input('restocking_quantity'),
             'measuring_unit'=>$request->input('measuring_unit'),
-            'thumbnail_img'=> $thumbNailUrl,
+            'description'=> $request->input('description')
         ]);
 
         return $this->returnResponse('Product Variant Updated',$product);
@@ -79,8 +79,63 @@ class ProductsVariantsController extends GoodBaseController
         return $this->returnResponse('Product variant removed',$product);
     }
 
+    public function updateVariantImage(Request $request){
+
+        $isThumbnailImage = $request->input('is_thumbnail')=='true';
+
+        $folder = 'public/product/variant';
+        $storedPath = $request->file('file')->store($folder, 's3');
+
+        $productVariant = ProductVariant::find($request->input('id'));
+        if(!$productVariant){
+            return $this->returnError("Product variant not found","", 422);
+        }
+
+        ProductImage::create([
+            'product_variant_id'=>$request->input('id'),
+            'url'=>  Storage::disk('s3')->url($storedPath),
+            'created_by'=> Auth::id()
+         ]);
 
 
+        if($productVariant->img_url == null || $isThumbnailImage ){
+            $product = ProductVariant::where([
+                'id'=>$request->input('id'),
+            ])->update([
+                'thumbnail_img'=>  $storedPath,
+                'img_url'=>  Storage::disk('s3')->url($storedPath)
+            ]);
+        }
+
+
+        return $this->returnResponse('Product image updated'," ");
+    }
+
+    public function removeVariantImage(Request $request){
+        ProductImage::destroy($request->input('id'));
+        return $this->returnResponse("Product variant removed","");
+    }
+
+
+    /*** Product Variants Price **/
+    public function addVariantPrice(Request $request){
+        ProductVariantPrice::where([
+            'zone_id' => $request->input('zone_id'),
+            'product_variant_id' => $request->input('product_variant_id'),
+        ])->delete();
+
+        $variantPrice = ProductVariantPrice::create([
+            'zone_id' => $request->input('zone_id'),
+            'product_variant_id' => $request->input('product_variant_id'),
+            'amount' => $request->input('amount')
+        ]);
+        return $this->returnResponse("Add Variant price",$variantPrice);
+    }
+
+    public function removeVariantPrice(Request $request){
+        $variantPrice = ProductVariantPrice::destroy($request->input('id'));
+        return $this->returnResponse("Product variant remove",$variantPrice);
+    }
 
 }
 

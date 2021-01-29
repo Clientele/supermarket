@@ -20,6 +20,7 @@ class CreateStockRequestProductsTable extends Migration
             $table->bigInteger('staff_id')->unsigned();
             $table->bigInteger('created_by')->unsigned();
             $table->integer('quantity')->default(0);
+            $table->integer('dispatched_quantity')->default(0);
 
             $table->boolean('rejected')->nullable()->default(false);
             $table->string('rejection_reason')->nullable();

@@ -13,8 +13,31 @@ class TruckedProduct extends Model{
 
 
     protected $fillable = [
+        'original_depot_id',
+        'product_id',
+        'product_variant_id',
+        'staff_id',
 
+        'received_quantity',
+        'remaining_quantity',
+        'created_by',
+        'deleted_by'
     ];
+
+
+    public function staff(){
+        return $this->belongsTo('App\Models\Staff', 'staff_id' );
+    }
+
+    public function product(){
+        return $this->belongsTo('App\Models\Product', 'product_id' );
+    }
+
+    public function variant(){
+        return $this->belongsTo('App\Models\ProductVariant', 'product_variant_id' );
+    }
+
+
 }
 
 

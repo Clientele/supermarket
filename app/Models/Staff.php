@@ -28,6 +28,12 @@ class Staff extends Model{
         return $this->hasMany('App\Models\Vehicle', 'assigned_staff_id' );
     }
 
+    public function trucked_products(){
+        return $this->hasMany('App\Models\TruckedProduct', 'staff_id' );
+    }
+
+
+
 
 }
 

@@ -25,6 +25,15 @@ class DepotProduct extends Model
         'created_by',
         'deleted_by'
     ];
+
+
+    public function product(){
+        return $this->belongsTo('App\Models\Product', 'product_id' );
+    }
+
+    public function variant(){
+        return $this->belongsTo('App\Models\ProductVariant', 'product_variant_id' );
+    }
 }
 
 
