@@ -22,3 +22,8 @@ Sales Module
 NB: 
   -->Loading
   -->Pagination
+  
+  
+  -->Category image
+  -->Reques products based on order
+  -->filter & search orders

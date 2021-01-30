@@ -41,6 +41,7 @@ Route::prefix('v1/products')->group(function () {
      Route::get('inventory/stock/mobile/staff', 'Products\MobileInventoryController@getStaffStock');
 
     /*** STOCK REQUESTS  ***/
+     Route::get('inventory/stock/init/request', 'Products\StockRequestsController@getOrderedStockSummary');
      Route::post('inventory/stock/request', 'Products\StockRequestsController@requestStock');
      Route::get('inventory/stock/requests', 'Products\StockRequestsController@getStockRequests');
      Route::get('inventory/stock/request', 'Products\StockRequestsController@getStockRequestDetails');

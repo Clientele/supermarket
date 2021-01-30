@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Products;
 use App\Http\Controllers\GoodBaseController;
 use App\Models\Depot;
 use App\Models\DepotProduct;
+use App\Models\OrderProduct;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\StockRequest;
@@ -23,6 +24,22 @@ class StockRequestsController extends GoodBaseController
 
     }
 
+    public function getOrderedStockSummary(Request $request){
+
+        #TODO: check permissions
+        $staffId = Auth::user()->staff_id;
+        if(!$staffId){
+            return $this->returnError('You do not have permission to request products', [""], 403);
+        }
+
+        $orderedProducts = OrderProduct::whereHas('order', function ($query) use($staffId) {
+            $query->where('sales_person_id', $staffId);
+        })->with(['product','variant'])->get();
+
+        $responseData['ordered_products'] = $orderedProducts;
+        return $this->returnResponse('Stock Requested', $responseData);
+
+    }
 
     public function requestStock(Request $request)
     {

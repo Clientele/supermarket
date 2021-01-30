@@ -1,14 +1,20 @@
 <template>
   <div id="data-list-list-view" class="data-list-container">
 
-    <div class="flex flex-wrap-reverse items-center flex-grow justify-between mb-6">
 
-      <div class="flex flex-wrap-reverse items-center data-list-btn-container">
+    <div class="flex flex-wrap-reverse items-center data-list-btn-container mb-6">
 
         <vs-icon class="mr-2" icon="shopping_cart" size="large" color="primary"></vs-icon>
-        <h1 class="mr-6">
-          Orders
-        </h1>
+       <div class="flex-grow">
+         <div class="flex"><h1 class="mr-6">
+           Orders
+         </h1>
+           <vs-button type="border" icon="refresh"  @click="fetchOrders" class="mr-4 ">Refresh </vs-button> </div>
+       </div>
+
+        <!-- Mine -->
+        <v-select v-model="orderSource" class="mr-6" :clearable="false" :reduce="item => item.value"
+                  :options="creatorOptions" label="text"/>
 
         <!-- Filter By Region -->
         <v-select v-model="selectedOrderRegionId" class="mr-6" :clearable="false" :reduce="item => item.id"
@@ -21,11 +27,28 @@
 
       </div>
 
-    </div>
 
     <!-- orders table-->
-    <vs-card>
-      <vs-table ref="table"  @selected="showOrderDetails" v-model="selectedOrder" pagination :max-items="100" search :data="orders">
+    <vs-card class="px-6">
+
+      <!--filters -->
+      <div class="flex flex-wrap py-12 ">
+        <ul class="centerx flex">
+          <li>
+            <vs-checkbox v-model="checkBox1">Approved</vs-checkbox>
+          </li>
+          <li>
+            <vs-checkbox v-model="checkBox2">Delivered</vs-checkbox>
+          </li>
+          <li>
+            <vs-checkbox v-model="checkBox3">Cancelled</vs-checkbox>
+          </li>
+
+        </ul>
+      </div>
+      <!--[end]  filters -->
+
+      <vs-table ref="table"  @selected="showOrderDetails" v-model="selectedOrder" pagination :max-items="100"   :data="orders">
 
         <template slot="thead">
           <vs-th >#</vs-th>
@@ -408,7 +431,20 @@ export default {
       selectedStaff: {},
 
       cancellationReason: '',
-      cancellationForm: false
+      cancellationForm: false,
+
+      /*** filtering **/
+      checkBox1 : false,
+      checkBox2 : false,
+      checkBox3 : false,
+      checkBox4 : false,
+
+      orderSource: { text:'All Sources', value: 0 },
+      creatorOptions: [
+        { text:'All Sources', value: 0 },
+        { text:'My Orders', value: 1 },
+        { text:'From Customers', value: 2 },
+        { text:'From Sales People', value: 3 }]
 
     }
   },
@@ -484,16 +520,17 @@ export default {
   methods: {
 
     fetchOrders() {
+      this.$vs.loading({ color: 'secondary' })
       console.log(JSON.stringify(this.selectedOrderRegionId));
 
       this.rawCustomers = [];
-      this.$vs.loading({background: this.backgroundLoading, container: "#customerLoading", scale: 0.45})
-      console.info("fetching customers..");
+       console.info("fetching customers..");
       axios.get('/resources/sales/orders?region_id=' + this.selectedOrderRegionId)
         .then((response) => {
+          this.$vs.loading.close();
           this.orders = response.data.payload.orders.data;
-          this.$vs.loading.close("#customerLoading > .con-vs-loading")
-        }).catch((error) => {
+         }).catch((error) => {
+        this.$vs.loading.close();
         console.log(error);
         this.handleApiError(error);
       })
@@ -738,6 +775,7 @@ export default {
     },
 
 
+
     /** Helpers **/
     handleApiError(error) {
       this.$vs.notify({
@@ -764,6 +802,7 @@ export default {
   created() {
     this.fetchProducts();
     this.fetchStaff();
+    this.fetchRegions();
   },
   mounted() {
     this.fetchOrders();

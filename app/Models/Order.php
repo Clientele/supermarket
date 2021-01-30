@@ -27,11 +27,13 @@ class Order extends Model
         'is_full_paid',
         'paid_amount',
 
+        'channel',
         'delivery_zone_id',
         'delivery_region_d',
         'delivery_district_id',
         'delivery_place_id',
         'order_created_by',
+
         'created_by',
         'deleted_by'
 

@@ -106,7 +106,6 @@
             <!-- Variant description & prices-->
             <div class="vx-col md:w-1/3 w-1/4 px-12" v-if="productVariantInstance" >
 
-
               <!-- Variant Prices -->
               <div class="mt-12">
                 <vs-divider></vs-divider>
