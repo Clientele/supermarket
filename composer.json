@@ -17,7 +17,8 @@
         "laravel/tinker": "^2.5",
         "league/flysystem-aws-s3-v3": "^1.0",
         "spatie/laravel-permission": "^3.18",
-        "spatie/laravel-searchable": "^1.9"
+        "spatie/laravel-searchable": "^1.9",
+      "ext-json": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

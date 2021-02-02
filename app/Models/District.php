@@ -34,6 +34,10 @@ class District extends Model  implements Searchable
     }
 
 
+    public function zone(){
+        return $this->belongsTo('App\Models\Zone', 'zone_id' );
+    }
+
     public function country(){
         return $this->belongsTo('App\Models\Country', 'country_id' );
     }

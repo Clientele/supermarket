@@ -30,18 +30,23 @@ class User extends Authenticatable
         'otp_expires_at',
         'last_seen_at',
 
+        'customer_id',
         'staff_id',
         'vendor_id'
     ];
 
     protected $hidden = [
         'password',
+        'otp',
         'remember_token',
     ];
 
-
     public function staff(){
         return $this->belongsTo('App\Models\Staff','staff_id');
+    }
+
+    public function customer(){
+        return $this->belongsTo('App\Models\Customer','customer_id');
     }
 
  }

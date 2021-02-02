@@ -89,11 +89,60 @@
         <!-- Content Row -->
         <div class="vx-row">
 
+          <!-- Cart contents -->
+          <div class="vx-col md:w-1/3 w-1/4">
+            <h3>Products To Request</h3>
+            <div class="category-itemm" v-for="(cartProduct, index) in orderedProductsGrouped" :key="index">
+              <vs-card class="my-6">
+                <div class="flex flex-wrap">
+                  <table  class="cartProductTable mt-1 flex-grow">
+                    <tr >
+                      <td>Product </td>
+                      <td>{{ cartProduct.product.product_name }}, {{ cartProduct.variant.variant_name }}</td>
+                      <td >
+                        <vs-button type="flat" color="danger" @click="removeFromCart(index)" class="px-2 py-1"  >
+                          Remove
+                        </vs-button>
+                      </td>
+                    </tr>
+
+                    <tr style="background-color: #f2f2f2;" >
+                      <td>Quantity:</td>
+                      <td>{{ cartProduct.quantity }}</td>
+                      <td></td>
+                    </tr>
+
+                    <tr >
+                      <td>Number of Orders:</td>
+                      <td>{{ cartProduct.ordered_products.length }}
+                        <vs-button v-if="cartProduct.ordered_products.length>0"
+                          class="px-2 py-1" type="flat" color="secondary"
+                          @click="showOrdersForProduct(cartProduct)"   >
+                           Show Orders
+                        </vs-button>
+                      </td>
+                    </tr>
+
+                  </table>
+
+                </div>
+              </vs-card>
+            </div>
+
+            <div v-if="orderedProductsGrouped.length>0">
+              <vs-button ref="saveButton" @click="submitRequest()" color="success" class="mr-4 mb-4">
+                Submit Request
+              </vs-button>
+            </div>
+          </div>
+          <!-- [end] Cart contents -->
+
+
           <!--product picker -->
           <div class="vx-col md:w-1/3 w-1/4">
 
             <div class="mx-6 px-6">
-              <h3>Pick Product</h3>
+              <h3>Add Product</h3>
               <!-- Product -->
               <div class="mt-4 mb-5">
                 <label class="vs-input--label">Product</label>
@@ -132,43 +181,32 @@
           </div>
           <!-- [end] product picker -->
 
-          <!-- Cart contents -->
-          <div class="vx-col md:w-1/3 w-1/4">
-            <h3>Selected products</h3>
-            <div class="category-itemm" v-for="(cartProduct, index) in cartProducts" :key="index">
-              <vs-card class="my-6">
-                <div class="flex flex-wrap">
-                  <p class="mt-1 flex-grow">
-                    {{ cartProduct.product.product_name }}
-                    {{ cartProduct.productVariant.variant_name }},
-                    QTY: {{ cartProduct.quantity }}
-                  </p>
-                  <vs-button type="border" color="danger" @click="removeFromCart(index)"
-                             radius icon="close" size="small"></vs-button>
-                </div>
-              </vs-card>
-            </div>
-
-            <div v-if="cartProducts.length>0">
-              <vs-button ref="saveButton" @click="submitRequest()" color="success" class="mr-4 mb-4">
-                Submit Request
-              </vs-button>
-            </div>
-          </div>
-          <!-- [end] Cart contents -->
 
         </div>
 
-        <div class="vx-row mt-12">
-          <div class="vx-col w-full">
-            <div class="flex items-start flex-col sm:flex-row">
-              <!-- <vs-avatar :src="data.avatar" size="80px" class="mr-4" /> -->
 
-            </div>
-          </div>
-        </div>
 
       </div>
+
+      <!-- Orders -->
+      <vs-popup @close="ordersDialog=false" title="Orders" :active.sync="ordersDialog">
+
+        <div>
+          <vs-card v-for="(order, index) in orderedProductVariant.ordered_products" :key="index">
+            <table  class="cartProductTable mt-1 flex-grow">
+              <tr >
+                <td>Customer </td>
+                <td>{{ order.order.customer.customer_name }}, {{ order.order.customer.phone_number_1 }}</td>
+              </tr>
+              <tr >
+                <td>Ordered Quantity </td>
+                <td>{{ order.ordered_quantity}}</td>
+              </tr>
+            </table>
+          </vs-card>
+        </div>
+
+      </vs-popup>
     </vs-popup>
     <!-- [end] Order Form -->
 
@@ -180,9 +218,11 @@
 import axios from "@/axios";
 import vSelect from 'vue-select';
 import {handle} from "@/http/handler";
+import Table from "@/views/ui-elements/table/Table";
 
 export default {
   components: {
+    Table,
     vSelect},
   data() {
     return {
@@ -219,11 +259,14 @@ export default {
       selectedRequest: {},
 
       /**Requesting **/
+      orderedProductsGrouped: [],
+      orderedProductVariant: {},
       orderFormDialog: false,
       cartProducts: [],
       quantity: 1,
       selectedOrderProduct: null,
       selectedOrderProductVariant: null,
+      ordersDialog: false,
 
       products: [],
       productVariants: []
@@ -237,12 +280,15 @@ export default {
     /*** stockRequests **/
     fetchStockRequests() {
       this.stockRequests = [];
+      this.$vs.loading({ color: 'secondary' })
       let endpoint = '/products/inventory/stock/requests?depot_id=';
       axios.get(endpoint)
         .then((response) => {
+          this.$vs.loading.close();
           this.stockRequests = response.data.payload.requests.data;
         }).catch((error) => {
-        console.log(error)
+        this.$vs.loading.close();
+        this.handleApiError(error)
       })
     },
 
@@ -260,34 +306,58 @@ export default {
     /*** Requesting **/
     showRequestForm( ) {
       this.orderFormDialog = true;
-     },
+      this.getOrderedProductsGrouped();
+    },
+
+    getOrderedProductsGrouped(){
+      this.orderedProductsGrouped = [];
+      this.$vs.loading({ color: 'secondary' })
+      let endpoint = '/products/inventory/stock/init/request';
+      axios.get(endpoint)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.orderedProductsGrouped = response.data.payload.ordered_variants;
+
+        }).catch((error) => {
+        this.$vs.loading.close();
+        this.handleApiError(error)
+      })
+    },
+
     closeRequestForm() {
       this.orderFormDialog = false;
     },
+
     addProductToCart() {
       let cartProduct = {
         product: this.selectedOrderProduct,
-        productVariant: this.selectedOrderProductVariant,
-        quantity: this.quantity
+        variant: this.selectedOrderProductVariant,
+        quantity: this.quantity,
+        ordered_products: [],
+        ordered_products_ids: [],
       };
 
       this.selectedOrderProduct = null;
       this.selectedOrderProductVariant = null;
       this.quantity = 1;
 
-      this.cartProducts.push(cartProduct)
+      this.$vs.notify({title: 'Success', text: "Added to list", color: 'success'})
+      this.orderedProductsGrouped.push(cartProduct)
     },
 
     removeFromCart(index) {
       console.log(index)
-      delete this.cartProducts.splice(index, 1);
+      delete this.orderedProductsGrouped.splice(index, 1);
+      this.$vs.notify({title: 'Success', text: "Removed", color: 'success'})
+
     },
 
     submitRequest() {
 
-      let variants = this.cartProducts.map(function (cartItem) {
+      let variants = this.orderedProductsGrouped.map(function (cartItem) {
         return {
-          variant_id: cartItem.productVariant.id,
+          ordered_products_ids: cartItem.ordered_products_ids,
+          variant_id: cartItem.variant.id,
           quantity: cartItem.quantity
         }
       });
@@ -307,6 +377,11 @@ export default {
         console.log(error);
         this.handleApiError(error);
       })
+    },
+
+    showOrdersForProduct(orderedProd){
+      this.orderedProductVariant = orderedProd;
+      this.ordersDialog =true;
     },
 
 
@@ -389,18 +464,20 @@ export default {
         .then((response) => {
           this.products = response.data.payload.products.data;
         }).catch((error) => {
-        console.log(error)
+        this.handleApiError(error);
       })
     },
 
     fetchProductVariants() {
+      this.$vs.loading({ color: 'secondary' })
       this.productVariants = [];
       this.selectedOrderProductVariant = null;
       axios.get('/resources/product/variants?product_id=' + this.selectedOrderProduct.id)
         .then((response) => {
+          this.$vs.loading.close();
           this.productVariants = response.data.payload.product_variants;
         }).catch((error) => {
-        console.log(error);
+        this.$vs.loading.close();
         this.handleApiError(error);
       })
     },
@@ -442,6 +519,12 @@ export default {
 </script>
 
 <style scoped>
+
+.cartProductTable td  {
+  padding: 8px;
+  font-size: 1.2em !important;
+}
+
 .category-item {
   padding: 8px 8px;
   margin-top: 12px;

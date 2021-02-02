@@ -18,7 +18,7 @@ class CreateOrdersTable extends Migration
             $table->bigInteger('customer_id')->unsigned()->nullable();
             $table->bigInteger('sales_person_id')->unsigned()->nullable();
 
-            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->bigInteger('is_approved')->unsigned()->nullable();
             $table->bigInteger('delivered_by')->unsigned()->nullable();
             $table->boolean('is_delivered')->nullable();
             $table->bigInteger('is_cancelled') ->nullable();
@@ -26,17 +26,21 @@ class CreateOrdersTable extends Migration
             $table->bigInteger('cancelled_at') ->nullable();
             $table->string('order_status') ->nullable();
 
+            $table->double('order_value',15,0)->nullable();
+            $table->double('total_discount',15,0)->nullable();
             $table->double('amount_due',15,0)->nullable();
             $table->boolean('is_full_paid')->default(false)->nullable();
             $table->double('paid_amount',15,0)->nullable();
 
+            $table->integer('order_channel')->nullable();
             $table->bigInteger('delivery_zone_id')->unsigned()->nullable();
-            $table->bigInteger('delivery_region_d')->unsigned()->nullable();
+            $table->bigInteger('delivery_region_id')->unsigned()->nullable();
             $table->bigInteger('delivery_district_id')->unsigned()->nullable();
             $table->bigInteger('delivery_place_id')->unsigned()->nullable();
 
 
-            $table->bigInteger('order_created_by')->unsigned()->nullable();
+            $table->bigInteger('approve_by')->unsigned()->nullable();
+            $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
             $table->softDeletes();
             $table->timestamps();

@@ -17,23 +17,27 @@ class Order extends Model
         'sales_person_id',
         'delivered_by',
 
+        'is_approved',
         'is_delivered',
         'is_cancelled',
         'cancellation_reason',
         'cancelled_at',
         'order_status',
 
+        'order_value',
+        'total_discount',
         'amount_due',
         'is_full_paid',
         'paid_amount',
 
-        'channel',
+        'order_channel',
         'delivery_zone_id',
         'delivery_region_d',
         'delivery_district_id',
         'delivery_place_id',
         'order_created_by',
 
+        'approve_by',
         'created_by',
         'deleted_by'
 

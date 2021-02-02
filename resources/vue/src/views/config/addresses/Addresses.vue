@@ -1,7 +1,3 @@
-<!-- =========================================================================================
-    File Name: TableStriped.vue
-    Description: Rendering default table with striped style
-========================================================================================== -->
 
 
 <template>
@@ -65,16 +61,16 @@
       </vs-table>
     </div>
 
-      <!-- Region Form -->
-      <vs-prompt :title="`Region Name`" :accept-text="`Save`" :cancel-text="`Cancel`"
-                 @cancel="regionInstance={}" color="secondary"
-                 @accept="saveRegion()"
-                 :active.sync="regionFormDialog">
-        <div  >
-          <vs-input placeholder="Region Name"  v-model="regionInstance.region_name" class="mt-3 w-full"/>
-        </div>
-      </vs-prompt>
-      <!-- [end] Region Form -->
+    <!-- Region Form -->
+    <vs-prompt :title="`Region Name`" :accept-text="`Save`" :cancel-text="`Cancel`"
+               @cancel="regionInstance={}" color="secondary"
+               @accept="saveRegion()"
+               :active.sync="regionFormDialog">
+      <div  >
+        <vs-input placeholder="Region Name"  v-model="regionInstance.region_name" class="mt-3 w-full"/>
+      </div>
+    </vs-prompt>
+    <!-- [end] Region Form -->
     <!--[end]  Regions -->
 
 
@@ -94,14 +90,20 @@
 
           <template slot="thead">
             <vs-th>District Name</vs-th>
+            <vs-th>Sales Zone</vs-th>
             <vs-th>Added</vs-th>
             <vs-th>Action</vs-th>
           </template>
 
           <template slot-scope="{data}">
-            <vs-tr :key="rowIndex" v-for="(region, rowIndex) in data">
+            <vs-tr :key="rowIndex" v-for="(district, rowIndex) in data">
               <vs-td :data="data[rowIndex].district_name">
                 {{data[rowIndex].district_name}}
+              </vs-td>
+              <vs-td>
+                <span v-bind:class="district.zone? 'green--text' : 'red--text'">
+                  {{ district.zone? district.zone.zone_name : "No Zone" }}
+                </span>
               </vs-td>
               <vs-td :data="data[rowIndex].created_at">
                 {{data[rowIndex].created_at}}
@@ -117,16 +119,26 @@
       </div>
     </vs-popup>
 
-      <!-- District Form -->
-      <vs-prompt :title="`District`" :accept-text="`Save`" :cancel-text="`Cancel`"
-                 @cancel="districtInstance={}" color="secondary"
-                 @accept="saveDistrict()"
-                 :active.sync="districtsFormVisible">
-        <div  >
-          <vs-input placeholder="District Name"  v-model="districtInstance.district_name" class="mt-3 w-full"/>
-        </div>
-      </vs-prompt>
-      <!-- [end] District Form -->
+    <!-- District Form -->
+    <vs-prompt :title="`District`" :accept-text="`Save`" :cancel-text="`Cancel`"
+               @cancel="districtInstance={}" color="secondary"
+               @accept="saveDistrict()"
+               :active.sync="districtsFormVisible">
+      <div>
+        <span>District Name</span>
+        <vs-input placeholder=""  v-model="districtInstance.district_name" class="mt-3 w-full"/>
+      </div>
+
+      <div class="my-6">
+        <span>Sales Zone </span>
+        <v-select class="mt-2" v-model="districtInstance.zone" :clearable="false"
+                  label="zone_name"   :options="salesZones" v-validate="'required'" name="unit"
+                  placeholder="Select">
+        </v-select>
+      </div>
+
+    </vs-prompt>
+    <!-- [end] District Form -->
     <!-- [end] Districts -->
 
 
@@ -181,9 +193,18 @@
 </template>
 
 <script>
+import vSelect from 'vue-select'
 import axios from "@/axios";
+import Table from "@/views/ui-elements/table/Table";
+import ProductDetails from "@/views/products/products/ProductDetails";
 
 export default {
+  components: {
+    Table,
+    vSelect,
+    ProductDetails
+  },
+
   data () {
     return {
       regions: [],
@@ -192,7 +213,7 @@ export default {
 
       districtsVisible: false,
       districtsFormVisible: false,
-      districtInstance : {id: null,  district_name : null, region_id : null},
+      districtInstance : {id: null,  district_name : null, region_id : null, zone_id: null, zone: null},
       districts : [
         {
           'id': 1,
@@ -206,6 +227,7 @@ export default {
       placeInstance: {id: null,  place_name : null, district_id : null},
       places : [],
 
+      /*** Resources **/
       countries: [
         { "name": "Tanzania" },
         { "name": "Kenya" },
@@ -213,7 +235,8 @@ export default {
         { "name": "Rwanda" },
         { "name": "Burundi" },
         { "name": "Congo" }
-      ]
+      ],
+      salesZones: []
 
     }
   },
@@ -290,7 +313,8 @@ export default {
     },
 
     saveDistrict(){
-      this.districtInstance.region_id = this.regionInstance.id;
+       this.districtInstance.region_id = this.regionInstance.id;
+       this.districtInstance.zone_id = this.districtInstance.zone.id;
       axios.post('/config/addresses/district/add', this.districtInstance)
         .then((response) => {
           this.districtsFormVisible = false;
@@ -396,12 +420,33 @@ export default {
     /*** Search**/
     searchLocation(){
 
-    }
+    },
+
+    /**Resources **/
+    fetchSalesZones() {
+      axios.get('/resources/addresses/zones').then((response) => {
+        this.salesZones = response.data.payload.zones;
+      }).catch((error) => {
+        console.log(error)
+      })
+    },
+    /** [end] Resources **/
 
 
   },
   created() {
     this.fetchRegions();
+    this.fetchSalesZones();
   }
 }
 </script>
+
+<style>
+.red--text{
+  color: #e60000;
+}
+
+.green--text{
+  color: #1b9a59;
+}
+</style>

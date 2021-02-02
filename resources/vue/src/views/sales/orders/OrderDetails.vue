@@ -10,8 +10,12 @@
         </h1>
       </div>
 
-      <vs-button v-if="!(selectedOrder.is_cancelled)"   @click="confirmOrderCancellation()" color="warning"> Cancel Order</vs-button>
-      <vs-chip v-else color="danger" >Order Cancelled </vs-chip>
+      <vs-button v-if="!(selectedOrder.is_approved) && !(selectedOrder.is_cancelled)"   @click="confirmOrderApproval()" color="secondary"> APPROVE ORDER</vs-button>
+      <vs-chip v-if="selectedOrder.is_approved" style="font-size: 1em" v-else color="success" >
+        <vs-icon class="mr-2" >check</vs-icon>
+        Order Approved </vs-chip>
+      <vs-chip v-if="selectedOrder.is_cancelled" style="font-size: 1em" v-else color="danger" >
+        Order Cancelled </vs-chip>
     </div>
 
     <vs-card >
@@ -114,7 +118,8 @@
                       <li>Quantity {{ orderProduct.ordered_quantity }}</li>
                       <li>Delivered: {{ orderProduct.delivered_quantity }}</li>
                       <li>@TSH{{ orderProduct.selling_price }}</li>
-                      <li v-if="!(selectedOrder.is_cancelled) && !(orderProduct.is_rejected) && !(orderProduct.delivered_quantity >= orderProduct.ordered_quantity)">
+                      <li v-if="!(selectedOrder.is_cancelled) &&  !(orderProduct.is_rejected)
+                       && !(selectedOrder.is_approved)  && !(orderProduct.delivered_quantity >= orderProduct.ordered_quantity)">
                         <vs-button @click="confirmOrderItemRejection(orderProduct)" class="mt-4 py-1 px-2" type="border">Reject Item</vs-button>
                       </li>
                     </ul>
@@ -129,7 +134,12 @@
       </div>
     </vs-card>
 
-    <!-- Delivery Form -->
+    <!-- Order cancellation -->
+    <div class="my-12 pb-12">
+      <vs-button type="border" v-if="!(selectedOrder.is_cancelled)"   @click="confirmOrderCancellation()" color="warning"> CANCEL ORDER</vs-button>
+      <vs-chip v-else color="danger" >Order Cancelled </vs-chip>
+    </div>
+    <!-- Order cancellation -->
 
     <!-- Dispatch Form -->
     <vs-prompt :title="`Delivery`" :accept-text="`Delivery`" :cancel-text="`Cancel`"
@@ -320,12 +330,14 @@ export default {
   methods: {
 
     fetchOrderDetails() {
+      this.$vs.loading({ color: 'secondary' })
       console.info("fetching details..");
       axios.get('/resources/sales/order?id=' + this.passedOrder.id)
         .then((response) => {
+          this.$vs.loading.close();
           this.selectedOrder = response.data.payload.order;
         }).catch((error) => {
-        console.log(error);
+        this.$vs.loading.close();
         this.handleApiError(error);
       })
     },
@@ -350,6 +362,7 @@ export default {
     },
 
     deliverProduct(){
+      this.$vs.loading({ color: 'secondary' })
       axios.post('/sales/order/delivery/deliver',
         {
           order_product_id: this.selectedOrderedProduct.id,
@@ -357,13 +370,14 @@ export default {
           quantity: this.quantityToDeliver,
         })
         .then((response) => {
+          this.$vs.loading.close();
           this.selectedTruckedProduct = null;
           this.selectedOrderedProduct = null;
           this.quantity = null;
           this.happilyNotify("Product delivered");
           this.fetchOrderDetails();
         }).catch((error) => {
-        console.log(error);
+        this.$vs.loading.close();
         this.handleApiError(error);
       })
     },
@@ -373,7 +387,6 @@ export default {
       axios.post('/sales/order/staff', {id: this.selectedOrder.id, staff_id: this.selectedStaff.id})
         .then((response) => {
           if (response.data.success) {
-            this.customers = response.data.payload.customers;
             this.happilyNotify("Updated");
             this.fetchOrderDetails();
           }
@@ -382,6 +395,33 @@ export default {
         this.handleApiError(error);
       })
     },
+
+    /*** Approval **/
+    confirmOrderApproval() {
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'success',
+        title: `Confirm`,
+        text: 'Are you sure you want to approve this order',
+        accept: this.approveOrder
+      })
+    },
+
+    approveOrder() {
+      this.$vs.loading({ color: 'secondary' })
+      axios.post('/sales/order/approve', {
+        id: this.selectedOrder.id
+      })
+        .then((response) => {
+           this.$vs.loading.close();
+           this.happilyNotify("Order Approved");
+            this.fetchOrderDetails();
+        }).catch((error) => {
+        this.$vs.loading.close();
+        this.handleApiError(error);
+      })
+    },
+
 
     /*** Cancellation **/
     promptCancellation(){
@@ -406,7 +446,6 @@ export default {
       })
         .then((response) => {
           if (response.data.success) {
-            this.customers = response.data.payload.customers;
             this.happilyNotify("Updated");
             this.fetchOrderDetails();
           }
@@ -427,7 +466,6 @@ export default {
       })
     },
 
-
     rejectOrderItem() {
       axios.post('/sales/order/item/reject', {
         id: this.selectedOrderProduct.id
@@ -442,6 +480,7 @@ export default {
         this.handleApiError(error);
       })
     },
+    /*** [end] Cancellation **/
 
 
     /*** Resources **/

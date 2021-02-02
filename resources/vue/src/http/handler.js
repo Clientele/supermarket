@@ -4,7 +4,7 @@ function parseError(statusCode) {
   switch (statusCode) {
     case 400:
     {
-      return "Server could not understand the request";
+      return "Server could not process the request";
     }break;
 
     case 401:
@@ -19,7 +19,7 @@ function parseError(statusCode) {
 
     case 403:
     {
-      return "Resource is forbbidden";
+      return "Resource is forbidden";
     }
       break;
     case 404:

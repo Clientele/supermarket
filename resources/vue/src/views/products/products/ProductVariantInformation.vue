@@ -1,22 +1,29 @@
 <template>
-  <div id="page-user-view">
 
-    <div>
+    <div >
       <div class="flex flex-wrap">
 
         <div style="max-width: 32px" class="mr-2">
-          <img :src="productVariantInstance?productVariantInstance.img_url:''"
+          <img :src="productVariantInstance ? productVariantInstance.img_url:productVariantInstance.thumbnail_img "
                alt="content-img" class="responsive card-img-top">
         </div>
         <div class="flex-grow">
-          <h3 class="mt-2">Product Variant Information</h3>
+          <h3 class="mt-2">Product Variant Information : {{ productVariantInstance?productVariantInstance.variant_name :''  }} </h3>
         </div>
+
+        <vs-button v-if="!(productVariantInstance.is_published)" round @click="publishVariant(true)" color="secondary">
+          Publish
+        </vs-button>
+
+        <vs-button v-else round @click="publishVariant(false)" color="danger">
+          Unpublish
+        </vs-button>
 
       </div>
 
       <vs-divider></vs-divider>
 
-      <div class="mt-5">
+      <div class="mt-5" style="min-height: 90vh !important;">
          <vs-tabs alignment="fixed">
 
            <!-- Primary information -->
@@ -53,16 +60,6 @@
               {{ errors.first('quantity') }}
             </span>
 
-               <!-- Measurement Unit -->
-               <div style="height: 12px"></div>
-               <span>Measurement Unit </span>
-               <v-select v-model="productVariantInstance.measuring_unit" :clearable="false"
-                         :options="measurementUnits" v-validate="'required'" name="unit"
-                         placeholder="Select">
-               </v-select>
-               <span class="text-danger text-sm" v-show="errors.has('unit')">
-              {{ errors.first('unit') }}
-            </span>
 
 
                <!-- Save buttons -->
@@ -83,8 +80,18 @@
              <div class="vx-col md:w-1/8"></div>
 
              <!-- Description -->
-             <div class="vx-col md:w-1/4  pl-12 pt-12">
-               <div class="flex flex-wrap">
+             <div class="vx-col md:w-1/4 mt-12 pl-12 pt-12">
+
+               <!-- Measurement Unit -->
+               <div style="height: 12px"></div>
+               <span>Measurement Unit </span>
+               <v-select v-model="productVariantInstance.measuring_unit" :clearable="false"
+                         :options="measurementUnits" v-validate="'required'" name="unit"
+                         placeholder="Select">
+               </v-select>
+               <span class="text-danger text-sm" v-show="errors.has('unit')"> {{ errors.first('unit') }} </span>
+
+               <div class="flex flex-wrap mt-6">
                  <div class="flex-grow">
                    <div style="height: 12px"></div>
                    <span>Variant description </span>
@@ -95,6 +102,8 @@
                    </div>
                  </div>
                </div>
+
+
              </div>
 
            </vs-row>
@@ -145,17 +154,28 @@
               </div>
               <!-- [end] Price form -->
 
+              <div   class="base-price flex flex-wrap justify-between"  >
+                <table>
+                  <tr>
+                    <td  >Base Price</td>
+                  </tr>
+                  <tr>
+                    <td  >TSH {{ productVariantInstance.base_price }}</td>
+                  </tr>
+                </table>
+              </div>
+
               <div v-if="!priceRemovalDialog" class="variant-price flex flex-wrap justify-between"
                    v-for="(variantPrice, index) in productVariantInstance.prices" :key="index">
                 <table>
-                  <tr>
-                    <td  >TSH {{ variantPrice.amount }}</td>
-                  </tr>
+
                   <tr>
                     <td class="mr-12">Sales Zone</td>
                     <td>{{ variantPrice.zone ? variantPrice.zone.zone_name : '' }}</td>
                   </tr>
-
+                  <tr>
+                    <td  >TSH {{ variantPrice.amount }}</td>
+                  </tr>
                   <tr>
                     <td  class="mr-12">Created</td>
                     <td>{{ variantPrice.created_at }}</td>
@@ -171,14 +191,14 @@
 
               <div v-if="priceRemovalDialog" class="variant-price flex flex-wrap justify-between" >
                 <table v-if="priceInstance">
-                  <tr>
-                    <td  >TSH {{ priceInstance.amount }}</td>
-                  </tr>
+
                   <tr>
                     <td class="mr-12">Sales Zone</td>
                     <td>{{ priceInstance.zone ? priceInstance.zone.zone_name : '' }}</td>
                   </tr>
-
+                  <tr>
+                    <td  >TSH {{ priceInstance.amount }}</td>
+                  </tr>
                   <tr>
                     <td  class="mr-12">Created</td>
                     <td>{{ priceInstance.created_at }}</td>
@@ -212,7 +232,7 @@
 
                 <div class="my-6">
                   <label class="btn btn-default">
-                    <input type="file" ref="variant_image" @change="selectVariantFile"/>
+                    <input style="font-size: 1.2em;" type="file" ref="variant_image" @change="selectVariantFile"/>
                   </label>
                 </div>
 
@@ -271,13 +291,9 @@
         </vs-tabs>
       </div>
 
-
-
-
     </div>
 
-  </div>
-</template>
+ </template>
 
 <script>
 
@@ -334,10 +350,12 @@ export default {
     }
   },
   watch: {
-    productVariant: function (variant) {
+    productVariant: function (newVariant) {
       // this.productVariantInstance = _.cloneDeep(variant);
-      if(variant.id!=null){
+      if(newVariant.id!=null){
         this.fetchVariantDetails();
+      }else{
+        this.productVariantInstance = {variant_name: '', base_price: '', restocking_quantity: '', measuring_unit: ''};
       }
     }
   },
@@ -360,12 +378,14 @@ export default {
       axios.get('/resources/product/variant/details?id=' + this.productVariant.id)
         .then((response) => {
           this.productVariantInstance = response.data.payload.variant;
+          if(this.productVariantInstance == null){
+            this.productVariantInstance = { variant_name: '', base_price: '', restocking_quantity: '', measuring_unit: ''}
+          }
         }).catch((error) => {
           this.handleApiError(error)
           console.log(error)
       })
     },
-
 
     closeProductVariants() {
       this.$emit('closeProductVariants');
@@ -487,6 +507,7 @@ export default {
     },
     /** [end] Variant image **/
 
+
     /** Variant price **/
     showPriceForm(){
       this.variantPriceForm = true;
@@ -540,6 +561,28 @@ export default {
     /** [end] Variant price **/
 
 
+    /** publish Variant  **/
+    publishVariant(value){
+      this.$vs.loading({ color: this.colorLoading });
+
+      axios.post( '/config/product/variant/publish/toggle',{
+        id : this.productVariantInstance.id,
+        is_published :value
+      }).then((response) => {
+        this.$vs.loading.close()
+        this.fetchVariantDetails();
+        this.happilyNotify("Product Updated")
+
+      }).catch((error) => {
+        this.$vs.loading.close()
+        this.variantPriceForm = false;
+        this.handleApiError(error);
+        console.log(error)
+      });
+    },
+    /**[end] publish Variant  **/
+
+
     /**  Resources **/
     fetchSalesZones() {
       axios.get('/resources/addresses/zones').then((response) => {
@@ -576,10 +619,20 @@ export default {
     console.log(JSON.stringify(this.productVariant))
     this.productVariantInstance = _.cloneDeep(this.productVariant);
     this.fetchSalesZones();
+
+    if(this.productVariantInstance == null){
+      this.productVariantInstance = { variant_name: '', base_price: '', restocking_quantity: '', measuring_unit: ''}
+    }
    },
 
   mounted() {
-   this.fetchVariantDetails();
+    if(this.productVariant){
+      if(this.productVariant.id){
+        this.fetchVariantDetails();
+      }
+    }else{
+      console.log("No variant selected...");
+    }
    }
 
 }
@@ -606,6 +659,14 @@ export default {
   padding: 8px 16px;
   border: 1px solid #ffedc2;
   background-color: #fffaf0;
+  margin-bottom: 16px;
+}
+
+.base-price{
+  border-radius: 6px;
+  padding: 8px 16px;
+  border: 1px solid #9c53cd;
+  background-color: #f1e6f8;
   margin-bottom: 16px;
 }
 

@@ -20,7 +20,8 @@ class StockRequestProduct extends Model
           'quantity',
           'dispatched_quantity',
           'rejected',
-          'rejection_reason'
+          'rejection_reason',
+          'ordered_products_ids'
         ];
 
 

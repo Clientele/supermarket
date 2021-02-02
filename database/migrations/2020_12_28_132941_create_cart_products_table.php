@@ -20,6 +20,12 @@ class CreateCartProductsTable extends Migration
             $table->bigInteger('customer_id')->unsigned()->nullable();
             $table->integer('quantity')->default(0);
 
+            $table->bigInteger('delivery_country_id')->nullable();
+            $table->bigInteger('delivery_zone_id')->nullable();
+            $table->bigInteger('delivery_region_id')->nullable();
+            $table->bigInteger('delivery_district_id')->nullable();
+            $table->bigInteger('delivery_place_id')->nullable();
+
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
             $table->softDeletes();

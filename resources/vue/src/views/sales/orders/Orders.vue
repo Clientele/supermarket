@@ -13,11 +13,11 @@
        </div>
 
         <!-- Mine -->
-        <v-select v-model="orderSource" class="mr-6" :clearable="false" :reduce="item => item.value"
-                  :options="creatorOptions" label="text"/>
+        <v-select @input="fetchOrders" v-model="orderChannel" class="mr-6" :clearable="false"
+                  :options="orderChannelsOptions" label="text"/>
 
         <!-- Filter By Region -->
-        <v-select v-model="selectedOrderRegionId" class="mr-6" :clearable="false" :reduce="item => item.id"
+        <v-select @input="fetchOrders" v-model="selectedOrderRegionId" class="mr-6" :clearable="false" :reduce="item => item.id"
                   :options="availableRegions" label="region_name"/>
 
         <!-- Add Order Button -->
@@ -35,13 +35,10 @@
       <div class="flex flex-wrap py-12 ">
         <ul class="centerx flex">
           <li>
-            <vs-checkbox v-model="checkBox1">Approved</vs-checkbox>
+            <vs-checkbox @input="fetchOrders" v-model="isApproved">Approved</vs-checkbox>
           </li>
           <li>
-            <vs-checkbox v-model="checkBox2">Delivered</vs-checkbox>
-          </li>
-          <li>
-            <vs-checkbox v-model="checkBox3">Cancelled</vs-checkbox>
+            <vs-checkbox @input="fetchOrders" v-model="isCancelled">Cancelled</vs-checkbox>
           </li>
 
         </ul>
@@ -56,8 +53,8 @@
           <vs-th  >Address</vs-th>
           <vs-th  >Sales Person</vs-th>
           <vs-th  >Status</vs-th>
-          <vs-th>Action</vs-th>
-        </template>
+          <vs-th  >Date</vs-th>
+         </template>
 
         <template slot-scope="{data}">
           <tbody>
@@ -88,14 +85,13 @@
             </vs-td>
 
             <vs-td>
-              <span v-bind:class="item.is_cancelled? `text-danger` : `text-primary` "> {{ item.order_status }}</span>
+              <span v-bind:class="getStatusColor(item)"> {{ item.order_status }}</span>
             </vs-td>
 
-
-            <vs-td class="whitespace-no-wrap">
-              <vs-button color="secondary" class="mr-2" size="small" type="border"  >View
-              </vs-button>
+            <vs-td>
+               {{ item.created_at }}
             </vs-td>
+
 
 
           </vs-tr>
@@ -113,6 +109,8 @@
 
         <!-- Content Row -->
         <div class="vx-row">
+
+          <!--customer info -->
           <div class="vx-col md:w-1/3 w-1/4">
 
             <!--Customer -->
@@ -434,32 +432,40 @@ export default {
       cancellationForm: false,
 
       /*** filtering **/
-      checkBox1 : false,
-      checkBox2 : false,
-      checkBox3 : false,
-      checkBox4 : false,
-
-      orderSource: { text:'All Sources', value: 0 },
-      creatorOptions: [
+      isApproved : false,
+      isCancelled : false,
+      orderChannel: { text:'All Sources', value: 0 },
+      orderChannelsOptions: [
         { text:'All Sources', value: 0 },
         { text:'My Orders', value: 1 },
-        { text:'From Customers', value: 2 },
-        { text:'From Sales People', value: 3 }]
+        { text:'Customer App', value: 2 },
+        { text:'From Sales People', value: 3 },
+        { text:'Call Center', value: 4 }
+      ]
 
     }
   },
 
   watch: {
-    selectedOrderRegionId: function (val) {
-      this.fetchOrders();
-    },
+
     locationQuery(query) {
       this.searchLocations();
     },
     customerQuery(query) {
       this.searchCustomer();
     },
-
+    isApproved (newValue){
+      if(newValue===true){
+        this.isCancelled = false;
+      }
+      this.fetchOrders();
+    },
+    isCancelled(newValue){
+      if(newValue===true){
+        this.isApproved = false;
+      }
+      this.fetchOrders();
+    }
   },
 
   computed: {
@@ -524,8 +530,15 @@ export default {
       console.log(JSON.stringify(this.selectedOrderRegionId));
 
       this.rawCustomers = [];
-       console.info("fetching customers..");
-      axios.get('/resources/sales/orders?region_id=' + this.selectedOrderRegionId)
+       console.info("fetching orders..");
+       let endpoint = '/resources/sales/orders?region_id='
+        + this.selectedOrderRegionId
+        + `&order_channel=${this.orderChannel.value}`
+        + `&include_approved=${this.isApproved? "1" : "0"}`
+        + `&include_cancelled=${this.isCancelled? "1" : "0"}` ;
+
+       console.log("endpoint"+endpoint);
+       axios.get(endpoint)
         .then((response) => {
           this.$vs.loading.close();
           this.orders = response.data.payload.orders.data;
@@ -537,11 +550,14 @@ export default {
     },
 
     fetchOrderDetails() {
+      this.$vs.loading({ color: 'secondary' })
       console.info("fetching details..");
       axios.get('/resources/sales/order?id=' + this.selectedOrder.id)
         .then((response) => {
+          this.$vs.loading.close();
           this.selectedOrder = response.data.payload.order;
         }).catch((error) => {
+        this.$vs.loading.close();
         console.log(error);
         this.handleApiError(error);
       })
@@ -612,12 +628,17 @@ export default {
       };
       console.log(JSON.stringify(orderData))
 
+      this.$vs.loading({ color: 'secondary' })
       axios.post('/sales/order/add', orderData)
         .then((response) => {
+          this.$vs.loading.close();
           this.closeOrderForm();
           this.happilyNotify("Order Added");
+          this.selectedOrderCustomer = null; this.selectedOrderAddress = null;
+          this.cartProducts = []; this.customerQuery = null; this.locationQuery = null;
           this.fetchOrders();
         }).catch((error) => {
+        this.$vs.loading.close();
         console.log(error);
         this.handleApiError(error);
       })
@@ -718,7 +739,6 @@ export default {
     },
 
 
-
     /*** Customers **/
     searchCustomer() {
       console.log("Finding customer...");
@@ -775,7 +795,6 @@ export default {
     },
 
 
-
     /** Helpers **/
     handleApiError(error) {
       this.$vs.notify({
@@ -795,6 +814,16 @@ export default {
       this.$vs.notify({title: 'Error', text: message, color: 'danger', position: 'bottom-left'})
     },
 
+    getStatusColor(item){
+      if(item.is_cancelled){
+        return 'text-danger';
+      }else if(item.is_delivered){
+        return `text-success`;
+      }else if(item.is_approved){
+        return `text-secondary`;
+      }
+      return 'text-warning'
+    }
 
   },
 
@@ -812,8 +841,15 @@ export default {
 </script>
 
 
+
+
+
+
 <style lang="scss">
 
+.text-secondary{
+  color: #0d77e4 !important;
+}
 .vs-card--content {
   font-size: 1em !important;
 }

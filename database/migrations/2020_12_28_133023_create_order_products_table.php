@@ -35,6 +35,9 @@ class CreateOrderProductsTable extends Migration
 
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();
+
+            $table->string('ordered_products_ids')->default('[]');
+
             $table->softDeletes();
             $table->timestamps();
         });

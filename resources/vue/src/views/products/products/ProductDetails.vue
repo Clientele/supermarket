@@ -68,7 +68,7 @@
               <!-- [end] Variant Heading -->
 
               <!-- Variant List -->
-              <vs-table stripe v-model="productVariantInstance" :data="productsVariants" @selected="showVariantForm">
+              <vs-table stripe v-model="productVariantInstance" :data="productsVariants" @selected="showVariantDetails">
 
                 <template slot="thead">
                   <vs-th>Thumbnail </vs-th>
@@ -263,12 +263,18 @@ export default {
       this.$emit('closeProductVariants');
     },
 
+    showVariantDetails() {
+      this.productVariantFormVisible = true;
+    },
+
     showVariantForm() {
-       this.productVariantFormVisible = true;
+      this.productVariantInstance = {variant_name: '',  base_price: '', restocking_quantity: '', measuring_unit: ''} ;
+      this.productVariantFormVisible = true;
     },
 
     closeProductVariantForm() {
       this.productVariantFormVisible = false;
+      this.productVariantInstance = {variant_name: '',  base_price: '', restocking_quantity: '', measuring_unit: ''} ;
     },
     /*** [end] Adding variant **/
 
