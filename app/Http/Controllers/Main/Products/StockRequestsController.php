@@ -41,6 +41,7 @@ class StockRequestsController extends GoodBaseController
          ->with(['order','product','variant'])
          ->get();
 
+
         foreach ($orderedProducts as $orderedProduct){
             if($orderedProduct->order){
                 $orderedProduct->order->customer;

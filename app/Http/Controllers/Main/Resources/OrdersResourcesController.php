@@ -67,16 +67,18 @@ class OrdersResourcesController extends GoodBaseController
             return $this->returnError("You do not have permission to view any order ", " ", 403);
         }
 
-
         /**get logged staff orders **/
         $orders = Order::whereRaw($salesPersonFilter)
             ->whereRaw($channelFilter)
             ->whereRaw($regionFilter)
             ->whereRaw($approvalFilter)
             ->whereRaw($cancellationFilter)
-            ->with(['staff', 'customer', 'region', 'district', 'place'])
-            ->latest()->paginate(50);
+            ->with(['order_products','staff', 'customer', 'region', 'district', 'place'])
+            ->latest()->paginate(20);
 
+        foreach ($orders as $order){
+            $order->delivered_items = $order->order_products->sum('has_delivered');
+        }
 
         $responseData['orders'] = $orders;
         return $this->returnResponse('Orders ', $responseData);

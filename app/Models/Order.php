@@ -32,7 +32,7 @@ class Order extends Model
 
         'order_channel',
         'delivery_zone_id',
-        'delivery_region_d',
+        'delivery_region_id',
         'delivery_district_id',
         'delivery_place_id',
         'order_created_by',
@@ -64,7 +64,7 @@ class Order extends Model
     }
 
     public function region(){
-        return $this->belongsTo('App\Models\Region', 'delivery_region_d' );
+        return $this->belongsTo('App\Models\Region', 'delivery_region_id' );
     }
 
     public function district(){

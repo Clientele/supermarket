@@ -60,9 +60,9 @@ class ProductsResourcesController extends GoodBaseController
         if(is_numeric($catId)){
             $products = Product::whereHas('categories', function($queryBuilder) use($catId){
                 $queryBuilder->where('category_id',$catId);
-            })->with('vendor')->paginate(500);
+            })->with('vendor','variants')->orderBy('product_name')->paginate(500);
         }else{
-            $products = Product::with('vendor')->paginate(500);
+            $products = Product::with('vendor','variants')->paginate(500);
         }
 
         $responseData['products'] = $products;
@@ -72,7 +72,7 @@ class ProductsResourcesController extends GoodBaseController
     public function getProductDetails(Request $request){
         $product = Product::where([
             'id' =>$request->input('id')
-        ])->with('vendor')->first();
+        ])->with('vendor','variants')->first();
 
         if(!$product){
             return  $this->returnError("Product not found",[ ""]);

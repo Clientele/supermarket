@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -32,7 +33,9 @@ class CustomersResourcesController extends GoodBaseController
         if(is_numeric($regionId)){
             $query = " ";
         }
-        $customers = Customer::with(['region','district','place'])->paginate(500);
+        $customers = Customer::where([
+            'created_by' => Auth::id()
+        ])->with(['region','district','place'])->paginate(500);
 
         $responseData['customers'] = $customers;
         return $this->returnResponse('Customers ', $responseData);

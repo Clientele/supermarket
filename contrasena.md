@@ -1,5 +1,5 @@
 # Ajab
 
 Sales person
-shamma@test.com
+shifra@test.com
 278552

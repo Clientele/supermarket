@@ -31,16 +31,17 @@ class OrdersController extends GoodBaseController
 
     public function addOrder(Request $request){
 
+        Log::debug($request->all());
         #TODO: check district
         $district = District::find($request->input('district_id'));
         if (!$district) {
-            return $this->returnError("The order should contain district ID", [""], 422);
+            return $this->returnError("The order should contain valid district ID", [""], 422);
         }
 
         #check zone
-//        if(!($district->zone_id)){
-//            return  $this->returnError("The district does not belong to any sales zone",[""],422);
-//        }
+        if(!($district->zone_id)){
+            return  $this->returnError("The district does not belong to any sales zone",[""],422);
+        }
 
         #check products
         if (!is_array($request->input('product_variants'))) {
@@ -54,8 +55,8 @@ class OrdersController extends GoodBaseController
             'sales_person_id' => $orderChannel == 4 ? null : Auth::user()->staff_id ,
 
             'delivery_zone_id' => $district->zone_id,
-            'delivery_region_d' => $request->input('region_id'),
-            'delivery_district_id' => $request->input('district_id'),
+            'delivery_region_id' => $district->region_id,
+            'delivery_district_id' => $district->id,
             'delivery_place_id' => $request->input('place_id'),
 
             'order_channel' => $request->input('order_channel',4),
@@ -217,6 +218,9 @@ class OrdersController extends GoodBaseController
         if ($deliveredQuantity > $quantityToDeliver) {
             return $this->returnError("Only " . $quantityToDeliver . " remained to deliver", [], 422);
         }
+
+        $orderProduct->has_delivered = true;
+        $orderProduct->save();
 
         $orderProduct->increment('delivered_quantity', $deliveredQuantity);
         $truckedProduct->decrement('remaining_quantity', $deliveredQuantity);
