@@ -26,9 +26,11 @@ class OrderProduct extends Model
         'selling_price',
         'discount_id',
         'discount_amount',
-
         'has_delivered',
+
         'is_rejected',
+        'is_approved',
+        'has_requested_products',
 
         'delivered_by',
         'created_by',

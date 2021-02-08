@@ -10,6 +10,7 @@ class StockRequestProduct extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    protected $casts = [ 'created_at' => 'datetime:Y-m-d H:m' ];
 
     protected $fillable = [
           'request_id',
@@ -19,6 +20,7 @@ class StockRequestProduct extends Model
           'created_by',
           'quantity',
           'dispatched_quantity',
+          'is_approved',
           'rejected',
           'rejection_reason',
           'ordered_products_ids'

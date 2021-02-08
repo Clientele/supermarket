@@ -23,6 +23,7 @@ class CreateStockRequestProductsTable extends Migration
             $table->integer('dispatched_quantity')->default(0);
 
             $table->boolean('rejected')->nullable()->default(false);
+            $table->boolean('is_approved')->nullable()->default(false);
             $table->string('rejection_reason')->nullable();
 
             $table->softDeletes();

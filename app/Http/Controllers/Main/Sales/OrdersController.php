@@ -21,6 +21,7 @@ use App\Utils\GoodOrderStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrdersController extends GoodBaseController
@@ -181,16 +182,26 @@ class OrdersController extends GoodBaseController
     /*** Delivery **/
     public function getAvailableTruckedProducts(Request $request)
     {
+        $staffId = Auth::user()->staff_id ;
+        if(!is_numeric($staffId)){
+            return $this->returnError("You are not a Staff",[""],403);
+        }
+
         $orderProduct = OrderProduct::find($request->input('order_product_id'));
 
         if (!$orderProduct) {
             return $this->returnError("Order product not found", [], 422);
         }
 
-        $truckedProducts = TruckedProduct::where([
-            'product_variant_id' => $orderProduct->product_variant_id
-        ])
+        $truckedProducts = TruckedProduct::where(['product_variant_id' => $orderProduct->product_variant_id])
             ->where('remaining_quantity', '>', 0)
+            ->where('staff_id', $staffId)
+            ->groupBy('product_variant_id')
+            ->select(
+                'product_variant_id', 'product_id',
+                DB::raw("sum(received_quantity) as received_quantity"),
+                DB::raw("sum(remaining_quantity) as remaining_quantity")
+            )
             ->with(['product', 'variant'])->take(3)->get();
 
         return $this->returnResponse("Available trucked products", $truckedProducts);

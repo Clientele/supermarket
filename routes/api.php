@@ -41,18 +41,25 @@ Route::prefix('v1/products')->group(function () {
         Route::get('inventory/stock/product', 'Main\Products\InventoryController@getVariantStocks');
         Route::get('inventory/stock/variant/breakdown', 'Main\Products\InventoryController@getVariantStocksBreakdown');
 
-        /*** MOBILE STOCK  ***/
+        /*** MOBILE VEHICLE STOCK  ***/
         Route::get('inventory/stock/mobile', 'Main\Products\MobileInventoryController@stockBySalesPeople');
         Route::get('inventory/stock/mobile/staff', 'Main\Products\MobileInventoryController@getStaffStock');
+        Route::get('inventory/stock/mobile/available', 'Main\Products\MobileInventoryController@checkAvailableStock');
+        Route::get('inventory/stock/mobile/breakdown', 'Main\Products\MobileInventoryController@getStockBreakdown');
 
         /*** STOCK REQUESTS  ***/
-        Route::get('inventory/stock/init/request', 'Main\Products\StockRequestsController@getOrderedStockSummary');
+        Route::get('inventory/stock/init/request', 'Main\Products\StockRequestsController@getGroupedOrderedVariants');
         Route::post('inventory/stock/request', 'Main\Products\StockRequestsController@requestStock');
         Route::get('inventory/stock/requests', 'Main\Products\StockRequestsController@getStockRequests');
         Route::get('inventory/stock/request', 'Main\Products\StockRequestsController@getStockRequestDetails');
-        Route::post('inventory/stock/request/approve', 'Main\Products\StockRequestsController@approveRequest');
+        Route::post('inventory/stock/request/history', 'Main\Products\StockRequestsController@getStockRequestHistory');
+        Route::post('inventory/stock/request/history/details', 'Main\Products\StockRequestsController@getStockRequestHistoryDetails');
+
+        #requests approval & dispatch
         Route::post('inventory/stock/request/available', 'Main\Products\StockRequestsController@getAvailableDepotProducts');
+        Route::post('inventory/stock/request/approve', 'Main\Products\StockRequestsController@approveRequest');
         Route::post('inventory/stock/request/dispatch', 'Main\Products\StockRequestsController@dispatchRequest');
+
     });
 
 });
@@ -62,6 +69,7 @@ Route::prefix('v1/products')->group(function () {
 Route::prefix('v1/sales')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
+
 
         /*** CUSTOMERS  ***/
         Route::post('customer/add', 'Main\Sales\CustomersController@addCustomer');
@@ -126,6 +134,13 @@ Route::prefix('v1/config')->group(function () {
     });
 });
 
+Route::prefix('v1/reports')->group(function () {
+
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::get('sales/stock', 'Main\Reports\SalesReportsController@salesPersonInsights');
+    });
+
+});
 
 /// S Y S T E M   C O N F I G
 Route::prefix('v1/config')->group(function () {
@@ -176,6 +191,15 @@ Route::prefix('v1/config')->group(function () {
     });
 
 });
+
+
+
+
+
+
+
+
+
 
 ///------------------------------------
 /// V E N D O R S

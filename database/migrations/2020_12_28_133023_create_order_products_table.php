@@ -31,6 +31,8 @@ class CreateOrderProductsTable extends Migration
             $table->boolean('has_delivered')->default(false)->nullable();
 
             $table->boolean('is_rejected')->default(false)->nullable();
+            $table->boolean('is_approved')->default(false)->nullable();
+            $table->boolean('has_requested_products')->default(false)->nullable();
             $table->bigInteger('delivered_by')->unsigned()->nullable();
 
             $table->bigInteger('created_by')->unsigned()->nullable();

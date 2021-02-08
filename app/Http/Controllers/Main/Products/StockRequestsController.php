@@ -26,7 +26,7 @@ class StockRequestsController extends GoodBaseController
 
     }
 
-    public function getOrderedStockSummary(Request $request){
+    public function getGroupedOrderedVariants(Request $request){
 
         #TODO: check permissions
         $staffId = Auth::user()->staff_id;
@@ -34,7 +34,10 @@ class StockRequestsController extends GoodBaseController
             return $this->returnError('You do not have permission to request products', [""], 403);
         }
 
-        $orderedProducts = OrderProduct::where('is_rejected', false)
+        $orderedProducts = OrderProduct::where([
+            'is_rejected' => false,
+            'has_requested_products' => false
+        ])
         ->whereHas('order', function ($query) use($staffId) {
             $query->where('sales_person_id', $staffId);
          })
@@ -107,6 +110,11 @@ class StockRequestsController extends GoodBaseController
                 'ordered_products_ids' =>  json_encode($variant['ordered_products_ids'])
             ]);
 
+           if(is_array($variant['ordered_products_ids'])){
+               OrderProduct::whereIn('id',$variant['ordered_products_ids'])
+                   ->update([ 'has_requested_products' => true]);
+           }
+
         }
 
         $responseData['requests'] = $stockRequest;
@@ -139,12 +147,53 @@ class StockRequestsController extends GoodBaseController
         return $this->returnResponse('Stock Request ', $responseData);
     }
 
+    public function getStockRequestHistory(Request $request){
+        $staff = Auth::user()->staff;
+        if (!($staff)) {
+            return $this->returnError("Only staff can access this feature", "", 422);
+        }
+
+        try{
+            $requestDate = Carbon::parse($request->input('request_date'));
+        }catch (\Exception $exception){
+            $requestDate = Carbon::now();
+            Log::debug($exception);
+        }
+
+        $requestedVariants = StockRequestProduct::where(['staff_id' => $staff->id])
+            ->whereDate('created_at',$requestDate)
+            ->with(['product','variant'])
+            ->orderBy('created_at','DESC')
+            ->orderBy('product_id')
+            ->paginate(10);
+
+        $responseData['requested_variants'] = $requestedVariants;
+        return $this->returnResponse('Grouped requested variants', $responseData);
+    }
+
+    public function getStockRequestHistoryDetails(Request $request){
+
+        $orderedProducts = OrderProduct::whereIn('id',$request->input('ordered_products_id'))
+            ->get();
+
+        $responseData['ordered_products'] = $orderedProducts;
+        return $this->returnResponse('Grouped requested variants', $responseData);
+    }
+
+
+    /** Approval & Dispatch  **/
     public function approveRequest(Request $request)
     {
          $productRequest = StockRequest::where([
              'id'=>$request->input('id')
          ])->update([
              'approved'=>true
+         ]);
+
+         StockRequestProduct::where([
+            'request_id' => $request->input('id')
+           ])->update([
+            'is_approved' => true
          ]);
 
          return $this->returnResponse('Stock Request ', $productRequest);

@@ -8,12 +8,14 @@ use App\Models\DepotProduct;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Staff;
+use App\Models\StockRequestProduct;
 use App\Models\TruckedProduct;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class MobileInventoryController extends GoodBaseController
@@ -42,13 +44,72 @@ class MobileInventoryController extends GoodBaseController
         return $this->returnResponse('Products ', $responseData);
     }
 
+
+
     public function getStaffStock(Request $request)
     {
         $staffId = $request->input('staff_id');
-        $stocks = TruckedProduct::where(['staff_id' => $staffId])->with('product','variant')->paginate(20);
+        if(!is_numeric($staffId)){
+            $staffId = Auth::user()->staff_id ;
+        }
+
+        if(!is_numeric($staffId)){
+            return $this->returnError("You are not a Staff",[""],403);
+        }
+
+        $stocks = TruckedProduct::where(['staff_id' => $staffId])
+            ->groupBy('product_variant_id')
+            ->select(
+                'product_variant_id', 'product_id',
+                DB::raw("sum(received_quantity) as received_quantity"),
+                DB::raw("sum(remaining_quantity) as remaining_quantity")
+            )
+            ->orderBy('product_id')
+            ->with('product','variant')->paginate(20);
+
+        $stockRequests = StockRequestProduct::where(['staff_id' => $staffId, 'rejected' => false])
+            ->whereDate('created_at', Carbon::now())->get();
+
+        $responseData['requested_items'] = $stockRequests->sum('quantity');
+        $responseData['dispatched_quantity'] = $stockRequests->sum('dispatched_quantity');
         $responseData['trucked_stock'] = $stocks;
         return $this->returnResponse('Trucked Stock ', $responseData);
     }
+
+    public function checkAvailableStock(Request $request){
+        Log::debug($request->all());
+        $staffId = Auth::user()->staff_id ;
+        if(!is_numeric($staffId)){
+            return $this->returnError("You are not a Staff",[""],403);
+        }
+
+        $truckedStock = TruckedProduct::where([
+            'staff_id' => $staffId,
+            'product_variant_id' => $request->input('product_variant_id'),
+        ])->get();
+
+        $responseData['received_quantity'] = $truckedStock->sum('received_quantity');
+        $responseData['remaining_quantity'] = $truckedStock->sum('remaining_quantity');
+        return $this->returnResponse('Remaining Stock ', $responseData);
+    }
+
+
+
+    public function getStockBreakdown(Request $request){
+        $staffId = Auth::user()->staff_id ;
+        if(!is_numeric($staffId)){
+            return $this->returnError("You are not a Staff",[""],403);
+        }
+
+        $truckedStock = TruckedProduct::where([
+            'staff_id' => $staffId,
+            'product_variant_id' => $request->input('product_variant_id'),
+        ])->with(['depot'])->paginate(20);
+
+        $responseData['trucked_stocks'] = $truckedStock;
+        return $this->returnResponse('Trucked Stock breakdown', $responseData);
+    }
+
 
 
 
