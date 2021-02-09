@@ -18,10 +18,12 @@ class Product extends Model
         'is_published',
         'product_description',
 
+        'price',
         'created_by',
         'deleted_by',
 
         'thumbnail_img',
+        'active',
         'img_url'
     ];
 

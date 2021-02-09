@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Main\Resources;
 
 use App\Http\Controllers\Main\GoodBaseController;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\Staff;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -26,9 +26,9 @@ class AssetsResourcesController extends GoodBaseController
 
         $regId = $request->input('region_id');
         if(is_numeric($regId)){
-            $depots = Depot::where(['region_id'=>$regId])->with(['region','district','place'])->paginate(500);
+            $depots = Branch::where(['region_id'=>$regId])->with(['region','district','place'])->paginate(500);
         }else{
-            $depots = Depot::with(['region','district','place'])->paginate(500);
+            $depots = Branch::with(['region','district','place'])->paginate(500);
         }
 
         $responseData['depots'] = $depots;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Main\Products;
 
 use App\Http\Controllers\Main\GoodBaseController;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\DepotProduct;
 use App\Models\GoodObject;
 use App\Models\OrderProduct;
@@ -82,7 +82,7 @@ class StockRequestsController extends GoodBaseController
         }
 
         $depotID = $request->input('depot_id');
-        $depot = Depot::find( is_numeric($depotID)? $depotID : $staff->default_depot_id);
+        $depot = Branch::find( is_numeric($depotID)? $depotID : $staff->default_depot_id);
         if (!$depot) {
             return $this->returnError("Depot not found  ", "", 422);
         }

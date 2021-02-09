@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Main\Products;
 
 use App\Http\Controllers\Main\GoodBaseController;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Http\Request;

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Depot extends Model
+class Branch extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'depot_name',
+        'branch_name',
         'country_id',
         'zone_id',
         'region_id',

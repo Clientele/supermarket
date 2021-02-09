@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Main\Resources;
 
 use App\Http\Controllers\Main\GoodBaseController;
 use App\Models\Customer;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductCategory;

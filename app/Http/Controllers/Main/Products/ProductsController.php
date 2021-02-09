@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Main\Products;
 
 use App\Http\Controllers\Main\GoodBaseController;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\Product;
 use App\Models\ProductAssignedCategory;
 use App\Models\ProductCategory;
@@ -15,20 +15,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductsController extends GoodBaseController
 {
 
     public function __construct(){
-        sleep(2);
+        //sleep(2);
     }
 
     /*** Products **/
     public function addProduct(Request $request){
+        $validator = Validator::make( $request->all(), [
+            'product_name' => 'required|unique:products'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnError($validator->errors()->first(), ["Validation failed"],422);
+        }
 
         $product = Product::create([
             'vendor_id'=>$request->input('vendor_id'),
             'product_name'=>$request->input('product_name'),
+            'price'=>$request->input('price'),
             'product_description'=>$request->input('product_description'),
             'is_published'=> false,
 
@@ -53,13 +62,20 @@ class ProductsController extends GoodBaseController
 
     public function updateProduct(Request $request){
 
-        $product = Product::where([
+        $validator = Validator::make( $request->all(), [
+            'product_name' => 'required|unique:products'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnError($validator->errors()->first(), ["Validation failed"],422);
+        }
+
+        Product::where([
             'id'=>$request->input('id'),
         ])->update([
              'product_name'=>$request->input('product_name'),
-             'product_description'=>$request->input('product_description'),
-             'vendor_id'=>$request->input('vendor_id')
-         ]);
+             'product_description'=>$request->input('product_description')
+        ]);
 
         $product = Product::find($request->input('id'));
         if(!$product){
@@ -104,8 +120,7 @@ class ProductsController extends GoodBaseController
     }
 
     public function removeProduct(Request $request){
-        $product = Product::destroy($request->input('id'));
-        $variant = ProductVariant::where([ 'product_id' => $request->input('id') ])->delete();
+        $product = Product::where(['id' => $request->input('id')])->update([ 'active' => false ]);
         return $this->returnResponse('Product removed',$product);
     }
 
@@ -118,8 +133,18 @@ class ProductsController extends GoodBaseController
         return $this->returnResponse('Category removed from product',$product);
     }
 
+
     /*** Product Categories **/
     public function addProductCategory(Request $request){
+
+        $validator = Validator::make( $request->all(), [
+            'category_name' => 'required|unique:product_categories'
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnError($validator->errors()->first(), ["Validation failed"],422);
+        }
+
 
         $product = ProductCategory::updateOrCreate([
             'id' => $request->input('id')
@@ -129,7 +154,7 @@ class ProductsController extends GoodBaseController
             'created_by'=> Auth::id()
         ]);
 
-        return $this->returnResponse('Category Added',$product);
+        return $this->returnResponse('Category Added/Updated',$product);
     }
 
     public function removeCategory(Request $request){

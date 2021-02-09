@@ -1,4 +1,3 @@
-
 [env-key]
 >> composer install --no-dev
 >> cp .env.example .env
@@ -24,7 +23,7 @@
 [Seeding]
 php artisan db:seed --class=PermissionsSeeder
 php artisan db:seed --class=SuperAdminSeeder
-  
+
 
 [Credentials]
 'email'=>"medicci@florence.com", 

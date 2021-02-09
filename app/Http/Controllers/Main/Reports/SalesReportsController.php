@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Main\Reports;
 
 use App\Http\Controllers\Main\GoodBaseController;
 use App\Models\Customer;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\DepotProduct;
 use App\Models\District;
 use App\Models\Order;

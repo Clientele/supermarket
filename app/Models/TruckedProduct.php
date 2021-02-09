@@ -26,7 +26,7 @@ class TruckedProduct extends Model{
 
 
     public function depot(){
-        return $this->belongsTo('App\Models\Depot', 'original_depot_id' );
+        return $this->belongsTo('App\Models\Branch', 'original_depot_id' );
     }
 
     public function staff(){

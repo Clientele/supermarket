@@ -1,29 +1,29 @@
-# Ajab
 
---> View vendor details
-     --details vendor info
-     --vendor products
+#---------------
+#  MODULES
+#---------------
+
+[Products Setup Module]
+->Managing product categories ✅
+->Managing products  
+->Retrieve products
+->Search products
  
-Inventory module
-   -> Manage depot stock
-      ->view available stock
-      ->receive stock
-      
-   ->Transfer Stock
-      ->view sales people stock requests
-      ->dispatch stock to sales person
+[Branches Setup Module]
+->Creating branches ✅
+->Updating/removing branches ✅
 
-Sales Module
-   ->record orders
-   ->assign order to sales person
-   ->request stock
-   ->make sales
-   
-NB: 
-  -->Loading
-  -->Pagination
-  
-  
-  -->Category image
-  -->Reques products based on order
-  -->filter & search orders
+[Users Setup Module]
+->Creating users ✅ 
+->Updating/removing user ✅
+->Managing user permission
+
+[Inventory Management Module]
+->Adding product to inventory/stock
+->Removing expired products from inventory
+
+[Order/Sales modules=] 
+->Selecting products
+->Specifying quantity
+->Recording sales
+

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDepotsTable extends Migration
+class CreateBranchesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateDepotsTable extends Migration
      */
     public function up()
     {
-        Schema::create('depots', function (Blueprint $table) {
+        Schema::create('branches', function (Blueprint $table) {
             $table->id();
-            $table->string('depot_name');
+            $table->string('branch_name');
 
             $table->bigInteger('country_id')->unsigned()->nullable();
             $table->bigInteger('zone_id')->unsigned()->nullable();

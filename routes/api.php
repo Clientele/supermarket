@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post('ping', 'Auth\AuthController@ping');
+Route::post('ping', 'Main\Auth\AuthController@ping');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
@@ -31,7 +31,7 @@ Route::prefix('v1/auth')->group(function () {
 
 
 /// I N V E N T O R Y
-Route::prefix('v1/products')->group(function () {
+Route::prefix('v1/inventory')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
 
@@ -65,18 +65,26 @@ Route::prefix('v1/products')->group(function () {
 });
 
 
-/// SALES
-Route::prefix('v1/sales')->group(function () {
+/// CUSTOMERS
+Route::prefix('v1/customers')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
-
-
         /*** CUSTOMERS  ***/
         Route::post('customer/add', 'Main\Sales\CustomersController@addCustomer');
         Route::post('customer/remove', 'Main\Sales\CustomersController@removeCustomer');
         Route::post('customer/verify', 'Main\Sales\CustomersController@verifyCustomer');
 
-        /*** ORDERS     ***/
+    });
+
+});
+
+
+/// ORDERS
+Route::prefix('v1/orders')->group(function () {
+
+    Route::group(['middleware' => 'auth:api'], function () {
+
+        /*** ORDERS ***/
         Route::post('order/add', 'Main\Sales\OrdersController@addOrder');
         Route::post('order/remove', 'Main\Sales\OrdersController@removeOrder');
         Route::post('order/staff', 'Main\Sales\OrdersController@setStaff');
@@ -84,87 +92,44 @@ Route::prefix('v1/sales')->group(function () {
         Route::post('order/cancel', 'Main\Sales\OrdersController@cancelOrder');
         Route::post('order/item/reject', 'Main\Sales\OrdersController@rejectOrderItem');
 
-        Route::post('order/delivery/available', 'Main\Sales\OrdersController@getAvailableTruckedProducts');
-        Route::post('order/delivery/deliver', 'Main\Sales\OrdersController@deliverProduct');
-
-        /*** DELIVERIES ***/
-        Route::post('delivery/add', 'Main\Sales\CustomersController@addDelivery');
-        Route::post('delivery/remove', 'Main\Sales\CustomersController@removeDelivery');
-
     });
 
 });
 
 
-/// P R O D U C T S    C O N F I G S
-Route::prefix('v1/config')->group(function () {
+
+/// SALES
+Route::prefix('v1/sales')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
 
-        /*** V E N D O R S  ***/
-        Route::post('vendor/add', 'Main\Products\VendorsController@addVendor');
-        Route::post('vendor/remove', 'Main\Products\VendorsController@removeVendor');
-        Route::post('vendor/status/change', 'Main\Products\VendorsController@toggleVendorStatus');
+        /*** ORDERS ***/
+        Route::post('add', 'Main\Sales\SalesController@addSale');
+        Route::get('get', 'Main\Sales\OrdersController@removeOrder');
 
-        /***  P R O D U C T S   ***/
-        #categories
-        Route::post('category/add', 'Main\Products\ProductsController@addProductCategory');
-        Route::post('category/remove', 'Main\Products\ProductsController@removeCategory');
-
-        #products
-        Route::post('product/add', 'Main\Products\ProductsController@addProduct');
-        Route::post('product/update', 'Main\Products\ProductsController@updateProduct');
-        Route::post('product/remove', 'Main\Products\ProductsController@removeProduct');
-        Route::post('product/publish/toggle', 'Main\Products\ProductsController@toggleStatus');
-        Route::post('product/assigned/category/remove', 'Main\Products\ProductsController@removeAssignedCategory');
-        Route::post('product/image/update', 'Main\Products\ProductsController@updateProductImage');
-
-        #product variants
-        Route::post('product/variant/add', 'Main\Products\ProductsVariantsController@addProductVariant');
-        Route::post('product/variant/update', 'Main\Products\ProductsVariantsController@updateProductVariant');
-        Route::post('product/variant/remove', 'Main\Products\ProductsVariantsController@removeProductVariant');
-        Route::post('product/variant/publish/toggle', 'Main\Products\ProductsVariantsController@toggleVariantStatus');
-        Route::post('product/variant/image/update', 'Main\Products\ProductsVariantsController@updateVariantImage');
-        Route::post('product/variant/image/remove', 'Main\Products\ProductsVariantsController@removeVariantImage');
-
-        #product variant prices
-        Route::post('product/variant/price/add', 'Main\Products\ProductsVariantsController@addVariantPrice');
-        Route::post('product/variant/price/remove', 'Main\Products\ProductsVariantsController@removeVariantPrice');
-
-    });
-});
-
-Route::prefix('v1/reports')->group(function () {
-
-    Route::group(['middleware' => 'auth:api'], function () {
-        Route::get('sales/stock', 'Main\Reports\SalesReportsController@salesPersonInsights');
     });
 
 });
+
 
 /// S Y S T E M   C O N F I G
 Route::prefix('v1/config')->group(function () {
 
+    /*** USERS, BRANCHES, ADDRESSES  ***/
     Route::group(['middleware' => ['auth:api']], function () {
 
-        /*** USERS & ROLES  ***/
-        #roles
-        Route::post('staff/role/add', 'Main\Config\PermissionsController@addRole');
-        Route::post('staff/role/remove', 'Main\Config\PermissionsController@removeRole');
-        Route::post('staff/role/update', 'Main\Config\PermissionsController@updateRole');
-
+        /*** USERS  ***/
         #users
-        Route::post('staff/user/add', 'Main\Config\StaffController@addStaff');
-        Route::post('staff/user/update', 'Main\Config\StaffController@updateStaff');
-        Route::post('staff/user/remove', 'Main\Config\StaffController@removeStaff');
+        Route::get('staff/users/get', 'Main\Config\StaffController@getUsers');
+        Route::post('staff/user/add', 'Main\Config\StaffController@addUser');
+        Route::post('staff/user/update', 'Main\Config\StaffController@updateUser');
+        Route::post('staff/user/remove', 'Main\Config\StaffController@removeUser');
 
-        /*** ASSETS  ***/
-        #depots
-        Route::post('assets/depot/add', 'Main\Config\DepotsController@addDepot');
-        Route::post('assets/depot/remove', 'Main\Config\DepotsController@removeDepot');
+        /*** BRANCHES  ***/
+        #branches
+        Route::post('branch/add', 'Main\Config\BranchesController@addBranch');
+        Route::post('branch/remove', 'Main\Config\BranchesController@removeBranch');
 
-        #vehicles
-        Route::post('assets/vehicle/add', 'Main\Config\VehiclesController@addVehicle');
 
         /*** ADDRESSES  ***/
         #zones
@@ -190,61 +155,36 @@ Route::prefix('v1/config')->group(function () {
 
     });
 
-});
+    /** PRODUCTS CONFIG */
+    Route::group(['middleware' => 'auth:api'], function () {
 
+        /***  P R O D U C T S   ***/
+        #categories
+        Route::post('category/add', 'Main\Products\ProductsController@addProductCategory');
+        Route::post('category/remove', 'Main\Products\ProductsController@removeCategory');
 
+        #products
+        Route::post('product/add', 'Main\Products\ProductsController@addProduct');
+        Route::post('product/update', 'Main\Products\ProductsController@updateProduct');
+        Route::post('product/remove', 'Main\Products\ProductsController@removeProduct');
+        Route::post('product/publish/toggle', 'Main\Products\ProductsController@toggleStatus');
+        Route::post('product/assigned/category/remove', 'Main\Products\ProductsController@removeAssignedCategory');
+        Route::post('product/image/update', 'Main\Products\ProductsController@updateProductImage');
 
-
-
-
-
-
-
-
-///------------------------------------
-/// V E N D O R S
-///------------------------------------
-
-
-/// -----------------------------------
-/// C U S T O M E R S
-///------------------------------------
-Route::prefix('v1/customer')->group(function () {
-
-    /*** AUTH  ***/
-    Route::post('login', 'Customer\AuthController@login');
-    Route::post('register', 'Customer\AuthController@register');
-
-    #Passwords
-    Route::post('password/otp/request', 'Customer\AuthController@requestOtp'); #send sms containing token
-    Route::post('password/otp/verify', 'Customer\AuthController@verifyOtp');   #returns logged token
-
-    /*** BROWSING PRODUCTS  ***/
-    Route::get('products/feed', 'Customer\CustomerProductsController@getProductsFeed');
-    Route::get('product/details', 'Customer\CustomerProductsController@getProductDetails');
-    /*** BROWSING PRODUCTS  ***/
-
-    Route::group(['middleware' => ['auth:api']], function () {
-        Route::post('password/update', 'Customer\AuthController@updatePassword');
-        Route::post('account/address', 'Customer\AccountController@updateAddress');
-
-        Route::post('/cart/product/add', 'Customer\CustomerCartController@addProductToCart');
-        Route::post('cart/delivery/address', 'Customer\CustomerCartController@addDeliveryAddress');
-        Route::get('cart/products', 'Customer\CustomerCartController@getCartProducts');
-
-        Route::post('order/place', 'Customer\CustomerOrdersController@submitOrder');
-        Route::get('order/history', 'Customer\CustomerOrdersController@getOrderHistory');
-        Route::get('order/details', 'Customer\CustomerOrdersController@getOrderDetails');
 
     });
 
-
 });
 
 
+/// R E P O R T S
+Route::prefix('v1/reports')->group(function () {
 
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::get('sales/stock', 'Main\Reports\SalesReportsController@salesPersonInsights');
+    });
 
-
+});
 
 
 
@@ -253,50 +193,16 @@ Route::prefix('v1/resources')->group(function () {
 
     Route::group(['middleware' => ['auth:api']], function () {
 
-        /*** PRODUCTS  ***/
-        #vendors
-        Route::get('products/vendors', 'Main\Resources\ProductsResourcesController@getVendors');
-        Route::get('products/vendors/all', 'Main\Resources\ProductsResourcesController@getAllVendors');
+        /*** BRANCHES  ***/
+        Route::get('branches/get', 'Main\Config\BranchesController@getBranches');
+
+        #categories
+        Route::get('products/categories', 'Main\Resources\ProductsResourcesController@getCategories');
 
         #products
-        Route::get('products/products', 'Main\Resources\ProductsResourcesController@getProducts');
-        Route::get('products/categories', 'Main\Resources\ProductsResourcesController@getCategories');
+        Route::get('products/get', 'Main\Resources\ProductsResourcesController@getProducts');
         Route::get('products/categories/all', 'Main\Resources\ProductsResourcesController@getAllCategories');
         Route::get('product/details', 'Main\Resources\ProductsResourcesController@getProductDetails');
-
-        #variants
-        Route::get('product/variants', 'Main\Resources\ProductsResourcesController@getProductVariants');
-        Route::get('product/variant/details', 'Main\Resources\ProductsResourcesController@getVariantDetails');
-
-        /*** SALES  ***/
-        #orders
-        Route::get('sales/orders', 'Main\Resources\OrdersResourcesController@getOrders');
-        Route::get('sales/order', 'Main\Resources\OrdersResourcesController@getOrderDetails');
-
-        #customers
-        Route::get('sales/customers', 'Main\Resources\CustomersResourcesController@getCustomers');
-        Route::get('sales/customer/find', 'Main\Resources\CustomersResourcesController@findCustomer');
-        Route::get('sales/customer/details', 'Main\Resources\CustomersResourcesController@getCustomerDetails');
-        Route::get('sales/customer/orders', 'Main\Resources\CustomersResourcesController@getCustomerOrders');
-
-        /*** ACCESS CONTROL  ***/
-        #roles & permissions
-        Route::get('staff/roles/full', 'Main\Resources\StaffResourcesController@getFullAvailableRoles');
-        Route::get('staff/roles/all', 'Main\Resources\StaffResourcesController@getAvailableRoles');
-        Route::get('staff/permissions/all', 'Main\Resources\StaffResourcesController@getAllAvailablePermissions');
-        Route::post('staff/role/permissions', 'Main\Resources\StaffResourcesController@getPermissionsInRole');
-
-        #users
-        Route::post('staff/get', 'Main\Resources\StaffResourcesController@getStaffByRole');
-        Route::post('staff/details', 'Main\Resources\StaffResourcesController@getStaffDetails');
-        Route::get('staff/no_role', 'Main\Resources\StaffResourcesController@getStaffWithNoRole');
-
-        /*** ASSETS  ***/
-        #depots
-        Route::get('assets/depots', 'Main\Resources\AssetsResourcesController@getDepots');
-
-        #vehicles
-        Route::get('assets/vehicles', 'Main\Resources\AssetsResourcesController@getVehicles');
 
     });
 
@@ -312,6 +218,7 @@ Route::prefix('v1/resources')->group(function () {
     Route::post('addresses/find', 'Main\Resources\AddressesResourcesController@findAddress');
 
 });
+
 
 
 

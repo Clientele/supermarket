@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Main\Resources;
 
 use App\Http\Controllers\Main\GoodBaseController;
-use App\Models\Depot;
+use App\Models\Branch;
 use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -60,7 +60,7 @@ class StaffResourcesController extends GoodBaseController
         foreach ($users as $user){
             $roles = $user->getRoleNames();
             $user->role_name = count($roles)>0? $roles[0] : null;
-            $user->depot = Depot::find( $user->default_depot_id);
+            $user->depot = Branch::find( $user->default_depot_id);
         }
 
         $responseData['staff'] = $users;
@@ -77,7 +77,7 @@ class StaffResourcesController extends GoodBaseController
         $user =  Staff::find($request->input('id'));
         $roles = $user->getRoleNames();
         $user->role_name = count($roles)>0? $roles[0] : null;
-        $user->depot = Depot::find( $user->default_depot_id);
+        $user->depot = Branch::find( $user->default_depot_id);
 
         if($user->depot ){
             $user->depot->region;

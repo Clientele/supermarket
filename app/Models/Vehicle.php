@@ -32,7 +32,7 @@ class Vehicle extends Model
     }
 
     public function depot(){
-        return $this->belongsTo('App\Models\Depot','default_depot_id');
+        return $this->belongsTo('App\Models\Branch','default_depot_id');
     }
 
 }

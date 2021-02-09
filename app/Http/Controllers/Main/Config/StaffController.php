@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class StaffController extends GoodBaseController
 {
@@ -16,63 +17,65 @@ class StaffController extends GoodBaseController
 
     }
 
-    public function addStaff(Request $request){
-         $password = rand(111111,999999);
-         Log::debug($password);
+    public function getUsers(Request $request){
+        $users = User::all();
+        $responseData['users'] = $users;
+        return $this->returnResponse('Users ',$responseData);
+    }
+
+    public function addUser(Request $request){
+
+        $validator = Validator::make( $request->all(), [
+            'name' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->returnError($validator->errors()->first(), ["Validation failed"],422);
+        }
 
          if( User::where(['email'=>$request->input('email')])->first() ){
             return $this->returnError("User Exists","") ;
         }
 
         $user = User::create([
-            'name' => $request->input('staff_name'),
+            'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => Hash::make($password)
-        ]);
-
-        $staff = Staff::create([
-            'user_id' =>  $user->id,
-            'default_depot_id' => $request->input('default_depot_id'),
-            'staff_name' => $request->input('staff_name'),
-            'email' => $request->input('email'),
-            'status' => $request->input('status'),
-            'phone_number' => $request->input('phone_number'),
             'password' => Hash::make($request->input('password'))
         ]);
 
+      //  $staff->syncRoles( [$request->input( 'role_name')]);
 
-        $user->staff_id = $staff->id;
-        $user->save();
-
-        $staff->syncRoles( [$request->input( 'role_name')]);
-
-        return $this->returnResponse('Staff added',$staff);
+        return $this->returnResponse('User  added',$user);
     }
 
-    public function updateStaff(Request $request){
+    public function updateUser(Request $request){
 
-        Log::debug($request->all());
+        $validator = Validator::make( $request->all(), [
+            'name' => 'required',
+            'password' => 'required',
+        ]);
 
-        Staff::where([
+        if ($validator->fails()) {
+            return $this->returnError($validator->errors()->first(), ["Validation failed"],422);
+        }
+
+        $user = User::where([
             'id'=>$request->input('id')
         ])->update([
-            'default_depot_id' => $request->input('default_depot_id'),
-            'staff_name' => $request->input('staff_name'),
-            'email' => $request->input('email'),
-            'phone_number' => $request->input('phone_number'),
-            'status' => $request->input('status'),
+            'name' => $request->input('name')
          ]);
 
-        $staff = Staff::find($request->input('id'));
-        if($staff){
-            $staff->syncRoles( $request->input( 'role_name'));
-        }
-        return $this->returnResponse('Staff updated',$staff);
+//        $user = User::find($request->input('id'));
+//        if($user){
+//            $user->syncRoles( $request->input( 'permissions'));
+//        }
+        return $this->returnResponse('User updated',$user);
     }
 
-
-    public function removeStaff(Request $request){
-        $results = Staff::destroy($request->input('id'));
+    public function removeUser(Request $request){
+        $results = User::destroy($request->input('id'));
         return $this->returnResponse('User removed',$results);
     }
 

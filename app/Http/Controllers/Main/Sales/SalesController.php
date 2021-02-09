@@ -13,6 +13,7 @@ use App\Models\PriceDiscount;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantPrice;
+use App\Models\Sale;
 use App\Models\TruckedProduct;
 use App\Models\User;
 use App\Models\Vendor;
@@ -24,97 +25,42 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class OrdersController extends GoodBaseController
-{
+class SalesController extends GoodBaseController{
 
-    public function __construct(){
-    }
+    public function __construct(){ }
 
-    public function addOrder(Request $request){
-
-        Log::debug($request->all());
-        #TODO: check district
-        $district = District::find($request->input('district_id'));
-        if (!$district) {
-            return $this->returnError("The order should contain valid district ID", [""], 422);
-        }
-
-        #check zone
-        if(!($district->zone_id)){
-            return  $this->returnError("The district does not belong to any sales zone",[""],422);
-        }
+    public function addSale(Request $request){
 
         #check products
-        if (!is_array($request->input('product_variants'))) {
-            return $this->returnError("Order products should be in an array", " ", 422);
+        if (!is_array($request->input('product_ids'))) {
+            return $this->returnError("Sold products should be in an array", " ", 412);
         }
 
         $orderChannel =  $request->input('order_channel',4);
 
-        $order = Order::create([
-            'customer_id' => $request->input('customer_id'),
-            'sales_person_id' => $orderChannel == 4 ? null : Auth::user()->staff_id ,
+        $products = $request->input('product_ids');
+        foreach ($products as $soldProduct) {
 
-            'delivery_zone_id' => $district->zone_id,
-            'delivery_region_id' => $district->region_id,
-            'delivery_district_id' => $district->id,
-            'delivery_place_id' => $request->input('place_id'),
+            $product = Product::find($soldProduct['id']);
+            Sale::create([
+                'order_id'=>$request->input(''),
+                'customer_id'=>$request->input(''),
+                'product_id'=>$request->input(''),
+                'product_variant_id'=>$request->input(''),
 
-            'order_channel' => $request->input('order_channel',4),
+                'ordered_quantity'=>$request->input(''),
+                'delivered_quantity'=>$request->input(''),
 
-            'is_delivered' => false,
-            'order_status' => "Pending",
-            'is_cancelled' => false,
-            'created_by' => Auth::id()
-        ]);
+                'selling_price_id'=>$request->input(''),
+                'selling_price'=>$request->input(''),
+                'discount_amount'=>0,
 
+                'created_by' => Auth::id()
+            ]);
 
-        $productVariants = $request->input('product_variants');
-        foreach ($productVariants as $orderedVariant) {
+         }
 
-            $productVariant = ProductVariant::find($orderedVariant['id']);
-            if ($productVariant) {
-
-                /** check price  */
-                $variantPrice = ProductVariantPrice::where([
-                    'zone_id' => $order->delivery_zone_id,
-                    'product_variant_id' => $orderedVariant['id']
-                ])->first();
-
-                /** check if discount  available */
-                $priceDiscount = PriceDiscount::where([
-                    'is_for_one_variant' => true,
-                    'applicable_zone_id' => $order->delivery_zone_id,
-                    'product_variant_id' => $orderedVariant['id']
-                ])->first();
-
-
-                OrderProduct::create([
-                    'order_id' => $order->id,
-                    'customer_id' => $request->input('customer_id'),
-                    'vendor_id' => $productVariant->vendor_id,
-                    'product_id' => $productVariant->product_id,
-                    'product_variant_id' => $productVariant->id,
-
-                    'ordered_quantity' => $orderedVariant['quantity'],
-                    'delivered_quantity' => 0,
-
-                    'selling_price_id' => $variantPrice ? $variantPrice->id : 0,
-                    'selling_price' => $variantPrice ? $variantPrice->amount : $productVariant->base_price,
-
-                    'discount_id' => $priceDiscount ? $priceDiscount->id : null,
-                    'discount_amount' => $priceDiscount ? $priceDiscount->amount : 0,
-
-                    'has_delivered' => false,
-                    'delivered_by' => null,
-                    'created_by' => Auth::id()
-                ]);
-
-            }
-        }
-
-
-        return $this->returnResponse('Order placed Added', $order);
+        return $this->returnResponse('Sales Recorded', " ");
     }
 
     public function setStaff(Request $request)
