@@ -1,3 +1,3 @@
-# Ajab
+# Supermarket
 
-Order & Delivery System
+Supermarket Management 
