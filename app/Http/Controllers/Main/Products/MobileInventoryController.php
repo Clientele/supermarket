@@ -67,11 +67,7 @@ class MobileInventoryController extends GoodBaseController
             ->orderBy('product_id')
             ->with('product','variant')->paginate(20);
 
-        $stockRequests = StockRequestProduct::where(['staff_id' => $staffId, 'rejected' => false])
-            ->whereDate('created_at', Carbon::now())->get();
 
-        $responseData['requested_items'] = $stockRequests->sum('quantity');
-        $responseData['dispatched_quantity'] = $stockRequests->sum('dispatched_quantity');
         $responseData['trucked_stock'] = $stocks;
         return $this->returnResponse('Trucked Stock ', $responseData);
     }

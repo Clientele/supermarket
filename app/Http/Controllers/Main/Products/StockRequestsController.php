@@ -167,14 +167,26 @@ class StockRequestsController extends GoodBaseController
             ->orderBy('product_id')
             ->paginate(10);
 
+        $stockRequests = StockRequestProduct::where(['staff_id' => $staff->id, 'rejected' => false])
+            ->whereDate('created_at', $requestDate)->get();
+
+        $responseData['requested_items'] = $stockRequests->sum('quantity');
+        $responseData['dispatched_quantity'] = $stockRequests->sum('dispatched_quantity');
         $responseData['requested_variants'] = $requestedVariants;
         return $this->returnResponse('Grouped requested variants', $responseData);
     }
 
     public function getStockRequestHistoryDetails(Request $request){
 
-        $orderedProducts = OrderProduct::whereIn('id',$request->input('ordered_products_id'))
-            ->get();
+        $orderedProductIds = $request->input('ordered_products_id');
+        if(!is_array($orderedProductIds)){
+            $idsArray = json_decode($orderedProductIds);
+        }else{
+            $idsArray = $orderedProductIds;
+        }
+
+        $orderedProducts = OrderProduct::whereIn('id',$idsArray)
+            ->with(['order','customer','product','variant'])->get();
 
         $responseData['ordered_products'] = $orderedProducts;
         return $this->returnResponse('Grouped requested variants', $responseData);
