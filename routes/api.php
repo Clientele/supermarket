@@ -35,30 +35,10 @@ Route::prefix('v1/inventory')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
 
-        /*** DEPOT STOCK  ***/
-        Route::get('inventory/stock', 'Main\Products\InventoryController@getStock');
-        Route::post('inventory/stock/receive', 'Main\Products\InventoryController@receiveStock');
-        Route::get('inventory/stock/product', 'Main\Products\InventoryController@getVariantStocks');
-        Route::get('inventory/stock/variant/breakdown', 'Main\Products\InventoryController@getVariantStocksBreakdown');
-
-        /*** MOBILE VEHICLE STOCK  ***/
-        Route::get('inventory/stock/mobile', 'Main\Products\MobileInventoryController@stockBySalesPeople');
-        Route::get('inventory/stock/mobile/staff', 'Main\Products\MobileInventoryController@getStaffStock');
-        Route::get('inventory/stock/mobile/available', 'Main\Products\MobileInventoryController@checkAvailableStock');
-        Route::get('inventory/stock/mobile/breakdown', 'Main\Products\MobileInventoryController@getStockBreakdown');
-
-        /*** STOCK REQUESTS  ***/
-        Route::get('inventory/stock/init/request', 'Main\Products\StockRequestsController@getGroupedOrderedVariants');
-        Route::post('inventory/stock/request', 'Main\Products\StockRequestsController@requestStock');
-        Route::get('inventory/stock/requests', 'Main\Products\StockRequestsController@getStockRequests');
-        Route::get('inventory/stock/request', 'Main\Products\StockRequestsController@getStockRequestDetails');
-        Route::post('inventory/stock/request/history', 'Main\Products\StockRequestsController@getStockRequestHistory');
-        Route::post('inventory/stock/request/history/details', 'Main\Products\StockRequestsController@getStockRequestHistoryDetails');
-
-        #requests approval & dispatch
-        Route::post('inventory/stock/request/available', 'Main\Products\StockRequestsController@getAvailableDepotProducts');
-        Route::post('inventory/stock/request/approve', 'Main\Products\StockRequestsController@approveRequest');
-        Route::post('inventory/stock/request/dispatch', 'Main\Products\StockRequestsController@dispatchRequest');
+        /*** BRANCHES STOCK  ***/
+        Route::post('add', 'Main\Products\InventoryController@addStockToInventory');
+        Route::get('available', 'Main\Products\InventoryController@getStockAvailableStock');
+        Route::post('available/branch/breakdown', 'Main\Products\InventoryController@getVariantStocksBreakdown');
 
     });
 
@@ -79,33 +59,15 @@ Route::prefix('v1/customers')->group(function () {
 });
 
 
-/// ORDERS
-Route::prefix('v1/orders')->group(function () {
-
-    Route::group(['middleware' => 'auth:api'], function () {
-
-        /*** ORDERS ***/
-        Route::post('order/add', 'Main\Sales\OrdersController@addOrder');
-        Route::post('order/remove', 'Main\Sales\OrdersController@removeOrder');
-        Route::post('order/staff', 'Main\Sales\OrdersController@setStaff');
-        Route::post('order/approve', 'Main\Sales\OrdersController@approveOrder');
-        Route::post('order/cancel', 'Main\Sales\OrdersController@cancelOrder');
-        Route::post('order/item/reject', 'Main\Sales\OrdersController@rejectOrderItem');
-
-    });
-
-});
-
-
-
 /// SALES
 Route::prefix('v1/sales')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
 
-        /*** ORDERS ***/
+        /*** SALES ***/
         Route::post('add', 'Main\Sales\SalesController@addSale');
-        Route::get('get', 'Main\Sales\OrdersController@removeOrder');
+
+        Route::get('my/get', 'Main\Sales\SalesController@getSalesMade');
 
     });
 
@@ -181,11 +143,16 @@ Route::prefix('v1/config')->group(function () {
 Route::prefix('v1/reports')->group(function () {
 
     Route::group(['middleware' => 'auth:api'], function () {
-        Route::get('sales/stock', 'Main\Reports\SalesReportsController@salesPersonInsights');
+        #Stock
+        Route::get('stock/available', 'Main\Reports\SalesReportsController@getAvailableStock');
+
+        #Sales
+        Route::get('stock/available', 'Main\Reports\SalesReportsController@getAvailableStock');
+        Route::get('sales/get', 'Main\Reports\SalesReportsController@getBranchSales');
+
     });
 
 });
-
 
 
 /// RESOURCES

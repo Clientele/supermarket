@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Main\Sales;
 use App\Http\Controllers\Main\GoodBaseController;
 use App\Models\Customer;
 use App\Models\Branch;
-use App\Models\DepotProduct;
+use App\Models\BranchProduct;
 use App\Models\District;
 use App\Models\Order;
 use App\Models\OrderProduct;

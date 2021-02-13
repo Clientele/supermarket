@@ -15,21 +15,18 @@ class CreateSalesTable extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('order_id')->unsigned();
-            $table->bigInteger('customer_id')->unsigned();
-            $table->bigInteger('product_id')->unsigned();
-            $table->bigInteger('product_variant_id')->unsigned();
+            $table->bigInteger('branch_id')->unsigned()->nullable();
+            $table->bigInteger('order_id')->unsigned()->nullable();
+            $table->bigInteger('customer_id')->unsigned()->nullable();
+            $table->bigInteger('product_id')->unsigned()->nullable();
+            $table->bigInteger('product_variant_id')->unsigned()->nullable();
 
             $table->double('selling_price',15,0)->default(0.0)->nullable();
+            $table->integer('sold_quantity')->default(0);
+
             $table->bigInteger('discount_id')->unsigned()->nullable();
             $table->double('discount_amount',15,0)->default(0.0)->nullable();
 
-            $table->integer('sold_quantity')->default(0);
-            $table->integer('delivered_quantity')->default(0);
-            $table->boolean('has_delivered')->default(false)->nullable();
-
-            $table->boolean('is_rejected')->default(false)->nullable();
-            $table->boolean('is_approved')->default(false)->nullable();
 
             $table->bigInteger('created_by')->unsigned()->nullable();
             $table->bigInteger('deleted_by')->unsigned()->nullable();

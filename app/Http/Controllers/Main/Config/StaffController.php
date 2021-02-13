@@ -26,6 +26,7 @@ class StaffController extends GoodBaseController
     public function addUser(Request $request){
 
         $validator = Validator::make( $request->all(), [
+            'branch_id' => 'required',
             'name' => 'required',
             'email' => 'required',
             'password' => 'required',
@@ -40,6 +41,7 @@ class StaffController extends GoodBaseController
         }
 
         $user = User::create([
+            'branch_id' => $request->input('branch_id'),
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'password' => Hash::make($request->input('password'))

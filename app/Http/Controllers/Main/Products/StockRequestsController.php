@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Main\Products;
 
 use App\Http\Controllers\Main\GoodBaseController;
 use App\Models\Branch;
-use App\Models\DepotProduct;
+use App\Models\BranchProduct;
 use App\Models\GoodObject;
 use App\Models\OrderProduct;
 use App\Models\Product;
@@ -219,7 +219,7 @@ class StockRequestsController extends GoodBaseController
             return $this->returnError("Requests  not found","",422);
         }
 
-        $depotRemainingProducts =  DepotProduct::where([
+        $depotRemainingProducts =  BranchProduct::where([
             'depot_id'=>$request->input('depot_id'),
             'product_variant_id'=> $requestedProduct->product_variant_id
         ])->where('remaining_quantity','>',0)
@@ -239,7 +239,7 @@ class StockRequestsController extends GoodBaseController
             return $this->returnError("Products","",422);
         }
 
-        $depotProduct =  DepotProduct::find($request->input('depot_product_id'));
+        $depotProduct =  BranchProduct::find($request->input('depot_product_id'));
         if(!$depotProduct){
             return $this->returnError("Depot product not found","",422);
         }

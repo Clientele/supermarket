@@ -32,6 +32,7 @@ class User extends Authenticatable
 
         'customer_id',
         'staff_id',
+        'branch_id',
         'vendor_id'
     ];
 

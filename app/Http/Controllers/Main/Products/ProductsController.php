@@ -27,7 +27,8 @@ class ProductsController extends GoodBaseController
     /*** Products **/
     public function addProduct(Request $request){
         $validator = Validator::make( $request->all(), [
-            'product_name' => 'required|unique:products'
+            'product_name' => 'required|unique:products',
+            'price' => 'required|numeric'
         ]);
 
         if ($validator->fails()) {
@@ -63,7 +64,8 @@ class ProductsController extends GoodBaseController
     public function updateProduct(Request $request){
 
         $validator = Validator::make( $request->all(), [
-            'product_name' => 'required|unique:products'
+            'product_name' => 'required',
+            'price' => 'required|numeric'
         ]);
 
         if ($validator->fails()) {
@@ -74,6 +76,7 @@ class ProductsController extends GoodBaseController
             'id'=>$request->input('id'),
         ])->update([
              'product_name'=>$request->input('product_name'),
+             'price'=>$request->input('price'),
              'product_description'=>$request->input('product_description')
         ]);
 

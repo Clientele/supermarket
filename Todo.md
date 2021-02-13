@@ -5,9 +5,10 @@
 
 [Products Setup Module]
 ->Managing product categories ✅
-->Managing products  
-->Retrieve products
-->Search products
+->Managing products ✅ 
+->Retrieve products ✅
+->Search products, (also by ID, QR)
+->Scan product using QR
  
 [Branches Setup Module]
 ->Creating branches ✅
@@ -19,11 +20,21 @@
 ->Managing user permission
 
 [Inventory Management Module]
-->Adding product to inventory/stock
+->Adding product to inventory/stock ✅
 ->Removing expired products from inventory
 
 [Order/Sales modules=] 
-->Selecting products
-->Specifying quantity
-->Recording sales
+->Browsing products  ✅
+->Recording sales  ✅
 
+
+[Reports]
+->Sales  
+  ->day
+  ->week
+  ->month
+  ->year
+  
+->Products
+  ->remaining products all branches
+  ->remaining products in branches  

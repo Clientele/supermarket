@@ -4,21 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDepotProductsTable extends Migration
+class CreateBranchProductsTable extends Migration
 {
+
     /**
      * Run the migrations.
-     *
      * @return void
      */
     public function up()
     {
-        Schema::create('depot_products', function (Blueprint $table) {
+        Schema::create('branch_products', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('depot_id')->unsigned();
-            $table->bigInteger('vendor_id')->unsigned();
-            $table->bigInteger('product_id')->unsigned();
-            $table->bigInteger('product_variant_id')->unsigned();
+            $table->bigInteger('branch_id')->unsigned()->nullable();
+            $table->bigInteger('product_id')->unsigned()->nullable();
+            $table->bigInteger('product_variant_id')->unsigned()->nullable();
 
             $table->integer('received_quantity')->default(0);
             $table->integer('remaining_quantity')->default(0);
