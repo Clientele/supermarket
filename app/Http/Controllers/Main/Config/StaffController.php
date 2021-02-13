@@ -28,7 +28,7 @@ class StaffController extends GoodBaseController
         $validator = Validator::make( $request->all(), [
             'branch_id' => 'required',
             'name' => 'required',
-            'email' => 'required',
+            'email' => 'required|unique:users',
             'password' => 'required',
         ]);
 

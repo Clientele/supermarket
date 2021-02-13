@@ -13,6 +13,9 @@ DB: Esspresso@64
 
 Site demo: http://demo.eyasi.co.tz
 
-Admin login: http://demo.eyasi.co.tz/admin
-email: admin@rhinoroofing.com
-Password: zxcvbnm
+ 
+
+[Credentails]
+TEST-URL: http://demo.eyasi.co.tz
+'email'=> "superuser@test.com",
+'password'=> Hash::make('zxcvbnm')
