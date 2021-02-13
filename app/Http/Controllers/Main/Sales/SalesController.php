@@ -31,6 +31,12 @@ class SalesController extends GoodBaseController{
     public function __construct(){ }
 
     public function addSale(Request $request){
+
+        $branchId = Auth::user()->branch_id;
+        if(!$branchId){
+            return $this->returnError('You do not belong to any branch'," ",412);
+        }
+
         $validator = Validator::make( $request->all(), [
             'products' => 'required|array'
         ]);
@@ -64,6 +70,11 @@ class SalesController extends GoodBaseController{
     }
 
     public function getSalesMade(Request $request){
+        $branchId = Auth::user()->branch_id;
+        if(!$branchId){
+            return $this->returnError('You do not belong to any branch'," ",412);
+        }
+
         $sales = Sale::where(['created_by'=>Auth::id()])->with(['branch'])->paginate(20);
         $responseData['sales'] = $sales;
         return $this->returnResponse('My Sales', $responseData);

@@ -21,6 +21,11 @@ class InventoryController extends GoodBaseController
 
     public function getStockAvailableStock(Request $request){
 
+        $branchId = Auth::user()->branch_id;
+        if(!$branchId){
+            return $this->returnError('You do not belong to any branch'," ",412);
+        }
+
         $products = Product::select('id','product_name')->paginate(20);
 
         foreach ($products as $product) {
@@ -49,6 +54,11 @@ class InventoryController extends GoodBaseController
         $product = Product::find($request->input('product_id'));
         if(!$product){
           return $this->returnError('Product Not Found'," ",412);
+        }
+
+        $branchId = Auth::user()->branch_id;
+        if(!$branchId){
+            return $this->returnError('You do not belong to any branch'," ",412);
         }
 
        $branchProduct =   BranchProduct::create([

@@ -45,20 +45,6 @@ Route::prefix('v1/inventory')->group(function () {
 });
 
 
-/// CUSTOMERS
-Route::prefix('v1/customers')->group(function () {
-
-    Route::group(['middleware' => 'auth:api'], function () {
-        /*** CUSTOMERS  ***/
-        Route::post('customer/add', 'Main\Sales\CustomersController@addCustomer');
-        Route::post('customer/remove', 'Main\Sales\CustomersController@removeCustomer');
-        Route::post('customer/verify', 'Main\Sales\CustomersController@verifyCustomer');
-
-    });
-
-});
-
-
 /// SALES
 Route::prefix('v1/sales')->group(function () {
 
@@ -188,6 +174,19 @@ Route::prefix('v1/resources')->group(function () {
 
 
 
+
+/// CUSTOMERS
+Route::prefix('v1/customers')->group(function () {
+
+    Route::group(['middleware' => 'auth:api'], function () {
+        /*** CUSTOMERS  ***/
+        Route::post('customer/add', 'Main\Sales\CustomersController@addCustomer');
+        Route::post('customer/remove', 'Main\Sales\CustomersController@removeCustomer');
+        Route::post('customer/verify', 'Main\Sales\CustomersController@verifyCustomer');
+
+    });
+
+});
 
 
 
