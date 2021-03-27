@@ -60,6 +60,21 @@ Route::prefix('v1/sales')->group(function () {
 });
 
 
+/// OTHERS
+Route::prefix('v1')->group(function () {
+
+    Route::group(['middleware' => 'auth:api'], function () {
+
+        /*** EXPENSES ***/
+        Route::post('expense/add', 'Main\ExpensesController@addExpense');
+        Route::get('expenses/get', 'Main\ExpensesController@getExpenses');
+        Route::get('expenses/branch/get', 'Main\ExpensesController@getBranchExpenses');
+
+    });
+
+});
+
+
 /// S Y S T E M   C O N F I G
 Route::prefix('v1/config')->group(function () {
 

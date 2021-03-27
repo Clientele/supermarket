@@ -28,7 +28,8 @@ class ProductsController extends GoodBaseController
     public function addProduct(Request $request){
         $validator = Validator::make( $request->all(), [
             'product_name' => 'required|unique:products',
-            'price' => 'required|numeric'
+            'price' => 'required|numeric',
+            'buying_price' => 'required|numeric'
         ]);
 
         if ($validator->fails()) {
@@ -39,6 +40,7 @@ class ProductsController extends GoodBaseController
             'vendor_id'=>$request->input('vendor_id'),
             'product_name'=>$request->input('product_name'),
             'price'=>$request->input('price'),
+            'buying_price'=>$request->input('buying_price'),
             'product_description'=>$request->input('product_description'),
             'is_published'=> false,
 
@@ -161,7 +163,7 @@ class ProductsController extends GoodBaseController
     }
 
     public function removeCategory(Request $request){
-        $product = ProductCategory::destroy($request->input('id'));
+        $product = ProductCategory::where('id',$request->input('id'))->forceDelete();
         return $this->returnResponse('Product category removed',$product);
     }
 

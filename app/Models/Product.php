@@ -18,6 +18,7 @@ class Product extends Model
         'is_published',
         'product_description',
 
+        'buying_price',
         'price',
         'created_by',
         'deleted_by',
