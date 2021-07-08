@@ -27,10 +27,10 @@ class ProductsController extends GoodBaseController
     /*** Products **/
     public function addProduct(Request $request){
         $validator = Validator::make( $request->all(), [
-            'bar_code_number' => 'required',
+//            'bar_code_number' => 'required',
             'product_name' => 'required|unique:products',
             'price' => 'required|numeric',
-            'buying_price' => 'required|numeric'
+//            'buying_price' => 'required|numeric'
         ]);
 
         if ($validator->fails()) {
@@ -39,10 +39,10 @@ class ProductsController extends GoodBaseController
 
         $product = Product::create([
             'vendor_id'=>$request->input('vendor_id'),
-            'bar_code_number'=>$request->input('bar_code_number'),
+            'bar_code_number'=>$request->input('bar_code_number',0),
             'product_name'=>$request->input('product_name'),
             'price'=>$request->input('price'),
-            'buying_price'=>$request->input('buying_price'),
+            'buying_price'=>$request->input('buying_price',$request->input('price')),
             'product_description'=>$request->input('product_description'),
             'is_published'=> false,
 
