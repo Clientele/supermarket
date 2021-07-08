@@ -68,6 +68,10 @@ class SalesReportsController extends GoodBaseController
         )->get();
         $sales = Sale::whereRaw($branchFilter)->with(['branch'])->paginate(20);
 
+        foreach ($sales as $sale){
+            $sale->branch = $sale->branch?$sale->branch : new Branch();
+        }
+
         $responseData['total_sales'] = $allSales->sum('sold_value');
         $responseData['sales'] = $sales;
         return $this->returnResponse('Branches Sales', $responseData);
